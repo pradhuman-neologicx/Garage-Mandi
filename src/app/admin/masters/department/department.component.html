@@ -1,0 +1,470 @@
+<div class="container mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="text-primary table-heading-detail">Department Management</h1>
+    <div>
+      <button
+        class="btn btn-custom-primary px-4 py-2 me-2"
+        (click)="openAddModal()"
+      >
+        Add Department
+      </button>
+    </div>
+  </div>
+
+  <div class="card border-0 my-4 px-4 py-4">
+    <div class="d-md-flex justify-content-between align-items-center my-3">
+      <div class="d-flex align-items-center mb-md-0 mb-2">
+        <span class="me-1 show-entery-text">Show</span>
+        <select
+          class="form-control form-select show-entries-select"
+          (change)="onTableSizeChange($event)"
+        >
+          <option *ngFor="let size of tableSizes" [ngValue]="size">
+            {{ size }}
+          </option>
+        </select>
+        <span class="ms-1 show-entery-text">entries</span>
+      </div>
+
+      <div class="d-flex align-items-center">
+        <form [formGroup]="searchbarform" class="d-flex align-items-center">
+          <span class="me-1">Search:</span>
+          <div>
+            <input
+              type="text"
+              class="form-control search-user position-relative"
+              type="text"
+              autocomplete="off"
+              formControlName="searchbar"
+              [ngClass]="{
+                'is-invalid':
+                  searchbarform.controls['searchbar'].errors &&
+                  (searchbarform.controls['searchbar'].touched ||
+                    searchbarform.controls['searchbar'].dirty),
+              }"
+            />
+            <div
+              class="text-danger error-message d-block"
+              *ngIf="
+                searchbarform.controls['searchbar'].errors &&
+                (searchbarform.controls['searchbar'].touched ||
+                  searchbarform.controls['searchbar'].dirty)
+              "
+            >
+              <p
+                class="fw-light text-danger search-required"
+                *ngIf="searchbarform.controls['searchbar'].errors['required']"
+              >
+                This is required
+              </p>
+            </div>
+          </div>
+
+          <button class="btn btn-primary search-btn ms-2" (click)="searchfun()">
+            <span
+              ><i
+                class="fa-solid fa-magnifying-glass form-control-feedback text-white"
+              ></i
+            ></span>
+          </button>
+          <button
+            class="btn btn-primary search-btn ms-2"
+            (click)="resetsearchbar()"
+            type="submit"
+            *ngIf="showreset == true"
+          >
+            <span
+              ><i
+                class="fa-solid fa-rotate-right form-control-feedback text-white"
+              ></i
+            ></span>
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="table-responsive-sm mt-2">
+      <!-- Table View for lg+ -->
+      <div class="hidden lg:block">
+        <table class="table table-bordered table-hover table-striped mb-0">
+          <thead class="table-header">
+            <tr *ngFor="let detail of table_heading">
+              <th>
+                <p class="table-heading">{{ detail.heading0 }}</p>
+              </th>
+              <th>
+                <p class="table-heading">{{ detail.heading1 }}</p>
+              </th>
+              <th>
+                <p class="table-heading">{{ detail.heading2 }}</p>
+              </th>
+              <th>
+                <p class="table-heading">{{ detail.heading3 }}</p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="
+                let user of departmentList
+                  | paginate
+                    : {
+                        itemsPerPage:
+                          tableSize != 'all' ? tableSize : totalRecords,
+                        currentPage: page,
+                        totalItems: totalRecords,
+                      };
+                index as i
+              "
+            >
+              <!-- <tr *ngFor="let user of usertable"> -->
+              <td>
+                {{
+                  tableSize * (page - 1) + i + 1 > 0
+                    ? tableSize * (page - 1) + i + 1
+                    : i + 1
+                }}
+              </td>
+
+              <td>
+                <p>{{ user.name }}</p>
+              </td>
+
+              <td>
+                <p
+                  [ngClass]="{
+                    'active-status': user.is_active == 1 ? 1 : 0,
+                    'deactive-status': user.is_active == 1 ? 0 : 1,
+                  }"
+                >
+                  {{ user.is_active == 1 ? "active" : "deactive" }}
+                </p>
+              </td>
+
+              <td>
+                <p>
+                  <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="OpenEditModal(user)">
+                      Edit
+                    </button>
+                    <button mat-menu-item (click)="openviewModal(user)">
+                      View Details
+                    </button>
+
+                    <button
+                      mat-menu-item
+                      *ngIf="user.is_active; else inactiveButton"
+                      (click)="Status(user.id, 0)"
+                    >
+                      Deactivate
+                    </button>
+                    <ng-template #inactiveButton>
+                      <button mat-menu-item (click)="Status(user.id, 1)">
+                        Activate
+                      </button>
+                    </ng-template>
+                  </mat-menu>
+                </p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Card View for below lg -->
+      <div class="lg:hidden space-y-4">
+        <div
+          *ngFor="
+            let user of departmentList
+              | paginate
+                : {
+                    itemsPerPage: tableSize != 'all' ? tableSize : totalRecords,
+                    currentPage: page,
+                    totalItems: totalRecords,
+                  };
+            index as i
+          "
+          class="bg-gray-50 border border-gray-200 rounded-lg p-4"
+        >
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <strong>Sr No:</strong>
+              {{
+                tableSize * (page - 1) + i + 1 > 0
+                  ? tableSize * (page - 1) + i + 1
+                  : i + 1
+              }}
+            </div>
+            <div>
+            <button mat-icon-button [matMenuTriggerFor]="cardMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #cardMenu="matMenu">
+                <button mat-menu-item (click)="OpenEditModal(user)">
+                  Edit
+                </button>
+                <button mat-menu-item (click)="openviewModal(user)">
+                  View Details
+                </button>
+
+                <button
+                  mat-menu-item
+                  *ngIf="user.is_active; else inactiveButton"
+                  (click)="Status(user.id, 0)"
+                >
+                  Deactivate
+                </button>
+                <ng-template #inactiveButton>
+                  <button mat-menu-item (click)="Status(user.id, 1)">
+                    Activate
+                  </button>
+                </ng-template>
+              </mat-menu>
+            </div>
+          </div>
+          <div class="mb-2"><strong>Name:</strong> {{ user.name }}</div>
+          <div>
+            <strong>Status:</strong>
+            <span
+              [ngClass]="{
+                'active-status': user.is_active == 1 ? 1 : 0,
+                'deactive-status': user.is_active == 1 ? 0 : 1,
+              }"
+            >
+              {{ user.is_active == 1 ? "active" : "deactive" }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="d-md-flex justify-content-between bottom-0 end-0 py-2 align-items-center"
+      >
+        <span class="showalltext"
+          >Showing
+          {{ tableSize * (page - 1) > 0 ? tableSize * (page - 1) + 1 : 1 }} to
+          {{
+            tableSize * page <= totalRecords ? tableSize * page : totalRecords
+          }}
+          of {{ totalRecords != undefined ? totalRecords : "" }} entries</span
+        >
+        <pagination-controls
+          previousLabel="Prev"
+          nextLabel="Next"
+          [responsive]="true"
+          (pageChange)="onTableDataChange($event)"
+          target="_top"
+        ></pagination-controls>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="createDepartmentOpen"
+  class="your-animation-class modal-container"
+  aria-labelledby="modal-title"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="createDepartmentForm">
+      <div class="card">
+        <div
+          class="card-header bg-white d-flex justify-content-between align-items-center"
+        >
+          <h5 class="modal-title pt-1 mb-0 tt-color">Add Department</h5>
+          <button
+            class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1"
+            type="button"
+            (click)="closeModal()"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="row">
+            <div class="mb-3">
+              <label
+                class="d-block text-capitalize form-label form-lable-custom"
+                for="Name"
+                >Enter Department Name</label
+              >
+              <input
+                type="text"
+                class="d-block form-control form-input-custom"
+                formControlName="Name"
+                [ngClass]="{
+                  'is-invalid':
+                    createDepartmentForm.controls['Name'].errors &&
+                    (createDepartmentForm.controls['Name'].touched ||
+                      createDepartmentForm.controls['Name'].dirty),
+                }"
+              />
+              <div
+                class="text-danger error-message"
+                *ngIf="
+                  createDepartmentForm.controls['Name'].errors &&
+                  (createDepartmentForm.controls['Name'].touched ||
+                    createDepartmentForm.controls['Name'].dirty)
+                "
+              >
+                <p
+                  class="fw-light text-danger"
+                  *ngIf="
+                    createDepartmentForm.controls['Name'].errors['required']
+                  "
+                >
+                  Department Name is required
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer text-end">
+          <button
+            class="btn btn-secondary main-btnfs px-4 py-2 me-4 text-gray-200"
+            type="button"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-custom-primary px-4 py-2"
+            type="button"
+            (click)="createDepartment()"
+          >
+            Create
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div
+  *ngIf="updateDepartmentOpen"
+  class="your-animation-class modal-container"
+  aria-labelledby="modal-title"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="updateDepartmentForm">
+      <div class="card">
+        <div
+          class="card-header bg-white d-flex justify-content-between align-items-center"
+        >
+          <h5 class="modal-title pt-1 mb-0 tt-color">Update Department</h5>
+          <button
+            class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1"
+            type="button"
+            (click)="closeModal()"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="row">
+            <div class="mb-3">
+              <label
+                class="d-block text-capitalize form-label form-lable-custom"
+                for="Name"
+                >Enter Department Name</label
+              >
+              <input
+                type="text"
+                class="d-block form-control form-input-custom"
+                formControlName="Name"
+                [ngClass]="{
+                  'is-invalid':
+                    updateDepartmentForm.controls['Name'].errors &&
+                    (updateDepartmentForm.controls['Name'].touched ||
+                      updateDepartmentForm.controls['Name'].dirty),
+                }"
+              />
+              <div
+                class="text-danger error-message"
+                *ngIf="
+                  updateDepartmentForm.controls['Name'].errors &&
+                  (updateDepartmentForm.controls['Name'].touched ||
+                    updateDepartmentForm.controls['Name'].dirty)
+                "
+              >
+                <p
+                  class="fw-light text-danger"
+                  *ngIf="
+                    updateDepartmentForm.controls['Name'].errors['required']
+                  "
+                >
+                  Department Name is required
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer text-end">
+          <button
+            class="btn btn-secondary main-btnfs px-4 py-2 me-4 text-gray-200"
+            type="button"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-custom-primary px-4 py-2"
+            type="button"
+            (click)="updateDepartment()"
+          >
+            Update
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div
+  *ngIf="viewDepartmentOpen"
+  class="your-animation-class modal-container"
+  aria-labelledby="modal-title"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="viewDepartmentForm">
+      <div class="card">
+        <div
+          class="card-header bg-white d-flex justify-content-between align-items-center"
+        >
+          <h5 class="modal-title pt-1 mb-0 tt-color">View Department</h5>
+          <button
+            class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1"
+            type="button"
+            (click)="closeModal()"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="row">
+            <div class="mb-3">
+              <label
+                class="d-block text-capitalize form-label form-lable-custom"
+                for="Name"
+              >
+                Name</label
+              >
+              <input
+                type="text"
+                formControlName="Name"
+                readonly="true"
+                class="d-block form-control form-input-custom"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

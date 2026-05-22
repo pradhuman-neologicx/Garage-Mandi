@@ -1,0 +1,55 @@
+.hedaer-content {
+  padding: 10px;
+}
+
+.tooglewithlogo {
+  padding: 7px 12px;
+  border: 1px solid #e9ecef;
+  width: 20%;
+  border-right: 0;
+}
+
+.header-dropdown {
+  position: absolute;
+  width: fit-content;
+  z-index: 2;
+}
+
+.header-profile {
+  margin-right: 50px;
+}
+
+.notification {
+  color: var(--primary-color);
+  border-radius: 4px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 500ms ease-in;
+}
+
+@media (max-width: 768px) {
+  .responsive-header {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100vw;
+    min-width: 0;
+    padding: 0.5rem 0.5rem 0.5rem 0.5rem !important;
+  }
+
+  .tooglewithlogo {
+    width: auto;
+    padding: 0 0.5rem;
+    border: none;
+  }
+
+  .hedaer-content {
+    margin-left: 0 !important;
+    padding: 0 0.7rem !important;
+    width: auto !important;
+  }
+
+  .header-profile {
+    margin-right: 0;
+  }
+}

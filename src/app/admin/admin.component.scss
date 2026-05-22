@@ -1,0 +1,45 @@
+/* Responsive styles for admin panel */
+
+.admin-container {
+    height: 100vh;
+    width: 100vw;
+}
+
+mat-sidenav {
+    min-width: 73px;
+    max-width: 255px;
+    transition: width 0.3s;
+}
+
+mat-sidenav-content {
+    transition: margin-left 0.3s, padding 0.3s;
+    min-height: 100vh;
+}
+
+.screenResponsive {
+    overflow-x: hidden;
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+@media (max-width: 768px) {
+    .admin-container {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    mat-sidenav-content {
+        margin-left: 0 !important;
+        padding: 0.5rem;
+    }
+}
+
+@media (min-width: 769px) {
+    mat-sidenav-content {
+        padding: 1.5rem 0rem;
+        overflow: scroll;
+        height: 100%;
+        overflow-x: hidden;
+        padding-bottom: 5rem;
+    }
+}

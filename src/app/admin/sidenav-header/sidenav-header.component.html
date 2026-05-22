@@ -1,0 +1,42 @@
+<div
+  class="bg-white header d-flex align-items-center p-0 responsive-header"
+  [ngClass]="{ 'mobile-header': isMobile }"
+>
+  <div class="border-right d-flex align-items-center tooglewithlogo">
+    <img src="./assets/logo.png" class="admin-theme-logo" alt />
+    <button mat-icon-button (click)="toggleCollapsed.emit()">
+      <mat-icon>reorder</mat-icon>
+    </button>
+  </div>
+  <div
+    class="hedaer-content w-100 ms-5 d-flex justify-content-end align-items-center"
+  >
+    <div class="header-profile d-flex justify-content-between">
+      <div class="me-4">
+        <span (click)="toggleMenu()" class="position-realtive notification">
+          <i class="fa-solid fa-bell"></i>
+        </span>
+      </div>
+      <div>
+        <span (click)="profile()" class="position-realtive notification">
+          <i class="fa-solid fa-user"></i>
+        </span>
+        <div
+          *ngIf="isProfileOpen"
+          class="card end-0 me-4 mt-3 border-0 header-dropdown"
+        >
+          <ul class="list-unstyled">
+            <li class="px-4 py-2 hover:bg-gray-300" (click)="logout()">
+              <a class="text-primary text-decoration-none" type="button">
+                <span class="me-2"
+                  ><i class="fa-solid fa-arrow-right-from-bracket"></i
+                ></span>
+                Log Out
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

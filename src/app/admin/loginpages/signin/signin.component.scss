@@ -1,0 +1,34 @@
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+  }
+  
+  .w-fit {
+    width: fit-content;
+    margin-left: 106px;
+  }
+  
+  .modal-content-width{
+    width: 100%;
+    // margin-left: 250px;
+    max-height: 60vh;
+    overflow-y: auto;
+    margin-bottom: 40px;
+  }
+  
+  .modal-content{
+    position: absolute;
+    top:20%;
+  }
+
+  .cursor {
+    cursor: pointer;
+  }

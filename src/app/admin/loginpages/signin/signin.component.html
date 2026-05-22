@@ -1,0 +1,83 @@
+<div class="card border-0 shadow-lg shadow-cyan-500" style="height: 100%">
+  <div class="card-body px-5 py-4">
+    <div class="text-center mb-3">
+      <img src="./assets/logo.png" class="logo-image mt-0" />
+      <h3 class="text-primary pb-2 text-center login-border-text text-capitalize text-primary">
+        {{ title }}
+      </h3>
+    </div>
+    <form [formGroup]="signIn">
+      <div class="mb-3">
+        <label class="d-block text-capitalize form-label form-lable-custom" for="Email">Enter Your Email</label>
+        <input type="text" class="d-block form-control form-input-custom" formControlName="Email"
+          placeholder="Enter Your Email" [ngClass]="{
+            'is-invalid':
+              signIn.controls['Email'].errors &&
+              (signIn.controls['Email'].touched ||
+                signIn.controls['Email'].dirty)
+          }" />
+        <div class="text-danger error-message" *ngIf="
+            signIn.controls['Email'].errors &&
+            (signIn.controls['Email'].touched || signIn.controls['Email'].dirty)
+          ">
+          <p class="fw-light text-danger" *ngIf="signIn.controls['Email'].errors['required']">
+            Email is required
+          </p>
+          <p class="fw-light text-danger" *ngIf="signIn.controls['Email'].errors['pattern']">
+            Please Enter correct email
+          </p>
+        </div>
+      </div>
+
+      <div class="mb-3 position-relative">
+        <label class="d-block text-capitalize form-label form-lable-custom" for="Password">Enter Password</label>
+        <div class="input-group">
+          <input [type]="password" class="form-control form-input-custom" formControlName="Password"
+            placeholder="Enter Password" [ngClass]="{
+              'is-invalid':
+                signIn.controls['Password'].errors &&
+                (signIn.controls['Password'].touched ||
+                  signIn.controls['Password'].dirty)
+            }" />
+          <span class="input-group-text cursor-pointer bg-white border-[#468faf]" (click)="togglePasswordVisibility()">
+            <i class="fa-solid" [ngClass]="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </span>
+        </div>
+        <div class="text-danger error-message mt-1" *ngIf="
+            signIn.controls['Password'].errors &&
+            (signIn.controls['Password'].touched ||
+              signIn.controls['Password'].dirty)
+          ">
+          <p class="fw-light text-danger m-0" *ngIf="signIn.controls['Password'].errors['required']">
+            Password is required
+          </p>
+          <p class="fw-light text-danger m-0" *ngIf="signIn.controls['Password'].errors['minlength']">
+            Password must be at least 6 characters
+          </p>
+        </div>
+        <p class="text-end text-primary mt-2">
+          <a routerLink="/forgot_password" class="text-decoration-none">Forgot Password?</a>
+        </p>
+      </div>
+      <div>
+        <button class="btn btn-custom-primary px-5 mt-3 w-100 text-white" (click)="login()">
+          Login
+        </button>
+        <div class="text-end error-message mt-2" *ngIf="!submitted && errorMessage">
+          <p class="fw-light text-danger m-0">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Create Employer forms start -->
+<div *ngIf="openSecondsuccess" class="your-animation-class modal-container-success" [@slideIn]
+  aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div>
+    <div class="p-4 d-flex justify-content-between align-items-center success-content">
+      <span class="icon-success me-2"><i class="fa-solid fa-check"></i></span>
+      <p class="text-green-900 text-capitalize">Login successfully</p>
+    </div>
+  </div>
+</div>

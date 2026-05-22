@@ -1,0 +1,183 @@
+<div class="min-h-screen container mx-auto">
+  <!-- Header -->
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-1">Subscription & Payment Management</h1>
+      <p class="text-sm text-gray-500">Manage subscription plans, provider payments, and renewals.</p>
+    </div>
+  </div>
+
+  <!-- Platform Plan Banner -->
+  <div
+    class="bg-custom-primary rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center text-white relative overflow-hidden">
+    <div class="relative z-10">
+      <h2 class="text-xl font-bold mb-1 flex items-center">
+        Current Platform Plan: {{ platformPlan.name }}
+        <button (click)="openEditPlanModal()"
+          class="ml-3 text-sm bg-white/20 hover:bg-white/30 p-1.5 rounded-lg transition-colors cursor-pointer"
+          title="Edit Plan Pricing">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+      </h2>
+      <p class="text-indigo-100 text-sm opacity-90">{{ platformPlan.features }}</p>
+    </div>
+    <div class="text-right relative z-10 flex items-center space-x-6">
+      <div class="text-right">
+        <div class="text-sm text-indigo-100 opacity-90">Base Price</div>
+        <div class="text-xl font-bold">₹{{ platformPlan.price }} <span class="text-sm font-normal opacity-90">/
+            mo</span></div>
+      </div>
+      <!-- <div class="text-lg font-bold bg-white text-[#2c7da0] px-4 py-2 rounded-lg inline-block shadow-sm">
+        {{ platformPlan.duration }}
+      </div> -->
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bg-white p-2 rounded-xl shadow-sm mb-6 inline-flex space-x-1">
+    <button (click)="switchTab('providers')"
+      [ngClass]="activeTab === 'providers' ? 'bg-custom-primary text-white font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'"
+      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2">
+      <i class="fa-solid fa-users"></i><span>Provider Subscriptions</span>
+    </button>
+    <button (click)="switchTab('payments')"
+      [ngClass]="activeTab === 'payments' ? 'bg-custom-primary text-white font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'"
+      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2">
+      <i class="fa-solid fa-file-invoice-dollar"></i><span>Payment History</span>
+    </button>
+    <button (click)="switchTab('alerts')"
+      [ngClass]="activeTab === 'alerts' ? 'bg-custom-primary text-white font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'"
+      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2 relative">
+      <i class="fa-solid fa-bell"></i><span>Renewal Alerts</span>
+      <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+    </button>
+  </div>
+
+  <!-- Content Container -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+    <!-- Provider Subscriptions Table -->
+    <div *ngIf="activeTab === 'providers'" class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+            <th class="p-4">Provider ID & Name</th>
+            <th class="p-4">Current Plan</th>
+            <th class="p-4">Start Date</th>
+            <th class="p-4">End Date</th>
+            <th class="p-4 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let sub of providerSubscriptions" class="hover:bg-gray-50/50 transition-colors">
+            <td class="p-4">
+              <div class="font-bold text-gray-800 text-sm">{{ sub.name }}</div>
+              <div class="text-xs text-gray-500 mt-1">{{ sub.providerId }}</div>
+            </td>
+            <td class="p-4 font-semibold text-custom-primary text-sm">{{ sub.plan }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ sub.startDate }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ sub.endDate }}</td>
+            <td class="p-4 text-center">
+              <span
+                [ngClass]="{'bg-green-100 text-green-700': sub.status === 'Active', 'bg-red-100 text-red-700': sub.status === 'Expired', 'bg-purple-100 text-purple-700': sub.status === 'Promotional Phase'}"
+                class="text-xs px-2.5 py-1 rounded-full font-semibold">{{ sub.status }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Payment History Table -->
+    <div *ngIf="activeTab === 'payments'" class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+            <th class="p-4">Transaction ID</th>
+            <th class="p-4">Date</th>
+            <th class="p-4">Provider Name</th>
+            <th class="p-4">Amount</th>
+            <th class="p-4">Method</th>
+            <th class="p-4 text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let payment of paymentHistory" class="hover:bg-gray-50/50 transition-colors">
+            <td class="p-4 font-mono text-gray-600 text-sm">{{ payment.txnId }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ payment.date }}</td>
+            <td class="p-4 font-bold text-gray-800 text-sm">{{ payment.provider }}</td>
+            <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ payment.amount }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ payment.method }}</td>
+            <td class="p-4 text-center">
+              <span [ngClass]="payment.status === 'Success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                class="text-xs px-2.5 py-1 rounded-full font-semibold">{{ payment.status }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Renewal Alerts Table -->
+    <div *ngIf="activeTab === 'alerts'" class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+            <th class="p-4">Provider ID & Name</th>
+            <th class="p-4">Current Plan</th>
+            <th class="p-4">Expiry Date</th>
+            <th class="p-4 text-center">Days Left</th>
+            <th class="p-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let alert of renewalAlerts" class="hover:bg-red-50/30 transition-colors bg-red-50/10">
+            <td class="p-4">
+              <div class="font-bold text-gray-800 text-sm">{{ alert.name }}</div>
+              <div class="text-xs text-gray-500 mt-1">{{ alert.providerId }}</div>
+            </td>
+            <td class="p-4 font-semibold text-gray-700 text-sm">{{ alert.plan }}</td>
+            <td class="p-4 text-sm text-red-600 font-semibold">{{ alert.expiryDate }}</td>
+            <td class="p-4 text-center font-bold text-red-700 text-lg">{{ alert.daysLeft }}</td>
+            <td class="p-4 text-right space-x-2">
+              <button
+                class="bg-custom-primary hover:opacity-90 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                Send Reminder
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Edit Plan Modal -->
+  <div *ngIf="isEditPlanModalOpen"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <h3 class="text-lg font-bold text-gray-800">Edit Platform Plan</h3>
+        <button (click)="closeEditPlanModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Base Price (₹ / month)</label>
+          <input type="number" [(ngModel)]="editPlanData.price"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm">
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
+        <button (click)="closeEditPlanModal()"
+          class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+          Cancel
+        </button>
+        <button (click)="savePlan()"
+          class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 transition-colors shadow-sm">
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

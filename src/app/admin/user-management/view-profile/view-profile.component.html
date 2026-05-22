@@ -1,0 +1,643 @@
+<!-- Loading State -->
+<div class="profile-loading" *ngIf="isLoading">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+
+<div *ngIf="!isLoading && staffData" class="profile-page">
+  <!-- Hero Banner + Profile Header -->
+  <div class="profile-header-card">
+    <div class="profile-header-body">
+      <!-- Avatar -->
+      <div class="avatar-wrap">
+        <div class="avatar-circle">
+          <span class="avatar-initials">{{ getInitials(staffData.name) }}</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="profile-info">
+        <h2 class="profile-name">{{ staffData.name }}</h2>
+        <div class="profile-meta">
+          <span class="meta-item">
+            <i class="fa-solid fa-briefcase text-primary"></i>
+            {{ staffData.role?.name || "N/A" }}
+          </span>
+          <span class="meta-item">
+            <i class="fa-solid fa-id-badge text-primary"></i>
+            EMP-{{ staffData.id || "N/A" }}
+          </span>
+          <span class="meta-item">
+            <i class="fa-solid fa-location-dot text-primary"></i>
+            {{ staffData.department?.name || "N/A" }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="profile-actions ms-auto">
+        <button
+          class="btn btn-action-icon me-2"
+          title="Edit Profile"
+          (click)="openEditModal()"
+        >
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+        <button class="btn btn-outline-secondary btn-action" (click)="goBack()">
+          <i class="fa-solid fa-arrow-left"></i> &nbsp;Back
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="profile-tabs">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'details'"
+        (click)="setActiveTab('details')"
+      >
+        <i class="fa-solid fa-user"></i> Details
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'documents'"
+        (click)="setActiveTab('documents')"
+      >
+        <i class="fa-solid fa-file-lines"></i> Documents
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Row -->
+  <div class="profile-content-row">
+    <!-- Left Main Content -->
+    <div class="profile-main">
+      <!-- === DETAILS TAB === -->
+      <ng-container *ngIf="activeTab === 'details'">
+        <!-- General Information -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <h5 class="info-card-title">General Information</h5>
+          </div>
+          <div class="info-grid">
+            <div class="info-field">
+              <span class="field-label">FULL NAME</span>
+              <span class="field-value">{{ staffData.name || "—" }}</span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">EMAIL ADDRESS</span>
+              <span class="field-value email-val">
+                <i class="fa-solid fa-envelope"></i>
+                {{ staffData.email || "—" }}
+              </span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">MOBILE NUMBER</span>
+              <span class="field-value">
+                <i class="fa-solid fa-phone"></i>
+                {{ staffData.mobile || "—" }}
+              </span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">STATUS</span>
+              <span
+                class="status-badge"
+                [class.status-active]="staffData.is_active == 1"
+                [class.status-inactive]="staffData.is_active == 0"
+              >
+                {{ staffData.is_active == 1 ? "Active" : "Inactive" }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <h5 class="info-card-title">Additional Information</h5>
+          </div>
+          <div class="info-grid">
+            <div class="info-field">
+              <span class="field-label">DATE OF BIRTH</span>
+              <span class="field-value"> {{ staffData.dob || "—" }} </span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">EMERGENCY CONTACT</span>
+              <span class="field-value">
+                <i class="fa-solid fa-phone"></i>
+                {{ staffData.emergency_contact || "—" }}
+              </span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">JOINING DATE</span>
+              <span class="field-value">
+                <i class="fa-solid fa-calendar-check"></i>
+                {{ staffData.joining_date || "—" }}
+              </span>
+            </div>
+            <div class="info-field" style="grid-column: 1 / -1">
+              <span class="field-label">ADDRESS</span>
+              <span class="field-value">
+                {{ staffData.address || "—" }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employment Details -->
+        <div class="info-card">
+          <div class="info-card-header">
+            <h5 class="info-card-title">Employment Details</h5>
+          </div>
+          <div class="info-grid">
+            <div class="info-field">
+              <span class="field-label">DEPARTMENT</span>
+              <span class="field-value">{{
+                staffData.department?.name || "—"
+              }}</span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">ROLE / DESIGNATION</span>
+              <span class="field-value">{{ staffData.role?.name || "—" }}</span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">EMPLOYEE ID</span>
+              <span class="field-value">EMP-{{ staffData.id || "N/A" }}</span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">REPORTING MANAGER</span>
+              <span class="field-value">
+                {{ staffData.reporting_manager || "John Doe" }}
+              </span>
+            </div>
+            <div class="info-field">
+              <span class="field-label">ASSIGNED STATION</span>
+              <span class="field-value">
+                {{ staffData.assigned_station || "Station Alpha" }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- === DOCUMENTS TAB === -->
+      <ng-container *ngIf="activeTab === 'documents'">
+        <div class="info-card">
+          <div
+            class="info-card-header d-flex justify-content-between align-items-center"
+          >
+            <h5 class="info-card-title mb-0">Employee Documents</h5>
+            <button
+              class="btn btn-primary btn-sm rounded-3"
+              (click)="openUploadModal()"
+            >
+              <i class="fa-solid fa-upload me-1"></i> Upload Document
+            </button>
+          </div>
+          <div class="documents-list p-3">
+            <div class="row g-3">
+              <div class="col-md-6" *ngFor="let doc of employeeDocuments">
+                <div
+                  class="document-item d-flex align-items-center p-3 border rounded-3 bg-light transition-all cursor-pointer hover-shadow"
+                >
+                  <div
+                    class="doc-icon me-3 text-danger fs-3"
+                    *ngIf="doc.type === 'pdf'"
+                  >
+                    <i class="fa-solid fa-file-pdf"></i>
+                  </div>
+                  <div
+                    class="doc-icon me-3 text-primary fs-3"
+                    *ngIf="doc.type === 'image'"
+                  >
+                    <i class="fa-solid fa-file-image"></i>
+                  </div>
+                  <div class="doc-info flex-grow-1">
+                    <h6 class="mb-1 fw-semibold text-dark fs-14">
+                      {{ doc.name }}
+                    </h6>
+                    <div class="text-muted small">
+                      {{ doc.size }} &bull; Uploaded {{ doc.uploadDate }}
+                    </div>
+                  </div>
+                  <div class="doc-actions ms-2">
+                    <button
+                      class="btn btn-icon text-muted p-1"
+                      title="View/Download"
+                    >
+                      <i class="fa-solid fa-arrow-down"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="profile-sidebar">
+      <!-- Quick Stats -->
+      <div class="sidebar-card border-0 shadow-sm p-4 rounded-4 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4 pb-2 border-bottom">
+          <div class="d-flex align-items-center gap-2">
+            <input
+              type="date"
+              class="hidden-date-input"
+              #datePicker
+              [value]="selectedDate"
+              (change)="onDateChange($event)"
+            />
+            <button
+              class="btn btn-light btn-sm rounded-pill shadow-none border d-flex align-items-center gap-2 px-3 py-1.5"
+              (click)="openDatePicker(datePicker)"
+            >
+              <i class="fa-solid fa-calendar-day text-primary"></i>
+              <span class="fs-13 fw-semibold text-dark">{{
+                selectedDate | date: "dd MMM, yyyy"
+              }}</span>
+            </button>
+          </div>
+          <h5 class="sidebar-title fw-semibold fs-15 text-dark mb-0">
+            Quick Stats
+          </h5>
+        </div>
+
+        <div
+          class="stat-item bg-success-subtle d-flex align-items-center mb-3 p-3 rounded-3 border-0"
+        >
+          <div
+            class="stat-icon me-3 bg-success rounded-circle d-flex align-items-center justify-content-center"
+            style="width: 10px; height: 10px"
+          ></div>
+          <div class="stat-info">
+            <span
+              class="stat-label text-muted text-uppercase fw-semibold"
+              style="font-size: 10px"
+              >CHECK IN</span
+            >
+            <span
+              class="stat-value fw-medium text-dark"
+              style="font-size: 13px"
+              >{{ staffData.check_in || "09:00 AM" }}</span
+            >
+          </div>
+        </div>
+
+        <div
+          class="stat-item bg-danger-subtle d-flex align-items-center p-3 rounded-3 border-0"
+        >
+          <div
+            class="stat-icon me-3 bg-danger rounded-circle d-flex align-items-center justify-content-center"
+            style="width: 10px; height: 10px"
+          ></div>
+          <div class="stat-info">
+            <span
+              class="stat-label text-muted text-uppercase fw-semibold"
+              style="font-size: 10px"
+              >CHECK OUT</span
+            >
+            <span
+              class="stat-value fw-medium text-dark"
+              style="font-size: 13px"
+              >{{ staffData.check_out || "07:00 PM" }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Info -->
+    <!-- <div class="sidebar-card">
+        <h5 class="sidebar-title">Account Info</h5>
+        <div class="account-row">
+          <div class="account-avatar-sm">
+            <span>{{ getInitials(staffData.name) }}</span>
+          </div>
+          <div>
+            <p class="account-name">{{ staffData.name }}</p>
+            <p class="account-role">{{ staffData.role?.name || "N/A" }}</p>
+          </div>
+        </div>
+      </div> -->
+  </div>
+</div>
+<!-- Empty state if no data -->
+<div *ngIf="!isLoading && !staffData" class="profile-empty">
+  <i class="fa-solid fa-user-slash"></i>
+  <p>Employee profile not found.</p>
+  <button class="btn btn-primary" (click)="goBack()">Go Back</button>
+</div>
+
+<!-- ========================================================================= -->
+<!-- EDIT PROFILE MODAL -->
+<!-- ========================================================================= -->
+<div
+  class="modal fade show custom-modal"
+  tabindex="-1"
+  *ngIf="isEditModalOpen"
+  style="display: block; background: rgba(0, 0, 0, 0.4)"
+  (click)="onModalClickTarget($event)"
+>
+  <div class="modal-dialog modal-lg" style="margin-top: 30px" @fadeIn>
+    <div
+      class="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="modal-header border-bottom-0 bg-light px-4 py-3">
+        <div>
+          <h5 class="modal-title fw-bold text-dark fs-5 mb-1">
+            Edit Employee Profile
+          </h5>
+          <p class="text-muted small mb-0">
+            Update personal and employment details for {{ staffData?.name }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="btn-close shadow-none"
+          (click)="closeModal()"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <!-- Body / Form -->
+      <form [formGroup]="editForm" (ngSubmit)="saveChanges()">
+        <div
+          class="modal-body px-4 py-4"
+          style="max-height: 70vh; overflow-y: auto"
+        >
+          <div class="row g-3">
+            <!-- Full Name -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Full Name <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                class="form-control bg-light border-0"
+                formControlName="name"
+              />
+            </div>
+
+            <!-- Mobile Number -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Mobile No <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                class="form-control bg-light border-0"
+                formControlName="mobile"
+                maxlength="10"
+              />
+            </div>
+
+            <!-- Email -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Email ID</label
+              >
+              <input
+                type="email"
+                class="form-control bg-light border-0"
+                formControlName="email"
+              />
+            </div>
+
+            <!-- Date of Birth -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Date of Birth <span class="text-danger">*</span></label
+              >
+              <input
+                type="date"
+                class="form-control bg-light border-0"
+                formControlName="dob"
+              />
+            </div>
+
+            <!-- Emergency Contact -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Emergency Contact <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                class="form-control bg-light border-0"
+                formControlName="emergency_contact"
+                maxlength="10"
+              />
+            </div>
+
+            <!-- Joining Date -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Joining Date <span class="text-danger">*</span></label
+              >
+              <input
+                type="date"
+                class="form-control bg-light border-0"
+                formControlName="joining_date"
+              />
+            </div>
+
+            <!-- Department -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Department <span class="text-danger">*</span></label
+              >
+              <select
+                class="form-select bg-light border-0"
+                formControlName="department"
+              >
+                <option value="" disabled>Select Department</option>
+                <option value="Operations">Operations</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Accounts">Accounts</option>
+                <option value="HR">HR</option>
+              </select>
+            </div>
+
+            <!-- Designation -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Designation <span class="text-danger">*</span></label
+              >
+              <select
+                class="form-select bg-light border-0"
+                formControlName="designation"
+              >
+                <option value="" disabled>Select Designation</option>
+                <option *ngFor="let des of designationsList" [value]="des">
+                  {{ des }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Assigned Branches -->
+            <div class="col-md-8">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Assigned Branch(es) <span class="text-danger">*</span></label
+              >
+              <select
+                class="form-select bg-light border-0"
+                formControlName="branches"
+                multiple
+              >
+                <option *ngFor="let branch of branchesList" [value]="branch">
+                  {{ branch }}
+                </option>
+              </select>
+              <small class="text-muted fs-11"
+                >Hold Ctrl to select multiple</small
+              >
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-4">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Status <span class="text-danger">*</span></label
+              >
+              <select
+                class="form-select bg-light border-0"
+                formControlName="status"
+              >
+                <option *ngFor="let stat of employmentStatuses" [value]="stat">
+                  {{ stat }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Address -->
+            <div class="col-12">
+              <label class="form-label fs-13 fw-semibold text-muted"
+                >Address <span class="text-danger">*</span></label
+              >
+              <textarea
+                class="form-control bg-light border-0"
+                formControlName="address"
+                rows="2"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer border-top-0 bg-light px-4 py-3">
+          <button
+            type="button"
+            class="btn btn-light border px-4 rounded-3"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary px-4 rounded-3"
+            [disabled]="editForm.invalid"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- UPLOAD DOCUMENT MODAL -->
+<!-- ========================================================================= -->
+<div
+  class="modal fade show custom-modal"
+  tabindex="-1"
+  *ngIf="isUploadModalOpen"
+  style="display: block; background: rgba(0, 0, 0, 0.4)"
+  (click)="onModalClickTarget($event)"
+>
+  <div class="modal-dialog modal-dialog-centered" @fadeIn>
+    <div
+      class="modal-content border-0 shadow-lg rounded-4 overflow-hidden"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header border-bottom-0 bg-light px-4 py-3">
+        <div>
+          <h5 class="modal-title fw-bold text-dark fs-5 mb-1">
+            Upload New Document
+          </h5>
+          <p class="text-muted small mb-0">Select a file and provide a label</p>
+        </div>
+        <button
+          type="button"
+          class="btn-close shadow-none"
+          (click)="closeModal()"
+        ></button>
+      </div>
+
+      <form [formGroup]="uploadForm" (ngSubmit)="saveUpload()">
+        <div class="modal-body px-4 py-4">
+          <div class="mb-3">
+            <label class="form-label fs-13 fw-semibold text-muted"
+              >Document Name <span class="text-danger">*</span></label
+            >
+            <input
+              type="text"
+              class="form-control bg-light border-0"
+              formControlName="docName"
+              placeholder="e.g. Driving License"
+            />
+          </div>
+
+
+          <div class="mb-0">
+            <label class="form-label fs-13 fw-semibold text-muted"
+              >Choose File <span class="text-danger">*</span></label
+            >
+            <div class="upload-zone border rounded-3 p-4 text-center bg-light">
+              <input
+                type="file"
+                class="d-none"
+                #fileInput
+                (change)="onFileSelected($event)"
+                accept=".pdf,image/*"
+              />
+              <div (click)="fileInput.click()" class="cursor-pointer">
+                <i
+                  class="fa-solid fa-cloud-arrow-up fs-2 text-primary mb-2"
+                ></i>
+                <p class="mb-1 fw-medium">
+                  {{
+                    uploadForm.get("file")?.value
+                      ? uploadForm.get("file")?.value.name
+                      : "Click to select file"
+                  }}
+                </p>
+                <p class="text-muted small mb-0">Max size: 5MB</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top-0 bg-light px-4 py-3">
+          <button
+            type="button"
+            class="btn btn-light border px-4 rounded-3"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary px-4 rounded-3"
+            [disabled]="uploadForm.invalid"
+          >
+            Upload Now
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

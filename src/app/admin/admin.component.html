@@ -1,0 +1,32 @@
+<!-- correct code -->
+<div class="screenResponsive">
+  <div class="responsive-admin-header">
+    <app-sidenav-header
+      (toggleCollapsed)="toggleCollapsed()"
+      [isMobile]="isMobile"
+    ></app-sidenav-header>
+  </div>
+  <mat-sidenav-container class="admin-container">
+    <mat-sidenav
+      [opened]="!isMobile ? true : sidenavOpened"
+      [mode]="isMobile ? 'over' : sidenavMode"
+      [style.width]="isMobile ? '100vw' : sidenavWidth"
+      (closedStart)="sidenavOpened = false"
+      class="responsive-sidenav"
+    >
+      <app-sidenav
+        [collapsed]="collapsed"
+        (closeSidenav)="sidenavOpened = false"
+        [isMobile]="isMobile"
+      ></app-sidenav>
+    </mat-sidenav>
+    <mat-sidenav-content
+      [style.margin-left]="isMobile ? '0' : contentMargin"
+      [style.transition]="'margin-left 0.3s ease-in-out'"
+      class="pt-4"
+    >
+      <app-spinner></app-spinner>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

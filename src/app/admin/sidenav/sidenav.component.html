@@ -1,0 +1,176 @@
+<div class="custom-scrollbar">
+  <div class="sidenav-header">
+    <div class="text-center">
+      <!-- <span *ngIf="ImageUrl!=undefined">
+          <img [src]="ImageUrl" class="profileImage"
+            [class]="ProfilePicSizeClass()" class="dashboard-pic"
+            alt="Profile image"></span> -->
+
+      <!-- <span class="text-red-600" *ngIf="ImageUrl==undefined"><p>Profile image is
+            not upload</p></span> -->
+      <!-- <div class="profileborder text-center"  [class]="ShortnameB()" *ngIf="ImageUrl==undefined">
+              <h1 class="text-color  text-center" [class]="Shortname()">{{getShortName('123') |
+                uppercase}}</h1>
+            </div> -->
+    </div>
+    <!-- <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
+      <h2>panel</h2>
+      <p>readf</p>
+    </div> -->
+  </div>
+  <mat-nav-list>
+    <ng-container *ngFor="let item of menuItems">
+      <ng-container
+        *ngIf="item.subItems && item.subItems.length > 0; else noSubmenu"
+      >
+        <mat-expansion-panel [expanded]="isSubmenuExpanded(item.route)">
+          <mat-expansion-panel-header
+            (click)="toggleSubmenu(item.route)"
+            class="submenu-list custom-header admin-sidenav"
+          >
+            <a mat-list-item class="submenu-list">
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+            </a>
+          </mat-expansion-panel-header>
+          <mat-nav-list class="submenu-list">
+            <a
+              mat-list-item
+              *ngFor="let subItem of item.subItems"
+              [routerLink]="subItem.route"
+              routerLinkActive="selected-submenu"
+              class="submenu-item"
+            >
+              <mat-icon matListItemIcon style="margin-left: 0">{{
+                subItem.icon
+              }}</mat-icon>
+              <span matListItemTitle>{{ subItem.label }}</span>
+            </a>
+          </mat-nav-list>
+        </mat-expansion-panel>
+      </ng-container>
+      <ng-template #noSubmenu>
+        <a
+          mat-list-item
+          [routerLink]="item.route"
+          (click)="closeSubmenu()"
+          routerLinkActive="active-link"
+          routerLinkActive="selected-menu-items"
+          class="menu-item"
+        >
+          <mat-icon matListItemIcon class="mat-icon">{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      </ng-template>
+    </ng-container>
+  </mat-nav-list>
+</div>
+
+<!-- 
+      <div class="sidenav-header">
+        <img [class]="ProfilePicSizeClass()" src="./assets/profile.jpeg" alt="profileimg" class="dashboard-pic">
+      
+          <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
+            <h2>Profession</h2>
+            <p> Johns</p>
+          </div>
+        </div>
+        <mat-nav-list>
+          <ng-container *ngFor="let item of menuItems">
+            <ng-container
+              *ngIf="item.subItems && item.subItems.length > 0; else noSubmenu">
+              <mat-expansion-panel [expanded]="isExpanded(item.route)">
+                <mat-expansion-panel-header class="submenu-list custom-header">
+                  <a mat-list-item class="submenu-list">
+                    <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                    <span matListItemTitle *ngIf="!sideNavCollapsed()">{{ item.label
+                      }}</span>
+                  </a>
+        
+                </mat-expansion-panel-header>
+                <mat-nav-list class="submenu-list">
+                  <a mat-list-item *ngFor="let subItem of item.subItems"
+                    [routerLink]="subItem.route" routerLinkActive="selected-submenu"
+                    class="submenu-item">
+        
+                    <mat-icon matListItemIcon style="margin-left:0;">{{ subItem.icon
+                      }}</mat-icon>
+                    <span matListItemTitle *ngIf="!sideNavCollapsed()">{{ subItem.label
+                      }}</span>
+                  </a>
+                </mat-nav-list>
+              </mat-expansion-panel>
+            </ng-container>
+            <ng-template #noSubmenu>
+              <a mat-list-item [routerLink]="item.route"
+                routerLinkActive="selected-menu-items" class="menu-item">
+                <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                <span matListItemTitle *ngIf="!sideNavCollapsed()">{{ item.label
+                  }}</span>
+              </a>
+            </ng-template>
+          </ng-container>
+        </mat-nav-list>
+         -->
+
+<!-- <div class="sidenav-header">
+        <img [width]="ProfilePicSize()" height="ProfilePicSize()"
+          src="./assets/profile.jpeg" alt="profileimg">
+        <div class="header-text" [class.hide-header-text]="sideNavCollapsed()">
+          <h2>Profession</h2>
+          <p> Johns</p>
+        </div>
+      </div>
+      <mat-nav-list>
+        <ng-container *ngFor="let item of menuItems">
+          <ng-container
+            *ngIf="item.subItems && item.subItems.length > 0; else noSubmenu">
+            <mat-expansion-panel [expanded]="isExpanded(item.route)">
+              <mat-expansion-panel-header class="submenu-list custom-header">
+                <a mat-list-item class="submenu-list">
+                  <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+                  <span matListItemTitle *ngIf="!sideNavCollapsed()">{{ item.label
+                    }}</span>
+    
+                    <!-- sub menu icon  start
+                <mat-icon matListItemIcon
+                    class="expend-icon"
+                    (click)="toggleExpansion(item)"
+                    [ngClass]="{ 'rotated': isExpanded(item.route) }">
+                    {{ isExpanded(item.route) ? 'expand_less' : 'expand_more' }}
+                  </mat-icon> 
+                   s
+      
+            <mat-icon matListItemIcon class="expend-icon">{{ isExpanded(item.route) }}</mat-icon> 
+            sub menu icon  start closed
+                </a>
+      
+              </mat-expansion-panel-header>
+              <mat-nav-list class="submenu-list">
+                <a mat-list-item *ngFor="let subItem of item.subItems"
+                  [routerLink]="subItem.route" routerLinkActive="selected-submenu"
+                  class="submenu-item">
+      
+                  <mat-icon matListItemIcon style="margin-left:0;">{{ subItem.icon
+                    }}</mat-icon>
+                  <span matListItemTitle *ngIf="!sideNavCollapsed()">{{ subItem.label
+                    }}</span>
+                </a>
+              </mat-nav-list>
+            </mat-expansion-panel>
+          </ng-container>
+          <ng-template #noSubmenu>
+            <a mat-list-item [routerLink]="item.route"
+              routerLinkActive="selected-menu-items" class="menu-item">
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              <span matListItemTitle *ngIf="!sideNavCollapsed()">{{ item.label
+                }}</span>
+            </a>
+          </ng-template>
+        </ng-container>
+      </mat-nav-list>
+    -->
+
+<!-- <mat-expansion-panel [expanded]="isExpanded(item.index)" (opened)="toggleSubmenu(item.index)">
+     
+    </mat-expansion-panel> -->
