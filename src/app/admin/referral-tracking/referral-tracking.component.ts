@@ -1,14 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-referral-tracking',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgxPaginationModule],
   templateUrl: './referral-tracking.component.html',
   styleUrl: './referral-tracking.component.scss'
 })
 export class ReferralTrackingComponent implements OnInit {
+  tableSize: any = 10;
+  tableSizes: any = [10, 20, 50, 100, 'all'];
+  page: number = 1;
+
+  onTableSizeChange(event: any): void {
+    this.tableSize = event.target.value;
+    this.page = 1;
+  }
+
+  onTableDataChange(event: any) {
+    this.page = event;
+  }
+
+  get totalRecords(): number {
+    return this.referrals.length;
+  }
+
   stats = {
     totalReferrals: 124,
     successfulOnboards: 89,

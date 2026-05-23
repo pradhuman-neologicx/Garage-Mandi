@@ -7,44 +7,20 @@
     </div>
   </div>
 
-  <!-- Stats -->
-  <div class="grid grid-cols-4 gap-6 mb-8">
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
-      <div class="bg-blue-50 text-blue-600 p-4 rounded-xl mr-4"><i class="fa-solid fa-users text-xl"></i></div>
-      <div>
-        <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Total Referrals</div>
-        <div class="text-2xl font-black text-gray-800">{{ stats.totalReferrals }}</div>
-      </div>
-    </div>
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
-      <div class="bg-green-50 text-green-600 p-4 rounded-xl mr-4"><i class="fa-solid fa-check-circle text-xl"></i></div>
-      <div>
-        <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Onboarded</div>
-        <div class="text-2xl font-black text-gray-800">{{ stats.successfulOnboards }}</div>
-      </div>
-    </div>
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
-      <div class="bg-amber-50 text-amber-600 p-4 rounded-xl mr-4"><i class="fa-solid fa-hourglass-half text-xl"></i>
-      </div>
-      <div>
-        <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Pending</div>
-        <div class="text-2xl font-black text-gray-800">{{ stats.pending }}</div>
-      </div>
-    </div>
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center">
-      <div class="bg-custom-primary/10 text-custom-primary p-4 rounded-xl mr-4"><i
-          class="fa-solid fa-wallet text-xl"></i></div>
-      <div>
-        <div class="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Rewards Distributed</div>
-        <div class="text-2xl font-black text-gray-800">₹{{ stats.totalRewards }}</div>
-      </div>
-    </div>
-  </div>
 
   <!-- Content Container -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-      <h3 class="text-lg font-bold text-gray-800">Recent Referrals</h3>
+    <!-- Show Entries -->
+    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
+      <h3 class="text-lg font-bold text-gray-800">Referrals</h3>
+      <div class="flex items-center text-sm text-gray-500">
+        <span class="mr-2">Show</span>
+        <select (change)="onTableSizeChange($event)"
+          class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
+          <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
+        </select>
+        <span class="ml-1">entries</span>
+      </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -54,12 +30,13 @@
             <th class="p-4">Ref ID</th>
             <th class="p-4 w-1/2">Referral Journey (Who referred Whom)</th>
             <th class="p-4">Date</th>
-            <th class="p-4 text-center">Reward</th>
             <th class="p-4 text-center">Status</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let ref of referrals" class="hover:bg-gray-50/50 transition-colors">
+          <tr
+            *ngFor="let ref of referrals | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-mono text-custom-primary font-semibold text-sm">{{ ref.id }}</td>
             <td class="p-4">
               <div class="flex items-center space-x-3">
@@ -73,7 +50,6 @@
               </div>
             </td>
             <td class="p-4 text-sm text-gray-600">{{ ref.date }}</td>
-            <td class="p-4 text-center font-mono font-bold text-gray-700 text-sm">{{ ref.reward }}</td>
             <td class="p-4 text-center">
               <span
                 [ngClass]="{'bg-green-100 text-green-700': ref.status === 'Onboarded' || ref.status === 'Subscribed', 'bg-amber-100 text-amber-700': ref.status === 'Pending', 'bg-red-100 text-red-700': ref.status === 'Rejected'}"
@@ -85,5 +61,17 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination Controls -->
+    <div class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-100">
+      <div class="text-sm text-gray-500 mb-4 sm:mb-0">
+        Showing
+        {{ tableSize !== 'all' ? (totalRecords === 0 ? 0 : (page - 1) * tableSize + 1) : (totalRecords === 0 ? 0 : 1) }}
+        to
+        {{ tableSize !== 'all' ? (page * tableSize <= totalRecords ? page * tableSize : totalRecords) : totalRecords }}
+          of {{ totalRecords }} entries </div>
+          <pagination-controls previousLabel="Prev" nextLabel="Next" [responsive]="true"
+            (pageChange)="onTableDataChange($event)"></pagination-controls>
+      </div>
+    </div>
   </div>
-</div>

@@ -1,16 +1,38 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-subscription-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgxPaginationModule],
   templateUrl: './subscription-management.component.html',
   styleUrl: './subscription-management.component.scss'
 })
 export class SubscriptionManagementComponent implements OnInit {
   activeTab: string = 'providers';
+
+  tableSize: any = 10;
+  tableSizes: any = [10, 20, 50, 100, 'all'];
+  page: number = 1;
+
+  onTableSizeChange(event: any): void {
+    this.tableSize = event.target.value;
+    this.page = 1;
+  }
+
+  onTableDataChange(event: any) {
+    this.page = event;
+  }
+
+  get totalRecords(): number {
+    switch (this.activeTab) {
+      case 'providers': return this.providerSubscriptions.length;
+      case 'alerts': return this.renewalAlerts.length;
+      default: return 0;
+    }
+  }
 
   platformPlan = {
     name: 'Standard Plan',
@@ -19,7 +41,7 @@ export class SubscriptionManagementComponent implements OnInit {
     features: 'Unlimited leads, Priority listing'
   };
 
-  providerSubscriptions = [
+  providerSubscriptions: any[] = [
     { providerId: 'SP001', name: 'AutoCare Garage', plan: 'Standard Plan', startDate: '01-Jan-2026', endDate: '01-Apr-2026', status: 'Active' },
     { providerId: 'SP002', name: 'Bike Masters', plan: 'Standard Plan', startDate: '15-Dec-2025', endDate: '15-Jan-2026', status: 'Expired' },
     { providerId: 'SP005', name: 'Elite Motors', plan: 'Standard Plan', startDate: '20-May-2026', endDate: '20-Jun-2026', status: 'Promotional Phase' }
@@ -39,13 +61,20 @@ export class SubscriptionManagementComponent implements OnInit {
   isEditPlanModalOpen: boolean = false;
   editPlanData: any = {};
 
+  isPaymentModalOpen: boolean = false;
+  selectedProvider: any = null;
+
   constructor() { }
 
   ngOnInit(): void {
+    this.providerSubscriptions.forEach(sub => {
+      sub.payments = this.paymentHistory.filter(p => p.provider === sub.name);
+    });
   }
 
   switchTab(tab: string) {
     this.activeTab = tab;
+    this.page = 1;
   }
 
   openEditPlanModal() {
@@ -60,5 +89,15 @@ export class SubscriptionManagementComponent implements OnInit {
   savePlan() {
     this.platformPlan = { ...this.editPlanData };
     this.closeEditPlanModal();
+  }
+
+  openPaymentModal(provider: any) {
+    this.selectedProvider = provider;
+    this.isPaymentModalOpen = true;
+  }
+
+  closePaymentModal() {
+    this.isPaymentModalOpen = false;
+    this.selectedProvider = null;
   }
 }

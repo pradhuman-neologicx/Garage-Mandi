@@ -2,16 +2,40 @@ import { Component, OnInit } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { NgxPaginationModule } from 'ngx-pagination';
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, NgxPaginationModule],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.scss',
 })
 export class UserManagementComponent implements OnInit {
   activeTab: string = 'service_providers';
+
+  tableSize: any = 10;
+  tableSizes: any = [10, 20, 50, 100, 'all'];
+  page: number = 1;
+
+  onTableSizeChange(event: any): void {
+    this.tableSize = event.target.value;
+    this.page = 1;
+  }
+
+  onTableDataChange(event: any) {
+    this.page = event;
+  }
+
+  get totalRecords(): number {
+    switch (this.activeTab) {
+      case 'service_providers': return this.serviceProviders.length;
+      case 'customers': return this.customers.length;
+      case 'field_executives': return this.fieldExecutives.length;
+      case 'system_admins': return this.systemAdmins.length;
+      default: return 0;
+    }
+  }
 
   // Mock Data
   systemAdmins = [
@@ -53,6 +77,7 @@ export class UserManagementComponent implements OnInit {
 
   switchTab(tabName: string) {
     this.activeTab = tabName;
+    this.page = 1;
   }
 
   openModal(mode: 'add' | 'edit' | 'view', user?: any) {

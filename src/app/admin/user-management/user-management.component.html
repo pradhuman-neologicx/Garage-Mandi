@@ -42,6 +42,16 @@
 
   <!-- Content Area -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Show Entries -->
+    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
+      <div class="flex items-center text-sm text-gray-500">
+        <span class="mr-2">Show</span>
+        <select (change)="onTableSizeChange($event)" class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
+          <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
+        </select>
+        <span class="ml-1">entries</span>
+      </div>
+    </div>
 
     <!-- Service Providers Table -->
     <div *ngIf="activeTab === 'service_providers'" class="overflow-x-auto">
@@ -58,7 +68,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let provider of serviceProviders" class="hover:bg-gray-50/50 transition-colors">
+          <tr *ngFor="let provider of serviceProviders | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">{{ provider.id }}</td>
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ provider.name }}</div>
@@ -123,7 +133,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let customer of customers" class="hover:bg-gray-50/50 transition-colors">
+          <tr *ngFor="let customer of customers | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">CUS-{{ customer.id }}</td>
             <td class="p-4 font-bold text-gray-800 text-sm">{{ customer.name }}</td>
             <td class="p-4">
@@ -163,7 +173,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let exec of fieldExecutives" class="hover:bg-gray-50/50 transition-colors">
+          <tr *ngFor="let exec of fieldExecutives | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">{{ exec.id }}</td>
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ exec.name }}</div>
@@ -206,7 +216,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let admin of systemAdmins" class="hover:bg-gray-50/50 transition-colors">
+          <tr *ngFor="let admin of systemAdmins | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">ADM-00{{ admin.id }}</td>
             <td class="p-4 font-bold text-gray-800 text-sm">{{ admin.name }}</td>
             <td class="p-4 text-sm text-gray-600">{{ admin.phone }}</td>
@@ -234,6 +244,22 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-100">
+      <div class="text-sm text-gray-500 mb-4 sm:mb-0">
+        Showing
+        {{ tableSize !== 'all' ? (totalRecords === 0 ? 0 : (page - 1) * tableSize + 1) : (totalRecords === 0 ? 0 : 1) }} to
+        {{ tableSize !== 'all' ? (page * tableSize <= totalRecords ? page * tableSize : totalRecords) : totalRecords }}
+        of {{ totalRecords }} entries
+      </div>
+      <pagination-controls
+        previousLabel="Prev"
+        nextLabel="Next"
+        [responsive]="true"
+        (pageChange)="onTableDataChange($event)"
+      ></pagination-controls>
     </div>
 
   </div>

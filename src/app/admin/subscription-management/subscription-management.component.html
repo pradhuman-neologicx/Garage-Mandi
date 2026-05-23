@@ -40,11 +40,6 @@
       class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2">
       <i class="fa-solid fa-users"></i><span>Provider Subscriptions</span>
     </button>
-    <button (click)="switchTab('payments')"
-      [ngClass]="activeTab === 'payments' ? 'bg-custom-primary text-white font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'"
-      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2">
-      <i class="fa-solid fa-file-invoice-dollar"></i><span>Payment History</span>
-    </button>
     <button (click)="switchTab('alerts')"
       [ngClass]="activeTab === 'alerts' ? 'bg-custom-primary text-white font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'"
       class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2 relative">
@@ -55,6 +50,16 @@
 
   <!-- Content Container -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Show Entries -->
+    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
+      <div class="flex items-center text-sm text-gray-500">
+        <span class="mr-2">Show</span>
+        <select (change)="onTableSizeChange($event)" class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
+          <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
+        </select>
+        <span class="ml-1">entries</span>
+      </div>
+    </div>
 
     <!-- Provider Subscriptions Table -->
     <div *ngIf="activeTab === 'providers'" class="overflow-x-auto">
@@ -66,10 +71,11 @@
             <th class="p-4">Start Date</th>
             <th class="p-4">End Date</th>
             <th class="p-4 text-center">Status</th>
+            <th class="p-4 text-right">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let sub of providerSubscriptions" class="hover:bg-gray-50/50 transition-colors">
+          <tr *ngFor="let sub of providerSubscriptions | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ sub.name }}</div>
               <div class="text-xs text-gray-500 mt-1">{{ sub.providerId }}</div>
@@ -82,34 +88,10 @@
                 [ngClass]="{'bg-green-100 text-green-700': sub.status === 'Active', 'bg-red-100 text-red-700': sub.status === 'Expired', 'bg-purple-100 text-purple-700': sub.status === 'Promotional Phase'}"
                 class="text-xs px-2.5 py-1 rounded-full font-semibold">{{ sub.status }}</span>
             </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Payment History Table -->
-    <div *ngIf="activeTab === 'payments'" class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-            <th class="p-4">Transaction ID</th>
-            <th class="p-4">Date</th>
-            <th class="p-4">Provider Name</th>
-            <th class="p-4">Amount</th>
-            <th class="p-4">Method</th>
-            <th class="p-4 text-center">Status</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let payment of paymentHistory" class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-mono text-gray-600 text-sm">{{ payment.txnId }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ payment.date }}</td>
-            <td class="p-4 font-bold text-gray-800 text-sm">{{ payment.provider }}</td>
-            <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ payment.amount }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ payment.method }}</td>
-            <td class="p-4 text-center">
-              <span [ngClass]="payment.status === 'Success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                class="text-xs px-2.5 py-1 rounded-full font-semibold">{{ payment.status }}</span>
+            <td class="p-4 text-right">
+              <button (click)="openPaymentModal(sub)" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors" title="View Payment History">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -129,7 +111,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let alert of renewalAlerts" class="hover:bg-red-50/30 transition-colors bg-red-50/10">
+          <tr *ngFor="let alert of renewalAlerts | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-red-50/30 transition-colors bg-red-50/10">
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ alert.name }}</div>
               <div class="text-xs text-gray-500 mt-1">{{ alert.providerId }}</div>
@@ -146,6 +128,22 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-100">
+      <div class="text-sm text-gray-500 mb-4 sm:mb-0">
+        Showing
+        {{ tableSize !== 'all' ? (totalRecords === 0 ? 0 : (page - 1) * tableSize + 1) : (totalRecords === 0 ? 0 : 1) }} to
+        {{ tableSize !== 'all' ? (page * tableSize <= totalRecords ? page * tableSize : totalRecords) : totalRecords }}
+        of {{ totalRecords }} entries
+      </div>
+      <pagination-controls
+        previousLabel="Prev"
+        nextLabel="Next"
+        [responsive]="true"
+        (pageChange)="onTableDataChange($event)"
+      ></pagination-controls>
     </div>
 
   </div>
@@ -175,6 +173,62 @@
         <button (click)="savePlan()"
           class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 transition-colors shadow-sm">
           Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment History Modal -->
+  <div *ngIf="isPaymentModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+        <h3 class="text-lg font-bold text-gray-800">
+          <i class="fa-solid fa-file-invoice-dollar mr-2 text-custom-primary"></i>Payment History - {{ selectedProvider?.name }}
+        </h3>
+        <button (click)="closePaymentModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 overflow-y-auto grow space-y-6">
+        <div *ngIf="selectedProvider?.payments && selectedProvider.payments.length > 0" class="overflow-x-auto border border-gray-100 rounded-lg">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+                <th class="p-4">Transaction ID</th>
+                <th class="p-4">Date</th>
+                <th class="p-4">Amount</th>
+                <th class="p-4">Method</th>
+                <th class="p-4 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr *ngFor="let payment of selectedProvider.payments" class="hover:bg-gray-50/50 transition-colors">
+                <td class="p-4 font-mono text-gray-600 text-sm">{{ payment.txnId }}</td>
+                <td class="p-4 text-sm text-gray-600">{{ payment.date }}</td>
+                <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ payment.amount }}</td>
+                <td class="p-4 text-sm text-gray-600">{{ payment.method }}</td>
+                <td class="p-4 text-center">
+                  <span [ngClass]="payment.status === 'Success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="text-xs px-2.5 py-1 rounded-full font-semibold">
+                    {{ payment.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div *ngIf="!selectedProvider?.payments || selectedProvider.payments.length === 0" class="text-sm text-gray-500 italic bg-gray-50 p-6 rounded-lg text-center border border-gray-100">
+          No payment history found for this provider.
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 shrink-0 text-right">
+        <button (click)="closePaymentModal()" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold text-gray-700 transition-colors shadow-sm">
+          Close
         </button>
       </div>
     </div>
