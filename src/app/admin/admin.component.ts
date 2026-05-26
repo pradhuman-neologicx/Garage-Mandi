@@ -3,6 +3,9 @@ import { Component, HostListener, Inject, Renderer2 } from '@angular/core';
 import { ThemePalette } from '@angular/material/core';
 import { MatDrawerMode } from '@angular/material/sidenav';
 import { OverlayContainer } from '@angular/cdk/overlay';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
@@ -17,8 +20,18 @@ export class AdminComponent {
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private render: Renderer2,
-    private overlay: OverlayContainer
-  ) {}
+    private overlay: OverlayContainer,
+    private router: Router
+  ) {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      const content = this.document.querySelector('.mat-drawer-content') || this.document.querySelector('mat-sidenav-content');
+      if (content) {
+        content.scrollTo(0, 0);
+      }
+    });
+  }
 
   ChangeLang(lang: any) {
     const selectedLanguage = lang.target.value;

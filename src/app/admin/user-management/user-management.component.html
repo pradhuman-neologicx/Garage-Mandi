@@ -10,7 +10,7 @@
       <button (click)="openModal('add')"
         class="bg-custom-primary hover:opacity-90 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-opacity flex items-center space-x-2">
         <i class="fa-solid fa-plus"></i>
-        <span>Add New User</span>
+        <span>{{ addButtonText }}</span>
       </button>
     </div>
   </div>
@@ -46,7 +46,8 @@
     <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
       <div class="flex items-center text-sm text-gray-500">
         <span class="mr-2">Show</span>
-        <select (change)="onTableSizeChange($event)" class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
+        <select (change)="onTableSizeChange($event)"
+          class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
           <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
         </select>
         <span class="ml-1">entries</span>
@@ -68,7 +69,9 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let provider of serviceProviders | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
+          <tr
+            *ngFor="let provider of serviceProviders | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">{{ provider.id }}</td>
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ provider.name }}</div>
@@ -98,10 +101,14 @@
               </div>
             </td>
             <td class="p-4 text-right space-x-2 whitespace-nowrap">
-              <button *ngIf="provider.approvalStatus === 'Pending'" (click)="openApprovalModal('approve', provider)" class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors" title="Approve">
+              <button *ngIf="provider.approvalStatus === 'Pending'" (click)="openApprovalModal('approve', provider)"
+                class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors"
+                title="Approve">
                 <i class="fa-solid fa-check"></i>
               </button>
-              <button *ngIf="provider.approvalStatus === 'Pending'" (click)="openApprovalModal('reject', provider)" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors" title="Reject">
+              <button *ngIf="provider.approvalStatus === 'Pending'" (click)="openApprovalModal('reject', provider)"
+                class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                title="Reject">
                 <i class="fa-solid fa-xmark"></i>
               </button>
               <button (click)="openModal('view', provider)"
@@ -133,12 +140,14 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let customer of customers | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
+          <tr
+            *ngFor="let customer of customers | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">CUS-{{ customer.id }}</td>
             <td class="p-4 font-bold text-gray-800 text-sm">{{ customer.name }}</td>
             <td class="p-4">
-               <div class="text-sm text-gray-600">{{ customer.phone }}</div>
-               <div class="text-xs text-gray-400 mt-1">{{ customer.email }}</div>
+              <div class="text-sm text-gray-600">{{ customer.phone }}</div>
+              <div class="text-xs text-gray-400 mt-1">{{ customer.email }}</div>
             </td>
             <td class="p-4 text-center">
               <span [ngClass]="customer.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
@@ -147,10 +156,14 @@
               </span>
             </td>
             <td class="p-4 text-right space-x-2">
-              <button (click)="openModal('view', customer)" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors" title="View Customer">
+              <button (click)="openModal('view', customer)"
+                class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors"
+                title="View Customer">
                 <i class="fa-solid fa-eye"></i>
               </button>
-              <button (click)="openModal('edit', customer)" class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors" title="Edit Customer">
+              <button (click)="openModal('edit', customer)"
+                class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors"
+                title="Edit Customer">
                 <i class="fa-solid fa-pen"></i>
               </button>
             </td>
@@ -173,7 +186,9 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let exec of fieldExecutives | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
+          <tr
+            *ngFor="let exec of fieldExecutives | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">{{ exec.id }}</td>
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ exec.name }}</div>
@@ -188,11 +203,14 @@
               </span>
             </td>
             <td class="p-4 text-right space-x-2">
-              <button (click)="openModal('view', exec)" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors" title="View Executive">
+              <button (click)="openModal('view', exec)"
+                class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors"
+                title="View Executive">
                 <i class="fa-solid fa-eye"></i>
               </button>
               <button (click)="openModal('edit', exec)"
-                class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors" title="Edit Executive">
+                class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors"
+                title="Edit Executive">
                 <i class="fa-solid fa-pen"></i>
               </button>
             </td>
@@ -216,7 +234,9 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let admin of systemAdmins | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
+          <tr
+            *ngFor="let admin of systemAdmins | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">ADM-00{{ admin.id }}</td>
             <td class="p-4 font-bold text-gray-800 text-sm">{{ admin.name }}</td>
             <td class="p-4 text-sm text-gray-600">{{ admin.phone }}</td>
@@ -233,11 +253,14 @@
               </span>
             </td>
             <td class="p-4 text-right space-x-2">
-              <button (click)="openModal('view', admin)" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors" title="View Admin">
+              <button (click)="openModal('view', admin)"
+                class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors"
+                title="View Admin">
                 <i class="fa-solid fa-eye"></i>
               </button>
               <button (click)="openModal('edit', admin)"
-                class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors" title="Edit Admin">
+                class="text-amber-600 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 p-2 rounded-lg transition-colors"
+                title="Edit Admin">
                 <i class="fa-solid fa-pen"></i>
               </button>
             </td>
@@ -250,112 +273,120 @@
     <div class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-100">
       <div class="text-sm text-gray-500 mb-4 sm:mb-0">
         Showing
-        {{ tableSize !== 'all' ? (totalRecords === 0 ? 0 : (page - 1) * tableSize + 1) : (totalRecords === 0 ? 0 : 1) }} to
+        {{ tableSize !== 'all' ? (totalRecords === 0 ? 0 : (page - 1) * tableSize + 1) : (totalRecords === 0 ? 0 : 1) }}
+        to
         {{ tableSize !== 'all' ? (page * tableSize <= totalRecords ? page * tableSize : totalRecords) : totalRecords }}
-        of {{ totalRecords }} entries
+          of {{ totalRecords }} entries </div>
+          <pagination-controls previousLabel="Prev" nextLabel="Next" [responsive]="true"
+            (pageChange)="onTableDataChange($event)"></pagination-controls>
       </div>
-      <pagination-controls
-        previousLabel="Prev"
-        nextLabel="Next"
-        [responsive]="true"
-        (pageChange)="onTableDataChange($event)"
-      ></pagination-controls>
+
     </div>
 
-  </div>
-
-  <!-- Unified Modal -->
-  <div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4 sm:p-0">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all">
-      <!-- Modal Header -->
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-        <h3 class="text-lg font-bold text-gray-800 capitalize">
-          {{ modalMode }} {{ activeTab.replace('_', ' ') }}
-        </h3>
-        <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-
-      <!-- Modal Body -->
-      <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
-        <!-- View Mode -->
-        <div *ngIf="modalMode === 'view'" class="space-y-4">
-          <div *ngFor="let key of objectKeys(selectedUser)" class="flex border-b border-gray-50 pb-2">
-            <span class="w-1/3 text-sm font-semibold text-gray-500 capitalize">{{ key }}</span>
-            <span class="w-2/3 text-sm text-gray-800 font-medium">{{ selectedUser[key] }}</span>
-          </div>
+    <!-- Unified Modal -->
+    <div *ngIf="isModalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4 sm:p-0">
+      <div
+        class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+          <h3 class="text-lg font-bold text-gray-800 capitalize">
+            {{ modalMode }} {{ activeTab.replace('_', ' ') }}
+          </h3>
+          <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
         </div>
 
-        <!-- Add / Edit Mode -->
-        <div *ngIf="modalMode !== 'view'" class="space-y-4">
-
-          <!-- Profile Image Upload (shared for all tabs) -->
-          <div class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
-            <div class="relative group cursor-pointer" (click)="profileImageInput.click()">
-              <!-- Avatar preview -->
-              <div class="w-32 h-24 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-custom-primary transition-colors flex items-center justify-center bg-gray-50">
-                <img *ngIf="selectedUser?.imagePreview" [src]="selectedUser.imagePreview"
-                  class="w-full h-full object-cover" alt="Profile" />
-                <i *ngIf="!selectedUser?.imagePreview" class="fa-solid fa-image text-3xl text-gray-300"></i>
-              </div>
-              <!-- Camera overlay -->
-              <div class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-custom-primary flex items-center justify-center shadow-md border-2 border-white">
-                <i class="fa-solid fa-camera text-white text-sm"></i>
-              </div>
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+          <!-- View Mode -->
+          <div *ngIf="modalMode === 'view'" class="space-y-4">
+            <div *ngFor="let key of objectKeys(selectedUser)" class="flex border-b border-gray-50 pb-2">
+              <span class="w-1/3 text-sm font-semibold text-gray-500 capitalize">{{ key }}</span>
+              <span class="w-2/3 text-sm text-gray-800 font-medium">{{ selectedUser[key] }}</span>
             </div>
-            <p class="text-xs text-gray-400 mt-1">Click to upload image</p>
-            <!-- Hidden file input -->
-            <input #profileImageInput type="file" accept="image/*" class="hidden"
-              (change)="onImageSelected($event)" />
           </div>
-          
-          <!-- Service Providers Form -->
-          <div *ngIf="activeTab === 'service_providers'" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Garage Name</label>
-                <input type="text" [value]="selectedUser?.name || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
-                <input type="text" [value]="selectedUser?.owner || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" [value]="selectedUser?.email || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="text" [value]="selectedUser?.phone || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              
-              <!-- Supported Vehicle Categories -->
-              <div class="col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Supported Vehicle Categories</label>
-                <div class="flex flex-wrap gap-4">
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">2-Wheeler</span>
-                  </label>
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">3-Wheeler</span>
-                  </label>
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">4-Wheeler</span>
-                  </label>
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">Trucks</span>
-                  </label>
+
+          <!-- Add / Edit Mode -->
+          <div *ngIf="modalMode !== 'view'" class="space-y-4">
+
+            <!-- Profile Image Upload (shared for all tabs) -->
+            <div class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
+              <div class="relative group cursor-pointer" (click)="profileImageInput.click()">
+                <!-- Avatar preview -->
+                <div
+                  class="w-32 h-24 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-custom-primary transition-colors flex items-center justify-center bg-gray-50">
+                  <img *ngIf="selectedUser?.imagePreview" [src]="selectedUser.imagePreview"
+                    class="w-full h-full object-cover" alt="Profile" />
+                  <i *ngIf="!selectedUser?.imagePreview" class="fa-solid fa-image text-3xl text-gray-300"></i>
+                </div>
+                <!-- Camera overlay -->
+                <div
+                  class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-custom-primary flex items-center justify-center shadow-md border-2 border-white">
+                  <i class="fa-solid fa-camera text-white text-sm"></i>
                 </div>
               </div>
+              <p class="text-xs text-gray-400 mt-1">Click to upload image</p>
+              <!-- Hidden file input -->
+              <input #profileImageInput type="file" accept="image/*" class="hidden"
+                (change)="onImageSelected($event)" />
+            </div>
 
-              <!-- Service Categories -->
-              <!-- <div class="col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Service Categories</label>
+            <!-- Service Providers Form -->
+            <div *ngIf="activeTab === 'service_providers'" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Garage Name</label>
+                  <input type="text" [value]="selectedUser?.name || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
+                  <input type="text" [value]="selectedUser?.owner || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input type="email" [value]="selectedUser?.email || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input type="text" [value]="selectedUser?.phone || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+
+                <!-- Supported Vehicle Categories -->
+                <div class="col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Supported Categories</label>
+                  <div class="flex flex-wrap gap-4">
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">2-Wheeler</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">3-Wheeler</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">4-Wheeler</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">Trucks</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Sub Categories -->
+                <div class="col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sub Categories</label>
                 <div class="flex flex-wrap gap-4">
                   <label class="inline-flex items-center cursor-pointer">
                     <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
@@ -378,164 +409,187 @@
                     <span class="ml-2 text-sm text-gray-600">Periodic Maintenance</span>
                   </label>
                 </div>
-              </div> -->
-
-              <!-- Business Description -->
-              <div class="col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Business Description</label>
-                <textarea rows="3" placeholder="Tell us about the garage..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">{{selectedUser?.description || ''}}</textarea>
               </div>
 
-              <!-- Operating Timings -->
-              <!-- <div class="col-span-2">
+                <!-- Business Description -->
+                <div class="col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Business Description</label>
+                  <textarea rows="3" placeholder="Tell us about the garage..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">{{selectedUser?.description || ''}}</textarea>
+                </div>
+
+                <!-- Operating Timings -->
+                <!-- <div class="col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Operating Timings (Optional)</label>
                 <input type="text" placeholder="e.g. 9:00 AM - 7:00 PM" [value]="selectedUser?.timings || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
               </div> -->
 
-              <div class="col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <textarea rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">{{selectedUser?.address || ''}}</textarea>
-              </div>
-              <div *ngIf="modalMode === 'edit'">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Approval Status</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                  <option value="Approved" [selected]="selectedUser?.approvalStatus === 'Approved'">Approved</option>
-                  <option value="Pending" [selected]="selectedUser?.approvalStatus === 'Pending'">Pending</option>
-                  <option value="Rejected" [selected]="selectedUser?.approvalStatus === 'Rejected'">Rejected</option>
-                </select>
-              </div>
-              <div *ngIf="modalMode === 'edit'">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                  <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                  <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Customers Form -->
-          <div *ngIf="activeTab === 'customers'" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" [value]="selectedUser?.name || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="text" [value]="selectedUser?.phone || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" [value]="selectedUser?.email || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div *ngIf="modalMode === 'edit'">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                  <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                  <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
-                </select>
+                <div class="col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <textarea rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">{{selectedUser?.address || ''}}</textarea>
+                </div>
+                <div *ngIf="modalMode === 'edit'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Approval Status</label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                    <option value="Approved" [selected]="selectedUser?.approvalStatus === 'Approved'">Approved</option>
+                    <option value="Pending" [selected]="selectedUser?.approvalStatus === 'Pending'">Pending</option>
+                    <option value="Rejected" [selected]="selectedUser?.approvalStatus === 'Rejected'">Rejected</option>
+                  </select>
+                </div>
+                <div *ngIf="modalMode === 'edit'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
+                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Field Executives Form -->
-          <div *ngIf="activeTab === 'field_executives'" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" [value]="selectedUser?.name || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+            <!-- Customers Form -->
+            <div *ngIf="activeTab === 'customers'" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input type="text" [value]="selectedUser?.name || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input type="text" [value]="selectedUser?.phone || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input type="email" [value]="selectedUser?.email || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div *ngIf="modalMode === 'edit'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
+                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="text" [value]="selectedUser?.phone || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" [value]="selectedUser?.email || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <!-- <div>
+            </div>
+
+            <!-- Field Executives Form -->
+            <div *ngIf="activeTab === 'field_executives'" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input type="text" [value]="selectedUser?.name || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input type="text" [value]="selectedUser?.phone || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input type="email" [value]="selectedUser?.email || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <!-- <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Region</label>
                 <input type="text" [value]="selectedUser?.region || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
               </div> -->
-              <div *ngIf="modalMode === 'edit'">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                  <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                  <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
-                </select>
+                <div *ngIf="modalMode === 'edit'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
+                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- System Admins Form -->
-          <div *ngIf="activeTab === 'system_admins'" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input type="text" [value]="selectedUser?.name || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input type="email" [value]="selectedUser?.email || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                <input type="text" [value]="selectedUser?.phone || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <input type="text" [value]="selectedUser?.role || 'System Admin'" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 focus:outline-none text-sm cursor-not-allowed">
-              </div>
-              <div *ngIf="modalMode === 'edit'">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                  <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                  <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
-                </select>
+            <!-- System Admins Form -->
+            <div *ngIf="activeTab === 'system_admins'" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input type="text" [value]="selectedUser?.name || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input type="email" [value]="selectedUser?.email || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input type="text" [value]="selectedUser?.phone || ''"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <input type="text" [value]="selectedUser?.role || 'System Admin'" readonly
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 focus:outline-none text-sm cursor-not-allowed">
+                </div>
+                <div *ngIf="modalMode === 'edit'">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
+                  <select
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
+                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
+                  </select>
+                </div>
               </div>
             </div>
+
           </div>
-          
         </div>
-      </div>
 
-      <!-- Modal Footer -->
-      <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
-        <button (click)="closeModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-          {{ modalMode === 'view' ? 'Close' : 'Cancel' }}
-        </button>
-        <button *ngIf="modalMode !== 'view'" (click)="saveUser()" class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 transition-colors shadow-sm">
-          Save Changes
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Approval/Reject Confirmation Modal -->
-  <div *ngIf="isApprovalModalOpen" class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
-      <div class="p-6 text-center">
-        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4"
-          [ngClass]="approvalAction === 'approve' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
-          <i class="fa-solid text-xl" [ngClass]="approvalAction === 'approve' ? 'fa-check' : 'fa-xmark'"></i>
-        </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2 capitalize">{{ approvalAction }} Provider</h3>
-        <p class="text-sm text-gray-500 mb-6">
-          Are you sure you want to {{ approvalAction }} <strong>{{ approvalTarget?.name }}</strong>? This action cannot be undone.
-        </p>
-        <div class="flex justify-center space-x-3">
-          <button (click)="closeApprovalModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors w-full">
-            Cancel
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
+          <button (click)="closeModal()"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+            {{ modalMode === 'view' ? 'Close' : 'Cancel' }}
           </button>
-          <button (click)="confirmApproval()" class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors w-full shadow-sm"
-            [ngClass]="approvalAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'">
-            Yes, {{ approvalAction }}
+          <button *ngIf="modalMode !== 'view'" (click)="saveUser()"
+            class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 transition-colors shadow-sm">
+            Save Changes
           </button>
         </div>
       </div>
     </div>
-  </div>
 
-</div>
-<router-outlet></router-outlet>
+    <!-- Approval/Reject Confirmation Modal -->
+    <div *ngIf="isApprovalModalOpen"
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
+        <div class="p-6 text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4"
+            [ngClass]="approvalAction === 'approve' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
+            <i class="fa-solid text-xl" [ngClass]="approvalAction === 'approve' ? 'fa-check' : 'fa-xmark'"></i>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2 capitalize">{{ approvalAction }} Provider</h3>
+          <p class="text-sm text-gray-500 mb-6">
+            Are you sure you want to {{ approvalAction }} <strong>{{ approvalTarget?.name }}</strong>? This action
+            cannot be undone.
+          </p>
+          <div class="flex justify-center space-x-3">
+            <button (click)="closeApprovalModal()"
+              class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors w-full">
+              Cancel
+            </button>
+            <button (click)="confirmApproval()"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors w-full shadow-sm"
+              [ngClass]="approvalAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'">
+              Yes, {{ approvalAction }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <router-outlet></router-outlet>

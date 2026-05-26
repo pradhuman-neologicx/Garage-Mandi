@@ -37,6 +37,16 @@ export class UserManagementComponent implements OnInit {
     }
   }
 
+  get addButtonText(): string {
+    switch (this.activeTab) {
+      case 'service_providers': return 'Add New Provider';
+      case 'customers': return 'Add New Customer';
+      case 'field_executives': return 'Add New Executive';
+      case 'system_admins': return 'Add New Admin';
+      default: return 'Add New User';
+    }
+  }
+
   // Mock Data
   systemAdmins = [
     { id: 1, name: 'Rahul Admin', phone: '+91 9876543210', email: 'rahul.admin@garagemandi.com', role: 'System Admin', status: 'Active' },

@@ -62,7 +62,7 @@ export class SidenavComponent {
           label: 'User Management',
           route: '/admin/user-management',
         },
-         {
+        {
           index: 3,
           icon: 'category',
           label: 'Category Management',
@@ -74,20 +74,20 @@ export class SidenavComponent {
           label: 'Subscriptions',
           route: '/admin/subscription-management',
         },
-        
+
         {
           index: 5,
           icon: 'list_alt',
           label: 'Requests',
           route: '/admin/requests-monitoring',
         },
+        // {
+        //   index: 6,
+        //   icon: 'group_add',
+        //   label: 'Referrals',
+        //   route: '/admin/referral-tracking',
+        // },
         {
-          index: 6,
-          icon: 'group_add',
-          label: 'Referrals',
-          route: '/admin/referral-tracking',
-        },
-       {
           index: 7,
           icon: 'star_half',
           label: 'Feedbacks',
