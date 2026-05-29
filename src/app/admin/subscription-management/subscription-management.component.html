@@ -50,14 +50,39 @@
 
   <!-- Content Container -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <!-- Show Entries -->
-    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
-      <div class="flex items-center text-sm text-gray-500">
+    <!-- Show Entries and Filters -->
+    <div
+      class="flex flex-col lg:flex-row justify-between items-start lg:items-center px-6 py-4 border-b border-gray-100 bg-white gap-4">
+      <div class="flex items-center text-sm text-gray-500 shrink-0">
         <span class="mr-2">Show</span>
-        <select (change)="onTableSizeChange($event)" class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
+        <select (change)="onTableSizeChange($event)"
+          class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
           <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
         </select>
         <span class="ml-1">entries</span>
+      </div>
+
+      <!-- Filters for Provider Subscriptions -->
+      <div *ngIf="activeTab === 'providers'" class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+        <div class="relative w-full sm:w-auto">
+          <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+          <input type="text" [(ngModel)]="searchText" (keyup.enter)="onFilterChange()" placeholder="Search providers..."
+            class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary">
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <input type="date" [(ngModel)]="filterStartDate" (change)="onFilterChange()"
+            class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary text-gray-600">
+          <span class="text-gray-400 text-sm">-</span>
+          <input type="date" [(ngModel)]="filterEndDate" (change)="onFilterChange()"
+            class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary text-gray-600">
+        </div>
+
+        <button *ngIf="searchText || filterStartDate || filterEndDate" (click)="resetFilters()"
+          class="text-gray-400 hover:text-red-500 transition-colors p-2 shrink-0 bg-gray-50 hover:bg-red-50 rounded-lg"
+          title="Clear Filters">
+          <i class="fa-solid fa-times"></i>
+        </button>
       </div>
     </div>
 
@@ -66,7 +91,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-            <th class="p-4">Provider ID & Name</th>
+            <th class="p-4">Provider Name & Number</th>
             <th class="p-4">Current Plan</th>
             <th class="p-4">Start Date</th>
             <th class="p-4">End Date</th>
@@ -75,10 +100,12 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let sub of providerSubscriptions | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
+          <tr
+            *ngFor="let sub of providerSubscriptions | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ sub.name }}</div>
-              <div class="text-xs text-gray-500 mt-1">{{ sub.providerId }}</div>
+              <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ sub.phoneNumber }}</div>
             </td>
             <td class="p-4 font-semibold text-custom-primary text-sm">{{ sub.plan }}</td>
             <td class="p-4 text-sm text-gray-600">{{ sub.startDate }}</td>
@@ -89,7 +116,9 @@
                 class="text-xs px-2.5 py-1 rounded-full font-semibold">{{ sub.status }}</span>
             </td>
             <td class="p-4 text-right">
-              <button (click)="openPaymentModal(sub)" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors" title="View Payment History">
+              <button (click)="openPaymentModal(sub)"
+                class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors"
+                title="View Payment History">
                 <i class="fa-solid fa-file-invoice-dollar"></i>
               </button>
             </td>
@@ -103,7 +132,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-            <th class="p-4">Provider ID & Name</th>
+            <th class="p-4">Provider Name & Number</th>
             <th class="p-4">Current Plan</th>
             <th class="p-4">Expiry Date</th>
             <th class="p-4 text-center">Days Left</th>
@@ -111,10 +140,12 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let alert of renewalAlerts | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-red-50/30 transition-colors bg-red-50/10">
+          <tr
+            *ngFor="let alert of renewalAlerts | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            class="hover:bg-red-50/30 transition-colors bg-red-50/10">
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ alert.name }}</div>
-              <div class="text-xs text-gray-500 mt-1">{{ alert.providerId }}</div>
+              <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ alert.phoneNumber }}</div>
             </td>
             <td class="p-4 font-semibold text-gray-700 text-sm">{{ alert.plan }}</td>
             <td class="p-4 text-sm text-red-600 font-semibold">{{ alert.expiryDate }}</td>
@@ -134,104 +165,162 @@
     <div class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-100">
       <div class="text-sm text-gray-500 mb-4 sm:mb-0">
         Showing
-        {{ tableSize !== 'all' ? (totalRecords === 0 ? 0 : (page - 1) * tableSize + 1) : (totalRecords === 0 ? 0 : 1) }} to
+        {{ tableSize !== 'all' ? (totalRecords === 0 ? 0 : (page - 1) * tableSize + 1) : (totalRecords === 0 ? 0 : 1) }}
+        to
         {{ tableSize !== 'all' ? (page * tableSize <= totalRecords ? page * tableSize : totalRecords) : totalRecords }}
-        of {{ totalRecords }} entries
+          of {{ totalRecords }} entries </div>
+          <pagination-controls previousLabel="Prev" nextLabel="Next" [responsive]="true"
+            (pageChange)="onTableDataChange($event)"></pagination-controls>
       </div>
-      <pagination-controls
-        previousLabel="Prev"
-        nextLabel="Next"
-        [responsive]="true"
-        (pageChange)="onTableDataChange($event)"
-      ></pagination-controls>
+
     </div>
 
-  </div>
-
-  <!-- Edit Plan Modal -->
-  <div *ngIf="isEditPlanModalOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-        <h3 class="text-lg font-bold text-gray-800">Edit Platform Plan</h3>
-        <button (click)="closeEditPlanModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-      <div class="p-6 space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Base Price (₹ / month)</label>
-          <input type="number" [(ngModel)]="editPlanData.price"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm">
+    <!-- Edit Plan Modal -->
+    <div *ngIf="isEditPlanModalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+          <h3 class="text-lg font-bold text-gray-800">Edit Platform Plan</h3>
+          <button (click)="closeEditPlanModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Base Price (₹ / month)</label>
+            <input type="number" [(ngModel)]="editPlanData.price"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm">
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
+          <button (click)="closeEditPlanModal()"
+            class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+            Cancel
+          </button>
+          <button (click)="savePlan()"
+            class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 transition-colors shadow-sm">
+            Save Changes
+          </button>
         </div>
       </div>
-      <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50">
-        <button (click)="closeEditPlanModal()"
-          class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-          Cancel
-        </button>
-        <button (click)="savePlan()"
-          class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 transition-colors shadow-sm">
-          Save Changes
-        </button>
-      </div>
     </div>
-  </div>
 
-  <!-- Payment History Modal -->
-  <div *ngIf="isPaymentModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
-      <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-        <h3 class="text-lg font-bold text-gray-800">
-          <i class="fa-solid fa-file-invoice-dollar mr-2 text-custom-primary"></i>Payment History - {{ selectedProvider?.name }}
-        </h3>
-        <button (click)="closePaymentModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
+    <!-- Payment History Modal -->
+    <div *ngIf="isPaymentModalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4">
+      <div
+        class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+          <h3 class="text-lg font-bold text-gray-800">
+            <i class="fa-solid fa-file-invoice-dollar mr-2 text-custom-primary"></i>Details - {{ selectedProvider?.name
+            }}
+          </h3>
+          <button (click)="closePaymentModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
 
-      <!-- Body -->
-      <div class="p-6 overflow-y-auto grow space-y-6">
-        <div *ngIf="selectedProvider?.payments && selectedProvider.payments.length > 0" class="overflow-x-auto border border-gray-100 rounded-lg">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-                <th class="p-4">Transaction ID</th>
-                <th class="p-4">Date</th>
-                <th class="p-4">Amount</th>
-                <th class="p-4">Method</th>
-                <th class="p-4 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr *ngFor="let payment of selectedProvider.payments" class="hover:bg-gray-50/50 transition-colors">
-                <td class="p-4 font-mono text-gray-600 text-sm">{{ payment.txnId }}</td>
-                <td class="p-4 text-sm text-gray-600">{{ payment.date }}</td>
-                <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ payment.amount }}</td>
-                <td class="p-4 text-sm text-gray-600">{{ payment.method }}</td>
-                <td class="p-4 text-center">
-                  <span [ngClass]="payment.status === 'Success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="text-xs px-2.5 py-1 rounded-full font-semibold">
-                    {{ payment.status }}
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto grow space-y-6">
+
+          <!-- Details Section -->
+          <div *ngIf="selectedProvider?.rawData"
+            class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+            <!-- Provider Details -->
+            <div>
+              <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Provider Details</h4>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Name</span>
+                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.name || 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Email</span>
+                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.email || 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Phone</span>
+                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.phone_number || 'N/A'
+                    }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subscription Details -->
+            <div>
+              <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Subscription Details</h4>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Plan Name</span>
+                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.plan?.name || 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Amount</span>
+                  <span class="font-medium text-gray-900">₹{{ selectedProvider.rawData.plan?.amount || 'N/A' }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Sub Status</span>
+                  <span class="font-medium capitalize"
+                    [ngClass]="selectedProvider.rawData.status === 'active' ? 'text-green-600' : 'text-red-600'">
+                    {{ selectedProvider.rawData.status || 'N/A' }}
                   </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <div *ngIf="!selectedProvider?.payments || selectedProvider.payments.length === 0" class="text-sm text-gray-500 italic bg-gray-50 p-6 rounded-lg text-center border border-gray-100">
-          No payment history found for this provider.
-        </div>
-      </div>
+                </div>
+              </div>
+            </div>
 
-      <!-- Footer -->
-      <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 shrink-0 text-right">
-        <button (click)="closePaymentModal()" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold text-gray-700 transition-colors shadow-sm">
-          Close
-        </button>
+            <div *ngIf="selectedProvider?.trialEndsAt" class="mt-4 bg-blue-50 text-blue-700 text-xs p-2.5 rounded-lg border border-blue-100 flex items-center">
+              <i class="fa-solid fa-clock mr-2"></i>
+              <span>Trial Ends On: <span class="font-bold ml-1">{{ selectedProvider.trialEndsAt }}</span></span>
+            </div>
+          </div>
+
+          <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1 mt-4">Payment History</h4>
+          <div *ngIf="selectedProvider?.payments && selectedProvider.payments.length > 0"
+            class="overflow-x-auto border border-gray-100 rounded-lg shadow-sm">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+                  <th class="p-4">Transaction ID</th>
+                  <th class="p-4">Date</th>
+                  <th class="p-4">Amount</th>
+                  <th class="p-4">Method</th>
+                  <th class="p-4 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let payment of selectedProvider.payments" class="hover:bg-gray-50/50 transition-colors">
+                  <td class="p-4 font-mono text-gray-600 text-sm">{{ payment.txnId }}</td>
+                  <td class="p-4 text-sm text-gray-600">{{ payment.date }}</td>
+                  <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ payment.amount }}</td>
+                  <td class="p-4 text-sm text-gray-600">{{ payment.method }}</td>
+                  <td class="p-4 text-center">
+                    <span
+                      [ngClass]="payment.status === 'Success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                      class="text-xs px-2.5 py-1 rounded-full font-semibold">
+                      {{ payment.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="!selectedProvider?.payments || selectedProvider.payments.length === 0"
+            class="text-sm text-gray-500 italic bg-gray-50 p-6 rounded-lg text-center border border-gray-100">
+            No payment history found for this provider.
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 shrink-0 text-right">
+          <button (click)="closePaymentModal()"
+            class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-semibold text-gray-700 transition-colors shadow-sm">
+            Close
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-</div>
+  </div>

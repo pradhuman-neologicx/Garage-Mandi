@@ -48,7 +48,7 @@ export class SidenavComponent {
     this.roles = this.jwtService.getadmiRole();
     this.menuItems = [];
 
-    if (this.roles == 'admin') {
+    if (this.roles == 'super-admin' || this.roles == 'system-admin') {
       this.menuItems = [
         {
           index: 1,

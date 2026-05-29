@@ -6,147 +6,147 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class JwtService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // admin panel
 
   getisLoggedIn(): boolean {
-    return window.localStorage['cargo_isloggedIn'];
+    return window.localStorage['garage_mandi_isloggedIn'];
   }
   isLoggedIn(isloggedIn: boolean) {
-    window.localStorage['cargo_isloggedIn'] =
+    window.localStorage['garage_mandi_isloggedIn'] =
       isloggedIn != undefined ? isloggedIn : false;
   }
 
   getLoginAs(): number {
-    return window.localStorage['cargo_LoginAs'];
+    return window.localStorage['garage_mandi_LoginAs'];
   }
 
   saveLoginAs(LoginAs: number) {
-    window.localStorage['cargo_LoginAs'] = LoginAs;
+    window.localStorage['garage_mandi_LoginAs'] = LoginAs;
   }
 
   saveRoles(roles: any) {
-    localStorage.setItem('cargo_roles', JSON.stringify(roles));
+    localStorage.setItem('garage_mandi_roles', JSON.stringify(roles));
   }
 
   getRoles() {
-    return JSON.parse(localStorage.getItem('cargo_roles') || '[]');
+    return JSON.parse(localStorage.getItem('garage_mandi_roles') || '[]');
   }
 
   getfirstLoggedIn(): boolean {
-    return window.localStorage['cargo_isfirstlogin'];
+    return window.localStorage['garage_mandi_isfirstlogin'];
   }
   firstLoggedIn(isfirstlogin: boolean) {
-    window.localStorage['cargo_isfirstlogin'] =
+    window.localStorage['garage_mandi_isfirstlogin'] =
       isfirstlogin != undefined ? isfirstlogin : false;
   }
 
   getSession(): string {
-    return window.localStorage['cargo_Session'];
+    return window.localStorage['garage_mandi_Session'];
   }
 
   saveSession(Session: string) {
-    window.localStorage['cargo_Session'] = Session;
+    window.localStorage['garage_mandi_Session'] = Session;
   }
   getName(): string {
-    return window.localStorage['cargo_name'];
+    return window.localStorage['garage_mandi_name'];
   }
 
   saveName(name: string) {
-    window.localStorage['cargo_name'] = name;
+    window.localStorage['garage_mandi_name'] = name;
   }
 
   getSessionStartdate(): string {
-    return window.localStorage['cargo_Sessionstartdate'];
+    return window.localStorage['garage_mandi_Sessionstartdate'];
   }
 
   saveSessionStartdate(Session: string) {
-    window.localStorage['cargo_Sessionstartdate'] = Session;
+    window.localStorage['garage_mandi_Sessionstartdate'] = Session;
   }
 
   getSessionEnddate(): string {
-    return window.localStorage['cargo_SessionEnddate'];
+    return window.localStorage['garage_mandi_SessionEnddate'];
   }
 
   saveSessionEnddate(Session: string) {
-    window.localStorage['cargo_SessionEnddate'] = Session;
+    window.localStorage['garage_mandi_SessionEnddate'] = Session;
   }
 
   getpanelUserId(): Number {
-    return window.localStorage['cargo_panel_user_id'];
+    return window.localStorage['garage_mandi_panel_user_id'];
   }
 
   savepanelUserId(userid: any) {
-    window.localStorage['cargo_panel_user_id'] = userid;
+    window.localStorage['garage_mandi_panel_user_id'] = userid;
   }
   getadminame(): String {
-    return window.localStorage['cargo_adminname'];
+    return window.localStorage['garage_mandi_adminname'];
   }
 
   saveadminame(adminname: string) {
-    window.localStorage['cargo_adminname'] = adminname;
+    window.localStorage['garage_mandi_adminname'] = adminname;
   }
 
   saveAdminToken(Token: String) {
-    window.localStorage['cargo_Token'] = Token;
+    window.localStorage['garage_mandi_Token'] = Token;
   }
   saveAdminRole(Role: String) {
-    window.localStorage['cargo_Role'] = Role;
+    window.localStorage['garage_mandi_Role'] = Role;
   }
   getadmiRole(): String {
-    return window.localStorage['cargo_Role'];
+    return window.localStorage['garage_mandi_Role'];
   }
   getpanelPartyId(): Number {
-    return window.localStorage['cargo_Party_id'];
+    return window.localStorage['garage_mandi_Party_id'];
   }
 
   savePartyId(Party_id: Number) {
-    window.localStorage['cargo_Party_id'] = Party_id;
+    window.localStorage['garage_mandi_Party_id'] = Party_id;
   }
 
   getType(): String {
-    return window.localStorage['cargo_Type'];
+    return window.localStorage['garage_mandi_Type'];
   }
 
   saveType(Type: String) {
-    window.localStorage['cargo_Type'] = Type;
+    window.localStorage['garage_mandi_Type'] = Type;
   }
 
   getToken(): String {
-    return window.localStorage['cargo_Token'];
+    return window.localStorage['garage_mandi_Token'];
   }
 
   saveToken(Token: String) {
-    window.localStorage['cargo_Token'] = Token;
+    window.localStorage['garage_mandi_Token'] = Token;
   }
 
   // Profile Image of
   getImageUrl(): String {
-    return window.localStorage['cargo_ImageUrl'];
+    return window.localStorage['garage_mandi_ImageUrl'];
   }
 
   saveImageUrl(ImageUrl: String) {
-    window.localStorage['cargo_ImageUrl'] = ImageUrl;
+    window.localStorage['garage_mandi_ImageUrl'] = ImageUrl;
   }
 
   getUserId(): String {
-    return window.localStorage['cargo_user_id'];
+    return window.localStorage['garage_mandi_user_id'];
   }
 
   saveUserId(user_id: String) {
-    window.localStorage['cargo_user_id'] = user_id;
+    window.localStorage['garage_mandi_user_id'] = user_id;
   }
 
   ///call on logout
   clearStorage() {
-    window.localStorage.removeItem('cargo_isloggedIn');
-    window.localStorage.removeItem('cargo_panel_user_id');
+    window.localStorage.removeItem('garage_mandi_isloggedIn');
+    window.localStorage.removeItem('garage_mandi_panel_user_id');
 
-    window.localStorage.removeItem('cargo_Token');
-    window.localStorage.removeItem('cargo_Role');
-    window.localStorage.removeItem('cargo_adminname');
-    window.localStorage.removeItem('cargo_isfirstlogin');
+    window.localStorage.removeItem('garage_mandi_Token');
+    window.localStorage.removeItem('garage_mandi_Role');
+    window.localStorage.removeItem('garage_mandi_adminname');
+    window.localStorage.removeItem('garage_mandi_isfirstlogin');
 
     // window.localStorage.removeItem("isloggedStudent");
   }

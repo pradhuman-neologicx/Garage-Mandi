@@ -129,29 +129,48 @@ export class SigninComponent {
   login() {
     this.errorMessage = '';
     if (this.signIn.valid) {
-      // Static Mock Logic
-      if (this.signIn.get('Password')?.value === 'admin123') {
-        this.closeModal();
-        this.submitted = true;
-        this.successName = 'Login';
-        setTimeout(() => {
-          this.openSecondsuccess = true;
-          setTimeout(() => {
-            this.openSecondsuccess = false;
-            // Mocking token and user data
-            this.jwtService.savepanelUserId('1');
-            this.jwtService.saveadminame('Admin User');
-            this.jwtService.saveAdminToken('mock-token-123');
-            this.jwtService.saveAdminRole('admin');
-            this.jwtService.isLoggedIn(true);
-            this.ngOnInit();
-            this.router.navigate(['admin/dashboard']);
-          }, 1800);
-        }, 200);
-      } else {
-        this.errorMessage = 'Invalid Password (Use admin123)';
-        this.submitted = false;
-      }
+      this.submitted = true;
+      const formData = new FormData();
+      formData.append('email', this.signIn.get('Email')?.value);
+      formData.append('password', this.signIn.get('Password')?.value);
+
+      this.loginService.AdminLoginapi(formData).subscribe({
+        next: (response: any) => {
+          if (response && (response.status === 200 || response.status === 201 || response.status === true || response.token || response.data?.token || !response.error)) {
+            this.closeModal();
+            this.successName = 'Login';
+            setTimeout(() => {
+              this.openSecondsuccess = true;
+              setTimeout(() => {
+                this.openSecondsuccess = false;
+
+                const user = response.user || response.data?.user || {};
+                const token = response.token || response.data?.token;
+
+                if (user.id) this.jwtService.savepanelUserId(user.id.toString());
+                if (user.name) this.jwtService.saveadminame(user.name);
+                if (token) this.jwtService.saveAdminToken(token);
+
+                // Extract role name or slug from the role object, fallback to 'admin'
+                const role = user.role?.slug || user.role?.name || 'admin';
+                this.jwtService.saveAdminRole(role);
+
+                this.jwtService.isLoggedIn(true);
+                this.ngOnInit();
+                this.router.navigate(['admin/dashboard']);
+              }, 1800);
+            }, 200);
+          } else {
+            this.errorMessage = response.message || 'Invalid Credentials';
+            this.submitted = false;
+          }
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.errorMessage = err;
+          this.submitted = false;
+        }
+      });
     } else {
       this.submitted = false;
       this.errorMessage = 'Please enter valid credentials';

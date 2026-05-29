@@ -1,83 +1,110 @@
-<div class="card border-0 shadow-lg shadow-cyan-500" style="height: 100%">
-  <div class="card-body px-5 py-4">
-    <div class="text-center mb-3">
-      <img src="./assets/logo.png" class="logo-image mt-0" />
-      <h3 class="text-primary pb-2 text-center login-border-text text-capitalize text-primary">
-        {{ title }}
-      </h3>
+<div class="flex flex-col justify-center h-full w-full max-w-md mx-auto">
+  <div class="bg-white rounded-3xl shadow-2xl overflow-hidden p-8 sm:p-10 transition-all duration-300 ring-1 ring-gray-100 h-full flex flex-col justify-center">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center p-3 bg-blue-50/50 rounded-2xl mb-4 border border-blue-100/50">
+        <img src="./assets/logo.png" alt="Logo" class="h-12 w-auto object-contain drop-shadow-sm" />
+      </div>
+      <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">Welcome Back</h2>
+      <p class="text-sm text-gray-500 font-medium">Please enter your credentials to access the admin panel.</p>
     </div>
-    <form [formGroup]="signIn">
-      <div class="mb-3">
-        <label class="d-block text-capitalize form-label form-lable-custom" for="Email">Enter Your Email</label>
-        <input type="text" class="d-block form-control form-input-custom" formControlName="Email"
-          placeholder="Enter Your Email" [ngClass]="{
-            'is-invalid':
-              signIn.controls['Email'].errors &&
-              (signIn.controls['Email'].touched ||
-                signIn.controls['Email'].dirty)
-          }" />
-        <div class="text-danger error-message" *ngIf="
-            signIn.controls['Email'].errors &&
-            (signIn.controls['Email'].touched || signIn.controls['Email'].dirty)
-          ">
-          <p class="fw-light text-danger" *ngIf="signIn.controls['Email'].errors['required']">
-            Email is required
-          </p>
-          <p class="fw-light text-danger" *ngIf="signIn.controls['Email'].errors['pattern']">
-            Please Enter correct email
-          </p>
+
+    <form [formGroup]="signIn" class="space-y-6">
+      
+      <!-- Email Field -->
+      <div>
+        <label for="Email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <i class="fa-solid fa-envelope text-gray-400"></i>
+          </div>
+          <input 
+            type="email" 
+            id="Email" 
+            formControlName="Email"
+            class="block w-full pl-11 pr-3 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-transparent transition-all sm:text-sm bg-gray-50 focus:bg-white"
+            placeholder="you@example.com"
+            [ngClass]="{
+              'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50': signIn.controls['Email'].errors && (signIn.controls['Email'].touched || signIn.controls['Email'].dirty)
+            }"
+          />
+        </div>
+        <div class="mt-2 text-sm text-red-600 flex items-center gap-1.5" *ngIf="signIn.controls['Email'].errors && (signIn.controls['Email'].touched || signIn.controls['Email'].dirty)">
+          <i class="fa-solid fa-circle-exclamation text-xs"></i>
+          <span *ngIf="signIn.controls['Email'].errors['required']" class="font-medium">Email is required.</span>
+          <span *ngIf="signIn.controls['Email'].errors['pattern']" class="font-medium">Please enter a valid email address.</span>
         </div>
       </div>
 
-      <div class="mb-3 position-relative">
-        <label class="d-block text-capitalize form-label form-lable-custom" for="Password">Enter Password</label>
-        <div class="input-group">
-          <input [type]="password" class="form-control form-input-custom" formControlName="Password"
-            placeholder="Enter Password" [ngClass]="{
-              'is-invalid':
-                signIn.controls['Password'].errors &&
-                (signIn.controls['Password'].touched ||
-                  signIn.controls['Password'].dirty)
-            }" />
-          <span class="input-group-text cursor-pointer bg-white border-[#468faf]" (click)="togglePasswordVisibility()">
-            <i class="fa-solid" [ngClass]="show ? 'fa-eye-slash' : 'fa-eye'"></i>
-          </span>
-        </div>
-        <div class="text-danger error-message mt-1" *ngIf="
-            signIn.controls['Password'].errors &&
-            (signIn.controls['Password'].touched ||
-              signIn.controls['Password'].dirty)
-          ">
-          <p class="fw-light text-danger m-0" *ngIf="signIn.controls['Password'].errors['required']">
-            Password is required
-          </p>
-          <p class="fw-light text-danger m-0" *ngIf="signIn.controls['Password'].errors['minlength']">
-            Password must be at least 6 characters
-          </p>
-        </div>
-        <p class="text-end text-primary mt-2">
-          <a routerLink="/forgot_password" class="text-decoration-none">Forgot Password?</a>
-        </p>
-      </div>
+      <!-- Password Field -->
       <div>
-        <button class="btn btn-custom-primary px-5 mt-3 w-100 text-white" (click)="login()">
-          Login
-        </button>
-        <div class="text-end error-message mt-2" *ngIf="!submitted && errorMessage">
-          <p class="fw-light text-danger m-0">{{ errorMessage }}</p>
+        <div class="flex items-center justify-between mb-2">
+          <label for="Password" class="block text-sm font-semibold text-gray-700">Password</label>
+          <a routerLink="/forgot_password" class="text-sm font-bold text-custom-primary hover:opacity-80 hover:underline transition-colors">Forgot password?</a>
+        </div>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <i class="fa-solid fa-lock text-gray-400"></i>
+          </div>
+          <input 
+            [type]="password" 
+            id="Password" 
+            formControlName="Password"
+            class="block w-full pl-11 pr-11 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-transparent transition-all sm:text-sm bg-gray-50 focus:bg-white"
+            placeholder="••••••••"
+            [ngClass]="{
+              'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500 bg-red-50': signIn.controls['Password'].errors && (signIn.controls['Password'].touched || signIn.controls['Password'].dirty)
+            }"
+          />
+          <button 
+            type="button"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-custom-primary focus:outline-none transition-colors"
+            (click)="togglePasswordVisibility()">
+            <i class="fa-solid" [ngClass]="show ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </button>
+        </div>
+        <div class="mt-2 text-sm text-red-600 flex items-center gap-1.5" *ngIf="signIn.controls['Password'].errors && (signIn.controls['Password'].touched || signIn.controls['Password'].dirty)">
+          <i class="fa-solid fa-circle-exclamation text-xs"></i>
+          <span *ngIf="signIn.controls['Password'].errors['required']" class="font-medium">Password is required.</span>
+          <span *ngIf="signIn.controls['Password'].errors['minlength']" class="font-medium">Must be at least 6 characters.</span>
         </div>
       </div>
+
+      <!-- Submit Button -->
+      <div class="pt-4">
+        <button 
+          (click)="login()"
+          class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-custom-primary/30 text-sm font-bold text-white bg-custom-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-primary transition-all duration-300 transform hover:-translate-y-1"
+        >
+          <span>Sign In</span>
+          <i class="fa-solid fa-arrow-right ml-2 text-xs opacity-80"></i>
+        </button>
+      </div>
+
+      <!-- Server Error -->
+      <div *ngIf="!submitted && errorMessage" class="rounded-xl bg-red-50 p-4 border border-red-100 mt-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <i class="fa-solid fa-circle-xmark text-red-500 mt-0.5"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-bold text-red-800">{{ errorMessage }}</p>
+          </div>
+        </div>
+      </div>
+
     </form>
   </div>
 </div>
 
-<!-- Create Employer forms start -->
-<div *ngIf="openSecondsuccess" class="your-animation-class modal-container-success" [@slideIn]
-  aria-labelledby="modal-title" role="dialog" aria-modal="true">
-  <div>
-    <div class="p-4 d-flex justify-content-between align-items-center success-content">
-      <span class="icon-success me-2"><i class="fa-solid fa-check"></i></span>
-      <p class="text-green-900 text-capitalize">Login successfully</p>
+<!-- Success Modal -->
+<div *ngIf="openSecondsuccess" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm transition-opacity" [@slideIn]>
+  <div class="bg-white rounded-2xl shadow-2xl p-6 flex items-center gap-5 border border-gray-100 max-w-sm w-full transform transition-all scale-100">
+    <div class="flex-shrink-0 w-14 h-14 rounded-full bg-green-100 flex items-center justify-center shadow-inner">
+      <i class="fa-solid fa-check text-2xl text-green-600"></i>
+    </div>
+    <div>
+      <h3 class="text-xl font-bold text-gray-900 mb-0.5">Success!</h3>
+      <p class="text-sm text-gray-500 font-medium">Login successful. Redirecting...</p>
     </div>
   </div>
 </div>

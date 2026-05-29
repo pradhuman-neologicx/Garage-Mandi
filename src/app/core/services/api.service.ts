@@ -5,13 +5,15 @@ import { catchError, map, retry } from 'rxjs/operators';
 import { JwtService } from './jwt.service';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
+import { NotificationService } from './notificationnew.service';
 
 @Injectable()
 export class ApiService {
   constructor(
     private http: HttpClient,
     private jwtService: JwtService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {}
 
   private formatErrors(error: any) {
@@ -165,14 +167,24 @@ export class ApiService {
         catchError(this.handleError)
       );
   }
-  handleError(error: any) {
+
+  patchWithHeader(path: string, body: any, headers: any): Observable<any> {
+    return this.http
+      .patch(`${environment.api_url}${path}`, body, { headers })
+      .pipe(
+        catchError(this.formatErrors),
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
+  handleError = (error: any) => {
     let errorMessage = '';
     if (error.error instanceof ErrorEvent) {
       // client-side error
-      errorMessage = `Error: ${error.error.message}`;
+      errorMessage = error.error.message || 'An unknown error occurred';
     } else {
       // server-side error
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+      errorMessage = error.error?.message || error.message || 'An unknown server error occurred';
     }
     if (error.status === 422) {
       const errorMessage =
@@ -186,9 +198,9 @@ export class ApiService {
       return throwError(() => new Error(errorMessage));
     }
     //console.log(errorMessage+"er");
-    window.alert(errorMessage);
+    this.notificationService.show(errorMessage, 'error');
     return throwError(() => {
       return errorMessage;
     });
-  }
+  };
 }

@@ -33,7 +33,7 @@
       class="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">
       <i class="fa-solid fa-user-tie mr-2"></i>Field Executives
     </button>
-    <button (click)="switchTab('system_admins')"
+    <button *ngIf="roles === 'super-admin'" (click)="switchTab('system_admins')"
       [ngClass]="activeTab === 'system_admins' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
       class="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">
       <i class="fa-solid fa-shield-halved mr-2"></i>System Admins
@@ -63,7 +63,6 @@
             <th class="p-4">Garage Name</th>
             <th class="p-4">Owner / Contact</th>
             <th class="p-4">Category</th>
-            <th class="p-4">Approval</th>
             <th class="p-4 text-center">Status</th>
             <th class="p-4 text-right">Actions</th>
           </tr>
@@ -87,30 +86,16 @@
                 class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-blue-100">{{
                 provider.category }}</span>
             </td>
-            <td class="p-4">
-              <span *ngIf="provider.approvalStatus === 'Approved'" class="text-emerald-600 text-xs font-bold"><i
-                  class="fa-solid fa-circle-check mr-1"></i>Approved</span>
-              <span *ngIf="provider.approvalStatus === 'Pending'" class="text-amber-500 text-xs font-bold"><i
-                  class="fa-solid fa-clock mr-1"></i>Pending</span>
-            </td>
             <td class="p-4 text-center">
               <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                 <input type="checkbox" name="toggle" [checked]="provider.status === 'Active'"
+                  id="toggle-sp-{{provider.id}}" (change)="toggleStatus(provider)"
                   class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 checked:border-green-400 checked:right-0 transition-all" />
-                <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                <label for="toggle-sp-{{provider.id}}"
+                  class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
               </div>
             </td>
             <td class="p-4 text-right space-x-2 whitespace-nowrap">
-              <button *ngIf="provider.approvalStatus === 'Pending'" (click)="openApprovalModal('approve', provider)"
-                class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors"
-                title="Approve">
-                <i class="fa-solid fa-check"></i>
-              </button>
-              <button *ngIf="provider.approvalStatus === 'Pending'" (click)="openApprovalModal('reject', provider)"
-                class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
-                title="Reject">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
               <button (click)="openModal('view', provider)"
                 class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors"
                 title="View Profile">
@@ -133,7 +118,7 @@
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
             <th class="p-4">Customer ID</th>
-            <th class="p-4">Name</th>
+            <th class="p-4">Customer</th>
             <th class="p-4">Contact</th>
             <th class="p-4 text-center">Status</th>
             <th class="p-4 text-right">Actions</th>
@@ -144,16 +129,31 @@
             *ngFor="let customer of customers | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
             class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">CUS-{{ customer.id }}</td>
-            <td class="p-4 font-bold text-gray-800 text-sm">{{ customer.name }}</td>
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+                  <img *ngIf="customer.profile_image" [src]="customer.profile_image" alt="Profile"
+                    class="w-full h-full object-cover">
+                  <div *ngIf="!customer.profile_image"
+                    class="w-full h-full flex items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                </div>
+                <div class="font-bold text-gray-800 text-sm">{{ customer.name }}</div>
+              </div>
+            </td>
             <td class="p-4">
               <div class="text-sm text-gray-600">{{ customer.phone }}</div>
               <div class="text-xs text-gray-400 mt-1">{{ customer.email }}</div>
             </td>
             <td class="p-4 text-center">
-              <span [ngClass]="customer.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                class="text-xs px-2.5 py-1 rounded-full font-semibold">
-                {{ customer.status }}
-              </span>
+              <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggle" [checked]="customer.status === 'Active'"
+                  id="toggle-cust-{{customer.id}}" (change)="toggleStatus(customer)"
+                  class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 checked:border-green-400 checked:right-0 transition-all" />
+                <label for="toggle-cust-{{customer.id}}"
+                  class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+              </div>
             </td>
             <td class="p-4 text-right space-x-2">
               <button (click)="openModal('view', customer)"
@@ -179,8 +179,7 @@
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
             <th class="p-4">Employee ID</th>
             <th class="p-4">Name</th>
-            <th class="p-4">Email</th>
-            <th class="p-4">Region</th>
+            <th class="p-4">Contact</th>
             <th class="p-4 text-center">Status</th>
             <th class="p-4 text-right">Actions</th>
           </tr>
@@ -191,16 +190,32 @@
             class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">{{ exec.id }}</td>
             <td class="p-4">
-              <div class="font-bold text-gray-800 text-sm">{{ exec.name }}</div>
-              <div class="text-xs text-yellow-500 mt-1"><i class="fa-solid fa-star mr-1"></i>{{ exec.rating }}</div>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+                  <img *ngIf="exec.profile_image" [src]="exec.profile_image" alt="Profile"
+                    class="w-full h-full object-cover">
+                  <div *ngIf="!exec.profile_image" class="w-full h-full flex items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                </div>
+                <div>
+                  <div class="font-bold text-gray-800 text-sm">{{ exec.name }}</div>
+                  <div class="text-xs text-yellow-500 mt-1"><i class="fa-solid fa-star mr-1"></i>{{ exec.rating }}</div>
+                </div>
+              </div>
             </td>
-            <td class="p-4 text-sm text-gray-600">{{ exec.email }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ exec.region }}</td>
+            <td class="p-4">
+              <div class="text-sm text-gray-600">{{ exec.phone }}</div>
+              <div class="text-xs text-gray-400 mt-1">{{ exec.email }}</div>
+            </td>
             <td class="p-4 text-center">
-              <span [ngClass]="exec.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                class="text-xs px-2.5 py-1 rounded-full font-semibold">
-                {{ exec.status }}
-              </span>
+              <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggle" [checked]="exec.status === 'Active'" (change)="toggleStatus(exec)"
+                  id="toggle-exec-{{exec.id}}"
+                  class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 checked:border-green-400 checked:right-0 transition-all" />
+                <label for="toggle-exec-{{exec.id}}"
+                  class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+              </div>
             </td>
             <td class="p-4 text-right space-x-2">
               <button (click)="openModal('view', exec)"
@@ -226,8 +241,7 @@
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
             <th class="p-4">Admin ID</th>
             <th class="p-4">Name</th>
-            <th class="p-4">Phone Number</th>
-            <th class="p-4">Email Address</th>
+            <th class="p-4">Contact</th>
             <th class="p-4">Role</th>
             <th class="p-4 text-center">Status</th>
             <th class="p-4 text-right">Actions</th>
@@ -238,19 +252,36 @@
             *ngFor="let admin of systemAdmins | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
             class="hover:bg-gray-50/50 transition-colors">
             <td class="p-4 font-semibold text-gray-700 text-sm">ADM-00{{ admin.id }}</td>
-            <td class="p-4 font-bold text-gray-800 text-sm">{{ admin.name }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ admin.phone }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ admin.email }}</td>
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
+                  <img *ngIf="admin.profile_image" [src]="admin.profile_image" alt="Profile"
+                    class="w-full h-full object-cover">
+                  <div *ngIf="!admin.profile_image"
+                    class="w-full h-full flex items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-user-shield"></i>
+                  </div>
+                </div>
+                <div class="font-bold text-gray-800 text-sm">{{ admin.name }}</div>
+              </div>
+            </td>
+            <td class="p-4">
+              <div class="text-sm text-gray-600">{{ admin.phone }}</div>
+              <div class="text-xs text-gray-400 mt-1">{{ admin.email }}</div>
+            </td>
             <td class="p-4">
               <span
                 class="bg-purple-50 text-purple-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-purple-100">{{
                 admin.role }}</span>
             </td>
             <td class="p-4 text-center">
-              <span [ngClass]="admin.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                class="text-xs px-2.5 py-1 rounded-full font-semibold">
-                {{ admin.status }}
-              </span>
+              <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggle" [checked]="admin.status === 'Active'"
+                  id="toggle-admin-{{admin.id}}" (change)="toggleStatus(admin)"
+                  class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 checked:border-green-400 checked:right-0 transition-all" />
+                <label for="toggle-admin-{{admin.id}}"
+                  class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+              </div>
             </td>
             <td class="p-4 text-right space-x-2">
               <button (click)="openModal('view', admin)"
@@ -286,7 +317,7 @@
     <!-- Unified Modal -->
     <div *ngIf="isModalOpen"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4 sm:p-0">
-      <div
+      <form #userForm="ngForm"
         class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all">
         <!-- Modal Header -->
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -302,17 +333,136 @@
         <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
           <!-- View Mode -->
           <div *ngIf="modalMode === 'view'" class="space-y-4">
-            <div *ngFor="let key of objectKeys(selectedUser)" class="flex border-b border-gray-50 pb-2">
-              <span class="w-1/3 text-sm font-semibold text-gray-500 capitalize">{{ key }}</span>
-              <span class="w-2/3 text-sm text-gray-800 font-medium">{{ selectedUser[key] }}</span>
+
+            <div *ngIf="activeTab === 'service_providers'" class="space-y-6">
+              <div class="flex flex-wrap justify-center gap-4 pb-4 border-b border-gray-100">
+                <ng-container *ngIf="imagePreviews && imagePreviews.length > 0; else noImages">
+                  <div *ngFor="let preview of imagePreviews"
+                    class="w-32 h-24 rounded-xl overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50">
+                    <img [src]="preview" class="w-full h-full object-cover" alt="Profile" />
+                  </div>
+                </ng-container>
+                <ng-template #noImages>
+                  <div
+                    class="w-32 h-24 rounded-xl overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50">
+                    <i class="fa-solid fa-image text-3xl text-gray-300"></i>
+                  </div>
+                </ng-template>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Garage Name</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.name || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Owner Name</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.owner || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Email</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.email || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Phone Number</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.phone || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Account Status</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.status || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Vehicle Categories</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.category || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2 md:col-span-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Address</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.address || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2 md:col-span-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Description</span>
+                  <span class="text-sm text-gray-800 font-medium whitespace-pre-line">{{ selectedUser?.description ||
+                    'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2 md:col-span-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize mb-2">Services & Spare Parts</span>
+                  <div class="flex flex-wrap items-center gap-4">
+                    <div class="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                      <span class="text-sm text-gray-600 font-medium mr-2">Service Available:</span>
+                      <i class="fa-solid fa-circle-check text-green-500 text-lg"
+                        *ngIf="selectedUser?.is_service_available"></i>
+                      <i class="fa-solid fa-circle-xmark text-red-400 text-lg"
+                        *ngIf="!selectedUser?.is_service_available"></i>
+                    </div>
+                    <div class="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                      <span class="text-sm text-gray-600 font-medium mr-2">Spare Parts:</span>
+                      <div class="flex gap-2">
+                        <span
+                          class="bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-xs font-bold"
+                          *ngIf="selectedUser?.spare_parts_new">New</span>
+                        <span
+                          class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded text-xs font-bold"
+                          *ngIf="selectedUser?.spare_parts_old">Old</span>
+                        <span class="text-gray-400 italic text-xs py-0.5"
+                          *ngIf="!selectedUser?.spare_parts_new && !selectedUser?.spare_parts_old">None</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="['customers', 'field_executives', 'system_admins'].includes(activeTab)" class="space-y-6">
+              <div class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
+                <div
+                  class="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50">
+                  <img *ngIf="selectedUser?.imagePreview" [src]="selectedUser.imagePreview"
+                    class="w-full h-full object-cover" alt="Profile" />
+                  <i *ngIf="!selectedUser?.imagePreview" class="fa-solid fa-user text-5xl text-gray-300"></i>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Full Name</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.name || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Email Address</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.email || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Phone Number</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.phone || 'N/A' }}</span>
+                </div>
+                <div *ngIf="activeTab === 'customers'" class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">State</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.state_name || 'N/A' }}</span>
+                </div>
+                <div *ngIf="activeTab === 'customers'" class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">City</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.city_name || 'N/A' }}</span>
+                </div>
+                <div *ngIf="activeTab === 'system_admins'" class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Role</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.role || 'System Admin' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Account Status</span>
+                  <span class="text-sm text-gray-800 font-medium"
+                    [ngClass]="{'text-green-600': selectedUser?.status === 'Active', 'text-red-600': selectedUser?.status === 'Inactive'}">{{
+                    selectedUser?.status || 'N/A' }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Add / Edit Mode -->
           <div *ngIf="modalMode !== 'view'" class="space-y-4">
 
-            <!-- Profile Image Upload (shared for all tabs) -->
-            <div class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
+            <!-- Profile Image Upload for Other Tabs -->
+            <div *ngIf="activeTab !== 'service_providers'"
+              class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
               <div class="relative group cursor-pointer" (click)="profileImageInput.click()">
                 <!-- Avatar preview -->
                 <div
@@ -333,89 +483,129 @@
                 (change)="onImageSelected($event)" />
             </div>
 
+            <!-- Multi Image Upload for Service Providers -->
+            <div *ngIf="activeTab === 'service_providers'"
+              class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
+              <div class="flex flex-wrap justify-center gap-4">
+                <div *ngFor="let preview of imagePreviews; let i = index" class="relative group">
+                  <div
+                    class="w-32 h-24 rounded-xl overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50">
+                    <img [src]="preview" class="w-full h-full object-cover" alt="Image" />
+                  </div>
+                  <div (click)="removeImage(i)"
+                    class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 cursor-pointer flex items-center justify-center shadow-md border border-white text-white z-10 transition-colors">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                  </div>
+                </div>
+
+                <!-- Add Button if less than 3 -->
+                <div *ngIf="imagePreviews.length < 3" class="relative group cursor-pointer"
+                  (click)="multiImageInput.click()">
+                  <div
+                    class="w-32 h-24 rounded-xl overflow-hidden border-2 border-dashed border-gray-300 hover:border-custom-primary transition-colors flex flex-col items-center justify-center bg-gray-50 text-gray-400 hover:text-custom-primary">
+                    <i class="fa-solid fa-camera text-2xl mb-1"></i>
+                    <span class="text-xs font-medium mt-1">Add Image</span>
+                  </div>
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Upload up to 3 images (select single or multiple)</p>
+              <input #multiImageInput type="file" accept="image/*" multiple class="hidden"
+                (change)="onImageSelected($event)" />
+            </div>
+
             <!-- Service Providers Form -->
             <div *ngIf="activeTab === 'service_providers'" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Garage Name</label>
-                  <input type="text" [value]="selectedUser?.name || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Garage Name <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.name" name="spName" required #spName="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spName.invalid && (spName.dirty || spName.touched), 'border-gray-300': !(spName.invalid && (spName.dirty || spName.touched))}">
+                  <div *ngIf="spName.invalid && (spName.dirty || spName.touched)" class="text-red-500 text-xs mt-1">
+                    Garage Name is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
-                  <input type="text" [value]="selectedUser?.owner || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Owner Name <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.owner" name="spOwner" required #spOwner="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spOwner.invalid && (spOwner.dirty || spOwner.touched), 'border-gray-300': !(spOwner.invalid && (spOwner.dirty || spOwner.touched))}">
+                  <div *ngIf="spOwner.invalid && (spOwner.dirty || spOwner.touched)" class="text-red-500 text-xs mt-1">
+                    Owner Name is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input type="email" [value]="selectedUser?.email || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address <span
+                      class="text-red-500">*</span></label>
+                  <input type="email" [(ngModel)]="selectedUser.email" name="spEmail" required email #spEmail="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spEmail.invalid && (spEmail.dirty || spEmail.touched), 'border-gray-300': !(spEmail.invalid && (spEmail.dirty || spEmail.touched))}">
+                  <div *ngIf="spEmail.invalid && (spEmail.dirty || spEmail.touched)" class="text-red-500 text-xs mt-1">
+                    <span *ngIf="spEmail.errors?.['required']">Email Address is required.</span>
+                    <span *ngIf="spEmail.errors?.['email']">Enter a valid email address.</span>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input type="text" [value]="selectedUser?.phone || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.phone" name="spPhone" required pattern="^[0-9]{10}$"
+                    #spPhone="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spPhone.invalid && (spPhone.dirty || spPhone.touched), 'border-gray-300': !(spPhone.invalid && (spPhone.dirty || spPhone.touched))}">
+                  <div *ngIf="spPhone.invalid && (spPhone.dirty || spPhone.touched)" class="text-red-500 text-xs mt-1">
+                    <span *ngIf="spPhone.errors?.['required']">Phone Number is required.</span>
+                    <span *ngIf="spPhone.errors?.['pattern']">Enter a valid 10-digit phone number.</span>
+                  </div>
                 </div>
 
                 <!-- Supported Vehicle Categories -->
                 <div class="col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Supported Categories</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Supported Vehicle Categories</label>
                   <div class="flex flex-wrap gap-4">
-                    <label class="inline-flex items-center cursor-pointer">
-                      <input type="checkbox"
+                    <label *ngFor="let cat of publicCategories" class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [value]="cat.id"
+                        [checked]="isSelectionChecked('vehicle_category_id', cat.id)"
+                        (change)="toggleSelection('vehicle_category_id', cat.id)"
                         class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                      <span class="ml-2 text-sm text-gray-600">2-Wheeler</span>
-                    </label>
-                    <label class="inline-flex items-center cursor-pointer">
-                      <input type="checkbox"
-                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                      <span class="ml-2 text-sm text-gray-600">3-Wheeler</span>
-                    </label>
-                    <label class="inline-flex items-center cursor-pointer">
-                      <input type="checkbox"
-                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                      <span class="ml-2 text-sm text-gray-600">4-Wheeler</span>
-                    </label>
-                    <label class="inline-flex items-center cursor-pointer">
-                      <input type="checkbox"
-                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                      <span class="ml-2 text-sm text-gray-600">Trucks</span>
+                      <span class="ml-2 text-sm text-gray-600">{{ cat.name }}</span>
                     </label>
                   </div>
                 </div>
 
-                <!-- Sub Categories -->
-                <div class="col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Sub Categories</label>
-                <div class="flex flex-wrap gap-4">
+                <!-- Is Service Available -->
+                <div class="col-span-1 border border-gray-100 rounded-lg p-3 bg-gray-50/50 flex items-center">
                   <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">Engine Repair</span>
-                  </label>
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">AC Service</span>
-                  </label>
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">Denting & Painting</span>
-                  </label>
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">Washing & Detailing</span>
-                  </label>
-                  <label class="inline-flex items-center cursor-pointer">
-                    <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
-                    <span class="ml-2 text-sm text-gray-600">Periodic Maintenance</span>
+                    <input type="checkbox" [(ngModel)]="selectedUser.is_service_available" name="isServiceAvailable"
+                      class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                    <span class="ml-2 text-sm font-medium text-gray-700">Is service available</span>
                   </label>
                 </div>
-              </div>
+
+                <!-- Spare Parts -->
+                <div class="col-span-1 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Spare Parts</label>
+                  <div class="flex flex-wrap gap-4">
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [(ngModel)]="selectedUser.spare_parts_new" name="sparePartsNew"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">New</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [(ngModel)]="selectedUser.spare_parts_old" name="sparePartsOld"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">Old</span>
+                    </label>
+                  </div>
+                </div>
+
+
 
                 <!-- Business Description -->
                 <div class="col-span-2">
                   <label class="block text-sm font-medium text-gray-700 mb-1">Business Description</label>
-                  <textarea rows="3" placeholder="Tell us about the garage..."
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">{{selectedUser?.description || ''}}</textarea>
+                  <textarea rows="3" placeholder="Tell us about the garage..." [(ngModel)]="selectedUser.description"
+                    name="spDescription"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm"></textarea>
                 </div>
 
                 <!-- Operating Timings -->
@@ -425,56 +615,84 @@
               </div> -->
 
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                  <textarea rows="2"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">{{selectedUser?.address || ''}}</textarea>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Address <span
+                      class="text-red-500">*</span></label>
+                  <textarea rows="2" [(ngModel)]="selectedUser.address" name="spAddress" required #spAddress="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spAddress.invalid && (spAddress.dirty || spAddress.touched), 'border-gray-300': !(spAddress.invalid && (spAddress.dirty || spAddress.touched))}"></textarea>
+                  <div *ngIf="spAddress.invalid && (spAddress.dirty || spAddress.touched)"
+                    class="text-red-500 text-xs mt-1">Address is required.</div>
                 </div>
-                <div *ngIf="modalMode === 'edit'">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Approval Status</label>
-                  <select
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                    <option value="Approved" [selected]="selectedUser?.approvalStatus === 'Approved'">Approved</option>
-                    <option value="Pending" [selected]="selectedUser?.approvalStatus === 'Pending'">Pending</option>
-                    <option value="Rejected" [selected]="selectedUser?.approvalStatus === 'Rejected'">Rejected</option>
-                  </select>
-                </div>
-                <div *ngIf="modalMode === 'edit'">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                  <select
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
-                  </select>
-                </div>
+
               </div>
             </div>
 
-            <!-- Customers Form -->
             <div *ngIf="activeTab === 'customers'" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input type="text" [value]="selectedUser?.name || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.name" name="customerName" required
+                    #customerName="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': customerName.invalid && (customerName.dirty || customerName.touched), 'border-gray-300': !(customerName.invalid && (customerName.dirty || customerName.touched))}">
+                  <div *ngIf="customerName.invalid && (customerName.dirty || customerName.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    Full Name is required.
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input type="text" [value]="selectedUser?.phone || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.phone" name="customerPhone" required
+                    pattern="^[0-9]{10}$" #customerPhone="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': customerPhone.invalid && (customerPhone.dirty || customerPhone.touched), 'border-gray-300': !(customerPhone.invalid && (customerPhone.dirty || customerPhone.touched))}">
+                  <div *ngIf="customerPhone.invalid && (customerPhone.dirty || customerPhone.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="customerPhone.errors?.['required']">Phone Number is required.</span>
+                    <span *ngIf="customerPhone.errors?.['pattern']">Enter a valid 10-digit phone number.</span>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input type="email" [value]="selectedUser?.email || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address <span
+                      class="text-red-500">*</span></label>
+                  <input type="email" [(ngModel)]="selectedUser.email" name="customerEmail" required email
+                    #customerEmail="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': customerEmail.invalid && (customerEmail.dirty || customerEmail.touched), 'border-gray-300': !(customerEmail.invalid && (customerEmail.dirty || customerEmail.touched))}">
+                  <div *ngIf="customerEmail.invalid && (customerEmail.dirty || customerEmail.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="customerEmail.errors?.['required']">Email Address is required.</span>
+                    <span *ngIf="customerEmail.errors?.['email']">Enter a valid email address.</span>
+                  </div>
                 </div>
-                <div *ngIf="modalMode === 'edit'">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                  <select
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">State <span
+                      class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.state_id" name="customerState" required #customerState="ngModel"
+                    (change)="onStateChange(selectedUser.state_id)"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': customerState.invalid && (customerState.dirty || customerState.touched), 'border-gray-300': !(customerState.invalid && (customerState.dirty || customerState.touched))}">
+                    <option [ngValue]="null" disabled>Select State</option>
+                    <option *ngFor="let state of states" [ngValue]="state.id">{{ state.name }}</option>
                   </select>
+                  <div *ngIf="customerState.invalid && (customerState.dirty || customerState.touched)"
+                    class="text-red-500 text-xs mt-1">State is required.</div>
                 </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">City <span
+                      class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.city_id" name="customerCity" required #customerCity="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': customerCity.invalid && (customerCity.dirty || customerCity.touched), 'border-gray-300': !(customerCity.invalid && (customerCity.dirty || customerCity.touched))}">
+                    <option [ngValue]="null" disabled>Select City</option>
+                    <option *ngFor="let city of cities" [ngValue]="city.id">{{ city.name }}</option>
+                  </select>
+                  <div *ngIf="customerCity.invalid && (customerCity.dirty || customerCity.touched)"
+                    class="text-red-500 text-xs mt-1">City is required.</div>
+                </div>
+
               </div>
             </div>
 
@@ -482,32 +700,41 @@
             <div *ngIf="activeTab === 'field_executives'" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input type="text" [value]="selectedUser?.name || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.name" name="execName" required #execName="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': execName.invalid && (execName.dirty || execName.touched), 'border-gray-300': !(execName.invalid && (execName.dirty || execName.touched))}">
+                  <div *ngIf="execName.invalid && (execName.dirty || execName.touched)"
+                    class="text-red-500 text-xs mt-1">Full Name is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input type="text" [value]="selectedUser?.phone || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.phone" name="execPhone" required pattern="^[0-9]{10}$"
+                    #execPhone="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': execPhone.invalid && (execPhone.dirty || execPhone.touched), 'border-gray-300': !(execPhone.invalid && (execPhone.dirty || execPhone.touched))}">
+                  <div *ngIf="execPhone.invalid && (execPhone.dirty || execPhone.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="execPhone.errors?.['required']">Phone Number is required.</span>
+                    <span *ngIf="execPhone.errors?.['pattern']">Enter a valid 10-digit phone number.</span>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input type="email" [value]="selectedUser?.email || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address <span
+                      class="text-red-500">*</span></label>
+                  <input type="email" [(ngModel)]="selectedUser.email" name="execEmail" required email
+                    #execEmail="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': execEmail.invalid && (execEmail.dirty || execEmail.touched), 'border-gray-300': !(execEmail.invalid && (execEmail.dirty || execEmail.touched))}">
+                  <div *ngIf="execEmail.invalid && (execEmail.dirty || execEmail.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="execEmail.errors?.['required']">Email Address is required.</span>
+                    <span *ngIf="execEmail.errors?.['email']">Enter a valid email address.</span>
+                  </div>
                 </div>
-                <!-- <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Region</label>
-                <input type="text" [value]="selectedUser?.region || ''" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-              </div> -->
-                <div *ngIf="modalMode === 'edit'">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                  <select
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
-                  </select>
-                </div>
+
               </div>
             </div>
 
@@ -515,33 +742,46 @@
             <div *ngIf="activeTab === 'system_admins'" class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input type="text" [value]="selectedUser?.name || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Full Name <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.name" name="adminName" required #adminName="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': adminName.invalid && (adminName.dirty || adminName.touched), 'border-gray-300': !(adminName.invalid && (adminName.dirty || adminName.touched))}">
+                  <div *ngIf="adminName.invalid && (adminName.dirty || adminName.touched)"
+                    class="text-red-500 text-xs mt-1">Full Name is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input type="email" [value]="selectedUser?.email || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.phone" name="adminPhone" required pattern="^[0-9]{10}$"
+                    #adminPhone="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': adminPhone.invalid && (adminPhone.dirty || adminPhone.touched), 'border-gray-300': !(adminPhone.invalid && (adminPhone.dirty || adminPhone.touched))}">
+                  <div *ngIf="adminPhone.invalid && (adminPhone.dirty || adminPhone.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="adminPhone.errors?.['required']">Phone Number is required.</span>
+                    <span *ngIf="adminPhone.errors?.['pattern']">Enter a valid 10-digit phone number.</span>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input type="text" [value]="selectedUser?.phone || ''"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email Address <span
+                      class="text-red-500">*</span></label>
+                  <input type="email" [(ngModel)]="selectedUser.email" name="adminEmail" required email
+                    #adminEmail="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': adminEmail.invalid && (adminEmail.dirty || adminEmail.touched), 'border-gray-300': !(adminEmail.invalid && (adminEmail.dirty || adminEmail.touched))}">
+                  <div *ngIf="adminEmail.invalid && (adminEmail.dirty || adminEmail.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="adminEmail.errors?.['required']">Email Address is required.</span>
+                    <span *ngIf="adminEmail.errors?.['email']">Enter a valid email address.</span>
+                  </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
                   <input type="text" [value]="selectedUser?.role || 'System Admin'" readonly
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 focus:outline-none text-sm cursor-not-allowed">
                 </div>
-                <div *ngIf="modalMode === 'edit'">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Account Status</label>
-                  <select
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary focus:border-custom-primary text-sm">
-                    <option value="Active" [selected]="selectedUser?.status === 'Active'">Active</option>
-                    <option value="Inactive" [selected]="selectedUser?.status === 'Inactive'">Inactive</option>
-                  </select>
-                </div>
+
               </div>
             </div>
 
@@ -554,42 +794,14 @@
             class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
             {{ modalMode === 'view' ? 'Close' : 'Cancel' }}
           </button>
-          <button *ngIf="modalMode !== 'view'" (click)="saveUser()"
-            class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 transition-colors shadow-sm">
+          <button *ngIf="modalMode !== 'view'" (click)="saveUser()" [disabled]="userForm.invalid"
+            class="px-4 py-2 bg-custom-primary rounded-lg text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">
             Save Changes
           </button>
         </div>
-      </div>
+      </form>
     </div>
 
-    <!-- Approval/Reject Confirmation Modal -->
-    <div *ngIf="isApprovalModalOpen"
-      class="fixed inset-0 z-[60] flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transform transition-all">
-        <div class="p-6 text-center">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4"
-            [ngClass]="approvalAction === 'approve' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
-            <i class="fa-solid text-xl" [ngClass]="approvalAction === 'approve' ? 'fa-check' : 'fa-xmark'"></i>
-          </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-2 capitalize">{{ approvalAction }} Provider</h3>
-          <p class="text-sm text-gray-500 mb-6">
-            Are you sure you want to {{ approvalAction }} <strong>{{ approvalTarget?.name }}</strong>? This action
-            cannot be undone.
-          </p>
-          <div class="flex justify-center space-x-3">
-            <button (click)="closeApprovalModal()"
-              class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors w-full">
-              Cancel
-            </button>
-            <button (click)="confirmApproval()"
-              class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors w-full shadow-sm"
-              [ngClass]="approvalAction === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'">
-              Yes, {{ approvalAction }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
   </div>
   <router-outlet></router-outlet>

@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { JwtService } from './jwt.service';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { NotificationService } from './notificationnew.service';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -13,15 +15,16 @@ export class LoginService {
   constructor(
     private http: HttpClient,
     private apiservice: ApiService,
-    private jwtService: JwtService
-  ) {}
+    private jwtService: JwtService,
+    private notificationService: NotificationService
+  ) { }
 
   AdminLoginapi(body: any): Observable<any> {
     return this.apiservice.postWithoutHeader(`login`, body);
   }
 
   AdminForgetPasswordApi(body: any): Observable<any> {
-    return this.apiservice.postWithoutHeader(`forgot-password`, body).pipe(
+    return this.apiservice.postWithoutHeader(`password/request`, body).pipe(
       tap((error: any) => {
         console.log('Response received:', error);
         this.erromessagefunction(error);
@@ -36,6 +39,10 @@ export class LoginService {
         this.erromessagefunction(error);
       })
     );
+  }
+
+  AdminResetPasswordV1(body: any): Observable<any> {
+    return this.apiservice.postWithoutHeader(`password/reset`, body);
   }
 
   Adminlogout(): Observable<any> {
@@ -89,7 +96,7 @@ export class LoginService {
       // Log the user out and navigate to sign-in page
       this.jwtService.clearStorage(); // Clear token (implement this method in your JwtService)
       // this.router.navigate(['/sign_in']); // Navigate to home route
-      alert(errorMessage); // Show alert with error message
+      this.notificationService.show(errorMessage, 'error');
     } else if (error.status === 422 && error.errors) {
       if (
         typeof response.errors === 'object' &&
@@ -100,10 +107,10 @@ export class LoginService {
       } else {
         errorMessage = response.errors;
       }
-      alert(errorMessage); // Show alert with error message
+      this.notificationService.show(errorMessage, 'error');
     } else if (error && error.message) {
       // Display error message
-      if (!errorMessage.includes('success')) alert(errorMessage);
+      if (!errorMessage.includes('success')) this.notificationService.show(errorMessage, 'error');
     }
   }
 }

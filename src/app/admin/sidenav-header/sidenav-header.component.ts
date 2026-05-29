@@ -10,7 +10,7 @@ import {
 import { NavigationEnd, Router } from '@angular/router';
 import { JwtService } from 'src/app/core/services/jwt.service';
 import { LoginService } from 'src/app/core/services/login.service';
-// import { JwtService } from 'src/app/core/services/jwt.service';
+import { NotificationService } from 'src/app/core/services/notificationnew.service';
 
 @Component({
   selector: 'app-sidenav-header',
@@ -26,8 +26,9 @@ export class SidenavHeaderComponent implements OnInit {
     private elementRef: ElementRef,
     private router: Router,
     private jwtService: JwtService,
-    private loginService: LoginService
-  ) {}
+    private loginService: LoginService,
+    private notificationService: NotificationService
+  ) { }
 
   clearSearch(): void {
     this.searchQuery = '';
@@ -86,13 +87,16 @@ export class SidenavHeaderComponent implements OnInit {
   successName: any = '';
 
   logout() {
-    this.loginService.Adminlogout().subscribe((response: any) => {
-      this.errorMessage = response.message;
-      if (response.status === 200) {
+    this.loginService.Adminlogout().subscribe({
+      next: (response: any) => {
+        this.notificationService.show(response?.message || 'Logged out successfully', 'success');
         this.jwtService.clearStorage();
         this.router.navigate(['/sign_in']);
-      } else {
-        this.submitted = false;
+      },
+      error: (err: any) => {
+        console.error('Logout error', err);
+        this.jwtService.clearStorage();
+        this.router.navigate(['/sign_in']);
       }
     });
   }
