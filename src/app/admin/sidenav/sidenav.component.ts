@@ -65,18 +65,24 @@ export class SidenavComponent {
         {
           index: 3,
           icon: 'category',
-          label: 'Category Management',
+          label: 'Category Mgt.',
           route: '/admin/category-management',
         },
         {
           index: 4,
+          icon: 'directions_car',
+          label: 'Vehicle Brands',
+          route: '/admin/vehicle-brands',
+        },
+        {
+          index: 5,
           icon: 'payments',
           label: 'Subscriptions',
           route: '/admin/subscription-management',
         },
 
         {
-          index: 5,
+          index: 6,
           icon: 'list_alt',
           label: 'Requests',
           route: '/admin/requests-monitoring',
@@ -93,8 +99,9 @@ export class SidenavComponent {
           label: 'Feedbacks',
           route: '/admin/feedback-monitoring',
         },
+
         // {
-        //   index: 8,
+        //   index: 9,
         //   icon: 'widgets',
         //   label: 'Master',
         //   route: '/admin/master',

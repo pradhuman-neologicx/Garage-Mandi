@@ -127,6 +127,11 @@ const routes: Routes = [
           },
         ],
       },
+      {
+        path: 'vehicle-brands',
+        loadComponent: () => import('./admin/vechicle-brand/vechicle-brand.component').then(m => m.VechicleBrandComponent),
+        canActivate: [AuthGuard],
+      },
     ],
   },
 ];

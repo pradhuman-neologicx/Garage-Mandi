@@ -1,0 +1,241 @@
+<div class="container mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="text-primary table-heading-detail">Vehicle Brands Management</h1>
+    <div>
+      <button
+        class="btn btn-custom-primary px-4 py-2 me-2"
+        (click)="openAddModal()"
+      >
+        Add Brand
+      </button>
+    </div>
+  </div>
+
+  <div class="card border-0 my-4 px-4 py-4">
+    <div class="d-md-flex justify-content-between align-items-center my-3">
+      <div class="d-flex align-items-center mb-md-0 mb-2">
+        <span class="me-1 show-entery-text">Show</span>
+        <select
+          class="form-control form-select show-entries-select"
+          (change)="onTableSizeChange($event)"
+        >
+          <option *ngFor="let size of tableSizes" [ngValue]="size">
+            {{ size }}
+          </option>
+        </select>
+        <span class="ms-1 show-entery-text">entries</span>
+      </div>
+
+      <div class="d-flex align-items-center">
+        <form [formGroup]="searchbarform" class="d-flex align-items-center">
+          <span class="me-1">Search:</span>
+          <div>
+            <input
+              type="text"
+              class="form-control search-user position-relative"
+              autocomplete="off"
+              formControlName="searchbar"
+              [ngClass]="{
+                'is-invalid':
+                  searchbarform.controls['searchbar'].errors &&
+                  (searchbarform.controls['searchbar'].touched ||
+                    searchbarform.controls['searchbar'].dirty)
+              }"
+            />
+            <div
+              class="text-danger error-message d-block"
+              *ngIf="
+                searchbarform.controls['searchbar'].errors &&
+                (searchbarform.controls['searchbar'].touched ||
+                  searchbarform.controls['searchbar'].dirty)
+              "
+            >
+              <p
+                class="fw-light text-danger search-required m-0"
+                *ngIf="searchbarform.controls['searchbar'].errors['required']"
+              >
+                This is required
+              </p>
+            </div>
+          </div>
+
+          <button class="btn btn-primary search-btn ms-2" (click)="searchfun()">
+            <span><i class="fa-solid fa-magnifying-glass form-control-feedback text-white"></i></span>
+          </button>
+          <button
+            class="btn btn-primary search-btn ms-2"
+            (click)="resetsearchbar()"
+            type="button"
+            *ngIf="showreset == true"
+          >
+            <span><i class="fa-solid fa-rotate-right form-control-feedback text-white"></i></span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cards Layout -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 mt-2">
+      <div
+        class="col"
+        *ngFor="
+          let brand of brandList
+            | paginate: {
+                itemsPerPage: tableSize != 'all' ? tableSize : totalRecords,
+                currentPage: page,
+                totalItems: totalRecords
+              };
+          index as i
+        "
+      >
+        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative hover-shadow transition-all bg-white">
+          <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+            
+            <div>
+              <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 70px; height: 70px; font-size: 28px; font-weight: bold;">
+                {{ brand.name.charAt(0) | uppercase }}
+              </div>
+              <h5 class="card-title fw-bold text-dark mb-1 text-truncate" [title]="brand.name">{{ brand.name }}</h5>
+              <p class="text-muted small mb-3">ID: #{{ brand.id }}</p>
+              
+              <div class="mb-4">
+                <span
+                  class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1"
+                  [ngClass]="brand.is_active ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'"
+                >
+                  <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+                  {{ brand.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Action Icons -->
+            <div class="d-flex justify-content-center align-items-center gap-3 pt-3 border-top border-light">
+              <button 
+                class="btn btn-sm btn-light rounded-circle text-primary d-flex align-items-center justify-content-center shadow-sm hover-elevate transition-all" 
+                style="width: 40px; height: 40px;"
+                title="Edit Brand"
+                (click)="OpenEditModal(brand)">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              
+              <button 
+                class="btn btn-sm btn-light rounded-circle text-info d-flex align-items-center justify-content-center shadow-sm hover-elevate transition-all" 
+                style="width: 40px; height: 40px;"
+                title="View Details"
+                (click)="openviewModal(brand)">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+
+              <button 
+                class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-elevate transition-all" 
+                [ngClass]="brand.is_active ? 'text-danger' : 'text-success'"
+                style="width: 40px; height: 40px;"
+                [title]="brand.is_active ? 'Deactivate' : 'Activate'"
+                (click)="Status(brand.id, brand.is_active ? 0 : 1)">
+                <i class="fa-solid" [ngClass]="brand.is_active ? 'fa-power-off' : 'fa-check'"></i>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-md-flex justify-content-between align-items-center mt-4">
+      <span class="showalltext text-muted">
+        Showing
+        {{ tableSize * (page - 1) > 0 ? tableSize * (page - 1) + 1 : 1 }} to
+        {{ tableSize * page <= totalRecords ? tableSize * page : totalRecords }}
+        of {{ totalRecords != undefined ? totalRecords : "" }} entries
+      </span>
+      <pagination-controls
+        previousLabel="Prev"
+        nextLabel="Next"
+        [responsive]="true"
+        (pageChange)="onTableDataChange($event)"
+      ></pagination-controls>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div *ngIf="createBrandOpen" class="modal-container" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="createBrandForm">
+      <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="modal-title pt-1 mb-0 tt-color">Add Brand</h5>
+          <button class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1" type="button" (click)="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Brand Name</label>
+            <input type="text" class="form-control form-input-custom" formControlName="Name" [ngClass]="{'is-invalid': createBrandForm.controls['Name'].errors && (createBrandForm.controls['Name'].touched || createBrandForm.controls['Name'].dirty)}" />
+            <div class="text-danger error-message" *ngIf="createBrandForm.controls['Name'].errors && (createBrandForm.controls['Name'].touched || createBrandForm.controls['Name'].dirty)">
+              <p class="fw-light text-danger m-0" *ngIf="createBrandForm.controls['Name'].errors['required']">Brand Name is required</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer text-end">
+          <button class="btn btn-secondary main-btnfs px-4 py-2 me-3 text-white" type="button" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-custom-primary px-4 py-2" type="button" (click)="createBrand()">Create</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div *ngIf="updateBrandOpen" class="modal-container" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="updateBrandForm">
+      <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="modal-title pt-1 mb-0 tt-color">Update Brand</h5>
+          <button class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1" type="button" (click)="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Brand Name</label>
+            <input type="text" class="form-control form-input-custom" formControlName="Name" [ngClass]="{'is-invalid': updateBrandForm.controls['Name'].errors && (updateBrandForm.controls['Name'].touched || updateBrandForm.controls['Name'].dirty)}" />
+            <div class="text-danger error-message" *ngIf="updateBrandForm.controls['Name'].errors && (updateBrandForm.controls['Name'].touched || updateBrandForm.controls['Name'].dirty)">
+              <p class="fw-light text-danger m-0" *ngIf="updateBrandForm.controls['Name'].errors['required']">Brand Name is required</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer text-end">
+          <button class="btn btn-secondary main-btnfs px-4 py-2 me-3 text-white" type="button" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-custom-primary px-4 py-2" type="button" (click)="updateBrand()">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Modal -->
+<div *ngIf="viewBrandOpen" class="modal-container" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="viewBrandForm">
+      <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="modal-title pt-1 mb-0 tt-color">View Brand</h5>
+          <button class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1" type="button" (click)="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Brand Name</label>
+            <input type="text" formControlName="Name" readonly class="form-control form-input-custom bg-light" />
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

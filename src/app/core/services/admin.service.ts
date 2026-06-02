@@ -607,6 +607,53 @@ export class AdminService {
     }
     // Subscription APIs end
 
+    // Vehicle-Brand APIs start
+    getVehicleBrand(tableSize: any, page: any, search: any): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+
+        let url = '';
+        if (tableSize !== 'all') {
+            url = `system-admin/vehicle-brands?limit=${tableSize}&page=${page}`;
+        } else {
+            url = `system-admin/vehicle-brands?`;
+        }
+
+        if (search) {
+            url += `&search=${search}`;
+        }
+
+
+        return this.apiservice.get(url, headers).pipe(
+            tap((error: any) => {
+                console.log('Response received:', error);
+                this.erromessagefunction(error);
+            })
+        );
+    }
+    addVehicleBrand(data: any): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+        return this.apiservice.post(`system-admin/vehicle-brands`, data, headers);
+    }
+    VehicleBrandStatus(id: any): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+        return this.apiservice.patchWithHeader(`system-admin/vehicle-brands/${id}/status`, {}, headers);
+    }
+    // Vehicle-Brand APIs end
+
+    // Subscription APIs end
+
     erromessagefunction(error: any) {
         console.log('Response received:', error);
         var response = error;
