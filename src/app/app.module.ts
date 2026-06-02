@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { HomeComponent } from './website/home/home.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -24,7 +23,6 @@ import { SpinnerComponent } from './spinner/spinner.component';
 import { EmployeeService } from './core/services/Employee.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { NavbarComponent } from './website/navbar/navbar.component';
 
 @NgModule({
   declarations: [
@@ -37,8 +35,6 @@ import { NavbarComponent } from './website/navbar/navbar.component';
     SigninComponent,
     OtpComponent,
     SpinnerComponent,
-    HomeComponent,
-    NavbarComponent,
   ],
   imports: [
     BrowserModule,
@@ -62,4 +58,4 @@ import { NavbarComponent } from './website/navbar/navbar.component';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

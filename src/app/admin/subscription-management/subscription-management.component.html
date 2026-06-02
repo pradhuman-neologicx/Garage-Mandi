@@ -1,15 +1,15 @@
 <div class="min-h-screen container mx-auto">
   <!-- Header -->
-  <div class="mb-8 flex justify-between items-center">
+  <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-gray-800 mb-1">Subscription & Payment Management</h1>
+      <h1 class="text-2xl font-bold text-gray-800 mb-1">Subscription Management</h1>
       <p class="text-sm text-gray-500">Manage subscription plans, provider payments, and renewals.</p>
     </div>
   </div>
 
   <!-- Platform Plan Banner -->
   <div
-    class="bg-custom-primary rounded-2xl shadow-sm p-6 mb-6 flex justify-between items-center text-white relative overflow-hidden">
+    class="bg-custom-primary rounded-2xl shadow-sm p-6 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center text-white relative overflow-hidden gap-4">
     <div class="relative z-10">
       <h2 class="text-xl font-bold mb-1 flex items-center">
         Current Platform Plan: {{ platformPlan.name }}
@@ -34,15 +34,15 @@
   </div>
 
   <!-- Tabs -->
-  <div class="bg-white p-2 rounded-xl shadow-sm mb-6 inline-flex space-x-1">
+  <div class="bg-white p-1 rounded-xl shadow-sm mb-6 flex sm:inline-flex overflow-x-auto w-full sm:w-auto space-x-1">
     <button (click)="switchTab('providers')"
       [ngClass]="activeTab === 'providers' ? 'bg-custom-primary text-white font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'"
-      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2">
+      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2 whitespace-nowrap">
       <i class="fa-solid fa-users"></i><span>Provider Subscriptions</span>
     </button>
     <button (click)="switchTab('alerts')"
       [ngClass]="activeTab === 'alerts' ? 'bg-custom-primary text-white font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'"
-      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2 relative">
+      class="px-5 py-2.5 rounded-lg text-sm transition-all flex items-center space-x-2 relative whitespace-nowrap">
       <i class="fa-solid fa-bell"></i><span>Renewal Alerts</span>
       <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
     </button>
@@ -62,26 +62,26 @@
         <span class="ml-1">entries</span>
       </div>
 
-      <!-- Filters for Provider Subscriptions -->
-      <div *ngIf="activeTab === 'providers'" class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-        <div class="relative w-full sm:w-auto">
+      <!-- Filters -->
+      <div class="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full lg:w-auto mt-4 lg:mt-0">
+        <div class="relative w-full sm:w-auto flex-grow sm:flex-grow-0">
           <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
-          <input type="text" [(ngModel)]="searchText" (keyup.enter)="onFilterChange()" placeholder="Search providers..."
+          <input type="text" [(ngModel)]="searchText" (keyup.enter)="onFilterChange()" placeholder="Search..."
             class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary">
         </div>
 
-        <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto flex-grow sm:flex-grow-0">
           <input type="date" [(ngModel)]="filterStartDate" (change)="onFilterChange()"
-            class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary text-gray-600">
-          <span class="text-gray-400 text-sm">-</span>
+            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary text-gray-600">
+          <span class="text-gray-400 text-sm hidden sm:inline">-</span>
           <input type="date" [(ngModel)]="filterEndDate" (change)="onFilterChange()"
-            class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary text-gray-600">
+            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary text-gray-600">
         </div>
 
         <button *ngIf="searchText || filterStartDate || filterEndDate" (click)="resetFilters()"
-          class="text-gray-400 hover:text-red-500 transition-colors p-2 shrink-0 bg-gray-50 hover:bg-red-50 rounded-lg"
+          class="w-full sm:w-auto text-gray-400 hover:text-red-500 transition-colors p-2 shrink-0 bg-gray-50 hover:bg-red-50 rounded-lg flex justify-center items-center"
           title="Clear Filters">
-          <i class="fa-solid fa-times"></i>
+          <i class="fa-solid fa-times mr-2 sm:mr-0"></i><span class="sm:hidden text-sm font-medium">Clear Filters</span>
         </button>
       </div>
     </div>
@@ -145,7 +145,8 @@
             class="hover:bg-red-50/30 transition-colors bg-red-50/10">
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ alert.name }}</div>
-              <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ alert.phoneNumber }}</div>
+              <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ alert.phoneNumber }}
+              </div>
             </td>
             <td class="p-4 font-semibold text-gray-700 text-sm">{{ alert.plan }}</td>
             <td class="p-4 text-sm text-red-600 font-semibold">{{ alert.expiryDate }}</td>
@@ -222,7 +223,15 @@
         </div>
 
         <!-- Body -->
-        <div class="p-6 overflow-y-auto grow space-y-6">
+        <div class="p-6 overflow-y-auto grow space-y-6 relative">
+          
+          <!-- Loading State -->
+          <div *ngIf="selectedProvider?.isLoading" class="absolute inset-0 flex items-center justify-center bg-white/80 z-10 backdrop-blur-sm">
+            <div class="flex flex-col items-center">
+              <i class="fa-solid fa-circle-notch fa-spin text-3xl text-custom-primary mb-3"></i>
+              <p class="text-sm text-gray-500 font-medium">Fetching details...</p>
+            </div>
+          </div>
 
           <!-- Details Section -->
           <div *ngIf="selectedProvider?.rawData"
@@ -269,7 +278,8 @@
               </div>
             </div>
 
-            <div *ngIf="selectedProvider?.trialEndsAt" class="mt-4 bg-blue-50 text-blue-700 text-xs p-2.5 rounded-lg border border-blue-100 flex items-center">
+            <div *ngIf="selectedProvider?.trialEndsAt"
+              class="mt-4 bg-blue-50 text-blue-700 text-xs p-2.5 rounded-lg border border-blue-100 flex items-center">
               <i class="fa-solid fa-clock mr-2"></i>
               <span>Trial Ends On: <span class="font-bold ml-1">{{ selectedProvider.trialEndsAt }}</span></span>
             </div>

@@ -1,0 +1,66 @@
+<!-- Sticky navbar: transparent on hero, white+shadow on scroll -->
+<nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" [ngClass]="(isScrolled || !isHomePage)
+    ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-gray-100'
+    : 'bg-transparent'">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between py-3">
+
+      <!-- Logo (Left) -->
+      <div class="flex-shrink-0">
+        <a routerLink="/" class="flex items-center group">
+          <img class="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            src="/assets/logo.png" alt="Garage Mandi Logo" />
+        </a>
+      </div>
+
+      <!-- Desktop Nav Links (Right) -->
+      <div class="hidden md:flex items-center gap-1">
+        <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="font-bold"
+          [ngClass]="(isScrolled || !isHomePage) ? 'text-gray-700 hover:text-[#1e3a8a]' : 'text-white/90 hover:text-white'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10">Home</a>
+
+        <a routerLink="/about" routerLinkActive="font-bold"
+          [ngClass]="(isScrolled || !isHomePage) ? 'text-gray-700 hover:text-[#1e3a8a]' : 'text-white/90 hover:text-white'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10">About</a>
+
+        <a routerLink="/contact" routerLinkActive="font-bold"
+          [ngClass]="(isScrolled || !isHomePage) ? 'text-gray-700 hover:text-[#1e3a8a]' : 'text-white/90 hover:text-white'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10">Contact</a>
+        <a routerLink="/admin" target="_blank" routerLinkActive="font-bold"
+          [ngClass]="(isScrolled || !isHomePage) ? 'text-gray-700 hover:text-[#1e3a8a]' : 'text-white/90 hover:text-white'"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/10">Admin Panel</a>
+      </div>
+
+      <!-- Mobile Hamburger -->
+      <div class="md:hidden flex items-center">
+        <button (click)="toggleMobileMenu()" class="p-2 rounded-lg transition-all focus:outline-none"
+          [ngClass]="(isScrolled || !isHomePage) ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'">
+          <svg class="h-6 w-6" [ngClass]="{ hidden: isMobileMenuOpen, block: !isMobileMenuOpen }" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg class="h-6 w-6" [ngClass]="{ block: isMobileMenuOpen, hidden: !isMobileMenuOpen }" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div [ngClass]="{ block: isMobileMenuOpen, hidden: !isMobileMenuOpen }"
+    class="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 shadow-xl absolute w-full left-0">
+    <div class="px-4 pt-4 pb-6 space-y-1 max-w-7xl mx-auto">
+      <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="bg-blue-50 text-[#1e3a8a] font-semibold border-l-4 border-[#1e3a8a]"
+        class="text-gray-600 hover:bg-gray-50 hover:text-[#1e3a8a] block px-4 py-3 rounded-r-lg text-base font-medium transition-all">Home</a>
+
+      <a routerLink="/about" routerLinkActive="bg-blue-50 text-[#1e3a8a] font-semibold border-l-4 border-[#1e3a8a]"
+        class="text-gray-600 hover:bg-gray-50 hover:text-[#1e3a8a] block px-4 py-3 rounded-r-lg text-base font-medium transition-all">About</a>
+
+      <a routerLink="/contact" routerLinkActive="bg-blue-50 text-[#1e3a8a] font-semibold border-l-4 border-[#1e3a8a]"
+        class="text-gray-600 hover:bg-gray-50 hover:text-[#1e3a8a] block px-4 py-3 rounded-r-lg text-base font-medium transition-all">Contact</a>
+    </div>
+  </div>
+</nav>

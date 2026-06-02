@@ -1,84 +1,638 @@
-<div
-  class="website-home-container min-h-screen grid grid-rows-[auto_1fr_auto] bg-gradient-to-br from-indigo-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-300 relative"
->
-  <app-navbar class="sticky top-0 z-50"></app-navbar>
-  <main
-    class="website-main flex flex-col items-center justify-center px-4 py-8 md:py-12"
-  >
-    <section
-      class="hero grid grid-cols-1 lg:grid-cols-2 gap-8 items-center max-w-7xl mx-auto mb-12 md:mb-16"
-    >
-      <div class="hero-content text-center lg:text-left order-2 lg:order-1">
-        <h1
-          class="text-3xl md:text-5xl font-extrabold leading-tight mb-4 tracking-tight"
-        >
-          <span class="highlight text-indigo-500">Welcome to</span><br />
-          <span class="brand text-indigo-900 dark:text-indigo-300"
-            >Lab Testing Portal</span
-          >
-        </h1>
-        <p
-          class="subtitle text-gray-600 dark:text-gray-300 text-base md:text-lg mb-6 max-w-md mx-auto lg:mx-0"
-        >
-          Your innovative platform for efficient, secure, and user-friendly
-          laboratory management.
-        </p>
-        <a
-          routerLink="/sign_in"
-          class="btn btn-custom-primary bg-indigo-600 text-white font-bold text-base md:text-lg px-3 py-2 rounded-full hover:bg-indigo-700 shadow-md hover:shadow-xl transition-all duration-300"
-          >Get Started</a
-        >
-      </div>
-      <div class="hero-image order-1 lg:order-2">
-        <img
-          src="https://images.pexels.com/photos/3825581/pexels-photo-3825581.jpeg"
-          alt="Lab Research Illustration"
-          loading="lazy"
-          class="max-w-full h-auto rounded-2xl border-4 border-white shadow-xl"
-        />
-      </div>
-    </section>
-    <section
-      class="features grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto mb-12 md:mb-16"
-    >
+<div class="website-home-container min-h-screen flex flex-col text-gray-900 transition-colors duration-300">
+  <app-navbar></app-navbar>
+
+  <!-- ===== FULL-SCREEN HERO ===== -->
+  <section class="relative w-full flex items-center justify-start min-h-screen overflow-hidden">
+
+
+    <!-- Background Image -->
+    <img src="/assets/hero-bg.png" alt="Garage Hero"
+      class="absolute inset-0 w-full h-full object-cover object-center" />
+
+    <!-- Dark gradient overlay – heavy on left, fades to transparent on right -->
+    <div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/10"></div>
+    <!-- Bottom fade -->
+    <div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/70 to-transparent"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-20 py-24 flex flex-col items-start">
+
+      <!-- Eyebrow badge -->
       <div
-        *ngFor="let feature of features"
-        class="feature bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center transform transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-      >
-        <div
-          class="feature-icon bg-gradient-to-r from-indigo-900 to-blue-600 text-white text-2xl w-12 h-12 flex items-center justify-center rounded-full mx-auto mb-4 shadow-md"
-        >
-          <i [class]="feature.icon"></i>
+        class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 text-sm font-medium px-4 py-1.5 rounded-full mb-7 tracking-wide">
+        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
+        India's #1 Automotive Services Marketplace
+      </div>
+
+      <!-- Headline -->
+      <h1
+        class="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] text-white tracking-tight max-w-3xl mb-6 drop-shadow-lg">
+        Find Services &amp; Spare Parts
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 block mt-1">
+          for Your Vehicle
+        </span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="text-white/70 text-lg md:text-xl max-w-lg mb-10 leading-relaxed">
+        Connect with trusted mechanics, workshops, and spare part vendors. Get multiple quotes and choose the best for
+        your 2-wheeler, car, or truck.
+      </p>
+
+      <!-- App Download Buttons -->
+      <div class="flex flex-col sm:flex-row items-start gap-4 mb-14">
+
+        <!-- Google Play -->
+        <a href="#"
+          class="group flex items-center gap-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-6 py-3.5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/20 hover:scale-105 hover:-translate-y-0.5">
+          <i
+            class="fa-brands fa-google-play text-3xl text-[#34D399] group-hover:scale-110 transition-transform duration-300"></i>
+          <div class="text-left">
+            <div class="text-[10px] leading-none text-white/55 uppercase tracking-widest mb-1">GET IT ON</div>
+            <div class="text-[17px] font-bold leading-none">Google Play</div>
+          </div>
+        </a>
+
+        <!-- Apple App Store -->
+        <a href="#"
+          class="group flex items-center gap-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white px-6 py-3.5 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-cyan-500/20 hover:scale-105 hover:-translate-y-0.5">
+          <i class="fa-brands fa-apple text-4xl group-hover:scale-110 transition-transform duration-300"></i>
+          <div class="text-left">
+            <div class="text-[10px] leading-none text-white/55 uppercase tracking-widest mb-1">Download on the</div>
+            <div class="text-[17px] font-bold leading-none">App Store</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Trust Stats -->
+      <div class="flex flex-wrap items-center gap-8 pt-8 border-t border-white/15 max-w-lg">
+        <div class="text-center">
+          <div class="text-3xl font-extrabold text-white">10k+</div>
+          <div class="text-xs text-white/55 mt-1 uppercase tracking-wider">Garages Listed</div>
         </div>
-        <p
-          class="text-lg md:text-xl font-bold text-indigo-900 dark:text-indigo-300 mb-2"
-        >
-          {{ feature.title }}
-        </p>
-        <p class="text-gray-600 dark:text-gray-300 text-sm md:text-base">
-          {{ feature.description }}
+        <div class="w-px h-10 bg-white/15 hidden sm:block"></div>
+        <div class="text-center">
+          <div class="text-3xl font-extrabold text-white">50k+</div>
+          <div class="text-xs text-white/55 mt-1 uppercase tracking-wider">Happy Customers</div>
+        </div>
+        <div class="w-px h-10 bg-white/15 hidden sm:block"></div>
+        <div class="text-center">
+          <div class="text-3xl font-extrabold text-white">200+</div>
+          <div class="text-xs text-white/55 mt-1 uppercase tracking-wider">Cities Covered</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="w-full bg-white py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      
+      <!-- Section Header -->
+      <div class="text-center mb-16">
+        <span class="inline-flex items-center bg-[#1e3a8a]/10 text-[#1e3a8a] font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full">Simple Process</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-4 mb-3">
+          How <span class="text-[#1e3a8a]">It Works</span>
+        </h2>
+        <p class="text-gray-500 text-base max-w-xl mx-auto">Get your vehicle serviced or find spare parts in three simple steps.</p>
+      </div>
+
+      <!-- Steps Container -->
+      <div class="relative grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16 max-w-5xl mx-auto text-center">
+        
+        <!-- Connecting Line (Desktop) -->
+        <div class="hidden md:block absolute top-10 left-[15%] right-[15%] h-0.5 bg-gray-200 -z-10"></div>
+        <div class="hidden md:block absolute top-10 left-[15%] right-[15%] h-0.5 bg-[#1e3a8a] -z-10 w-0 transition-all duration-1000 group-hover:w-full"></div>
+
+        <!-- Step 1 -->
+        <div class="relative group">
+          <div class="w-20 h-20 mx-auto bg-gray-50 border-4 border-white rounded-full flex items-center justify-center shadow-lg group-hover:border-[#1e3a8a]/20 transition-all duration-300 relative z-10 mb-6">
+            <span class="absolute -top-2 -right-2 w-8 h-8 bg-[#1e3a8a] text-white font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm">1</span>
+            <i class="fa-solid fa-list-check text-2xl text-[#1e3a8a] group-hover:scale-110 transition-transform duration-300"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#1e3a8a] transition-colors duration-300">Raise Request</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Tell us what service or spare part you need. Provide details like vehicle make, model, and the specific issue.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative group">
+          <div class="w-20 h-20 mx-auto bg-gray-50 border-4 border-white rounded-full flex items-center justify-center shadow-lg group-hover:border-[#1e3a8a]/20 transition-all duration-300 relative z-10 mb-6">
+            <span class="absolute -top-2 -right-2 w-8 h-8 bg-[#1e3a8a] text-white font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm">2</span>
+            <i class="fa-solid fa-file-invoice-dollar text-2xl text-[#1e3a8a] group-hover:scale-110 transition-transform duration-300"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#1e3a8a] transition-colors duration-300">Get Quotes</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Verified mechanics and vendors will review your request and provide competitive quotes directly to you.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="relative group">
+          <div class="w-20 h-20 mx-auto bg-gray-50 border-4 border-white rounded-full flex items-center justify-center shadow-lg group-hover:border-[#1e3a8a]/20 transition-all duration-300 relative z-10 mb-6">
+            <span class="absolute -top-2 -right-2 w-8 h-8 bg-[#1e3a8a] text-white font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm">3</span>
+            <i class="fa-solid fa-handshake text-2xl text-[#1e3a8a] group-hover:scale-110 transition-transform duration-300"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#1e3a8a] transition-colors duration-300">Compare & Contact</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Compare prices, read reviews, and choose the best vendor. Contact them directly to finalize the service.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EXPLORE OUR PLATFORM ===== -->
+  <section class="w-full bg-gray-50 py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+
+      <!-- Section Badge + Heading -->
+      <div class="text-center mb-14">
+        <span
+          class="inline-flex items-center bg-[#1e3a8a]/10 text-[#1e3a8a] font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full">Explore
+          Our Platform</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-4 mb-3">
+          Services for <span class="text-[#1e3a8a]">Every Vehicle</span>
+        </h2>
+        <p class="text-gray-500 text-base max-w-xl mx-auto">Find verified services, mechanics, and spare parts for
+          2-wheelers, 3-wheelers, cars, and trucks — all in one place.</p>
+      </div>
+
+      <!-- ── VEHICLE CATEGORIES ── -->
+      <h3 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+        <span class="w-1 h-5 bg-[#1e3a8a] rounded-full inline-block"></span>
+        Vehicle Categories
+      </h3>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-14">
+        <!-- 2-Wheeler -->
+        <div
+          class="group category-card flex flex-col items-center gap-3 bg-white hover:bg-[#1e3a8a] border border-gray-100 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="w-14 h-14 rounded-xl bg-gray-50 group-hover:bg-white/20 flex items-center justify-center shadow-sm transition-all duration-300">
+            <i
+              class="fa-solid fa-motorcycle text-2xl text-[#1e3a8a] group-hover:text-white transition-colors duration-300"></i>
+          </div>
+          <span
+            class="text-sm font-semibold text-gray-700 group-hover:text-white transition-colors duration-300">2-Wheeler</span>
+          <span class="text-xs text-gray-400 group-hover:text-white/70 transition-colors duration-300">Bikes &
+            Scooters</span>
+        </div>
+        <!-- 3-Wheeler -->
+        <div
+          class="group category-card flex flex-col items-center gap-3 bg-white hover:bg-[#1e3a8a] border border-gray-100 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="w-14 h-14 rounded-xl bg-gray-50 group-hover:bg-white/20 flex items-center justify-center shadow-sm transition-all duration-300">
+            <i
+              class="fa-solid fa-taxi text-2xl text-[#1e3a8a] group-hover:text-white transition-colors duration-300"></i>
+          </div>
+          <span
+            class="text-sm font-semibold text-gray-700 group-hover:text-white transition-colors duration-300">3-Wheeler</span>
+          <span class="text-xs text-gray-400 group-hover:text-white/70 transition-colors duration-300">Auto &
+            E-Rickshaw</span>
+        </div>
+        <!-- 4-Wheeler -->
+        <div
+          class="group category-card flex flex-col items-center gap-3 bg-white hover:bg-[#1e3a8a] border border-gray-100 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="w-14 h-14 rounded-xl bg-gray-50 group-hover:bg-white/20 flex items-center justify-center shadow-sm transition-all duration-300">
+            <i
+              class="fa-solid fa-car text-2xl text-[#1e3a8a] group-hover:text-white transition-colors duration-300"></i>
+          </div>
+          <span
+            class="text-sm font-semibold text-gray-700 group-hover:text-white transition-colors duration-300">4-Wheeler</span>
+          <span class="text-xs text-gray-400 group-hover:text-white/70 transition-colors duration-300">Cars &
+            SUVs</span>
+        </div>
+        <!-- Truck -->
+        <div
+          class="group category-card flex flex-col items-center gap-3 bg-white hover:bg-[#1e3a8a] border border-gray-100 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+          <div
+            class="w-14 h-14 rounded-xl bg-gray-50 group-hover:bg-white/20 flex items-center justify-center shadow-sm transition-all duration-300">
+            <i
+              class="fa-solid fa-truck text-2xl text-[#1e3a8a] group-hover:text-white transition-colors duration-300"></i>
+          </div>
+          <span
+            class="text-sm font-semibold text-gray-700 group-hover:text-white transition-colors duration-300">Truck</span>
+          <span class="text-xs text-gray-400 group-hover:text-white/70 transition-colors duration-300">Heavy
+            Vehicles</span>
+        </div>
+      </div>
+
+      <!-- ── SERVICES GRID ── -->
+      <h3 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+        <span class="w-1 h-5 bg-[#1e3a8a] rounded-full inline-block"></span>
+        Popular Services
+      </h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-16">
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-oil-can text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">Engine Repair</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-wind text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">AC Service</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-car-burst text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">Denting & Painting</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-circle-notch text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">Tyre Change</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-bolt text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">Electrical Repair</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-car-battery text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">Battery Service</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-screwdriver-wrench text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">General Service</span>
+        </div>
+        <div
+          class="flex items-center gap-3 bg-white border border-gray-100 rounded-xl px-4 py-3.5 hover:border-[#1e3a8a]/30 hover:bg-blue-50/50 transition-all duration-200 cursor-pointer group">
+          <i class="fa-solid fa-gauge text-[#1e3a8a] text-lg w-5 flex-shrink-0"></i>
+          <span class="text-sm font-medium text-gray-700 group-hover:text-[#1e3a8a]">Performance Tuning</span>
+        </div>
+      </div>
+
+      <!-- ── SPARE PARTS SECTION ── -->
+      <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <span class="w-1 h-5 bg-[#1e3a8a] rounded-full inline-block"></span>
+        Spare Parts Marketplace
+      </h3>
+      <div
+        class="bg-gradient-to-br from-[#1e3a8a]/5 via-white to-blue-50/40 border border-[#1e3a8a]/10 rounded-3xl p-8 md:p-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+
+          <!-- Left: Part type cards -->
+          <div class="space-y-4">
+            <p class="text-gray-600 text-sm mb-6">Browse from a wide selection of genuine and aftermarket parts from
+              verified vendors across India.</p>
+
+            <!-- New Parts Card -->
+            <div
+              class="flex items-start gap-4 bg-white border border-[#1e3a8a]/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div class="w-12 h-12 rounded-xl bg-[#1e3a8a] flex items-center justify-center flex-shrink-0 shadow-md">
+                <i class="fa-solid fa-box-open text-white text-xl"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="text-base font-bold text-gray-900">New Spare Parts</h4>
+                  <span
+                    class="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">OEM
+                    & Aftermarket</span>
+                </div>
+                <p class="text-sm text-gray-500">Brand new parts from authorized dealers and top-rated vendors. Get
+                  manufacturer warranty and full quality assurance.</p>
+              </div>
+            </div>
+
+            <!-- Second-Hand Parts Card -->
+            <div
+              class="flex items-start gap-4 bg-white border border-[#1e3a8a]/10 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div class="w-12 h-12 rounded-xl bg-[#2c7da0] flex items-center justify-center flex-shrink-0 shadow-md">
+                <i class="fa-solid fa-recycle text-white text-xl"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="text-base font-bold text-gray-900">Second-Hand Parts</h4>
+                  <span
+                    class="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Budget-Friendly</span>
+                </div>
+                <p class="text-sm text-gray-500">Quality-checked used parts at a fraction of the cost. Ideal for older
+                  vehicles or budget-conscious repairs.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Benefits grid -->
+          <div>
+            <p class="text-sm font-semibold text-gray-700 mb-5 uppercase tracking-wider">Why buy from Garage Mandi?</p>
+            <div class="grid grid-cols-1 gap-4">
+              <div class="flex items-start gap-4 p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-store text-[#1e3a8a]"></i>
+                </div>
+                <div>
+                  <h5 class="text-sm font-bold text-gray-900 mb-0.5">Multiple Vendors</h5>
+                  <p class="text-xs text-gray-500">Compare offerings from verified sellers across your city and get the
+                    best deal.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4 p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-scale-balanced text-[#1e3a8a]"></i>
+                </div>
+                <div>
+                  <h5 class="text-sm font-bold text-gray-900 mb-0.5">Price Comparison</h5>
+                  <p class="text-xs text-gray-500">Find the best deal across vendors — side-by-side pricing
+                    transparency.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-4 p-4 rounded-xl bg-white border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 rounded-lg bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-medal text-[#1e3a8a]"></i>
+                </div>
+                <div>
+                  <h5 class="text-sm font-bold text-gray-900 mb-0.5">Quality Options</h5>
+                  <p class="text-xs text-gray-500">Choose between OEM, aftermarket, or verified second-hand parts based
+                    on your needs.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WHY CHOOSE US ===== -->
+  <section class="w-full bg-white py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+
+      <!-- Section Header -->
+      <div class="text-center mb-14">
+        <span
+          class="inline-flex items-center bg-[#1e3a8a]/10 text-[#1e3a8a] font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full">Why
+          Garage Mandi</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-3 mb-4">
+          Everything You Need,<br />
+          <span class="text-[#1e3a8a]">All in One Place</span>
+        </h2>
+        <p class="text-gray-500 text-base max-w-xl mx-auto leading-relaxed">
+          From finding a trusted mechanic to buying spare parts, Garage Mandi simplifies every step of your vehicle
+          service journey.
         </p>
       </div>
-    </section>
-    <section class="cta-section text-center mb-12 md:mb-16">
-      <h2
-        class="text-2xl md:text-3xl font-bold text-indigo-900 dark:text-indigo-300 mb-6"
-      >
-        Revolutionize Your Lab Management Today
-      </h2>
-      <a
-        routerLink="/sign_in"
-        class="btn btn-custom-primary bg-indigo-600 text-white font-bold text-base md:text-lg px-3 py-2 rounded-full hover:bg-indigo-700 shadow-md hover:shadow-xl transition-all duration-300"
-        >Start Now</a
-      >
-    </section>
-  </main>
-  <!-- <div
-    class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900"
-  ></div> -->
-  <footer
-    class="website-footer bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 text-center py-4 text-sm"
-  >
-    <p>© {{ currentYear }} Lab Testing Portal. All rights reserved.</p>
-  </footer>
+
+      <!-- Feature Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+        <div *ngFor="let feature of features"
+          class="group relative bg-gray-50 border border-gray-100 rounded-2xl p-7 shadow-sm hover:shadow-2xl hover:border-blue-200 hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-default">
+
+          <!-- Hover background glow -->
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-indigo-50/0 group-hover:from-blue-50/60 group-hover:to-indigo-50/40 transition-all duration-500 rounded-2xl">
+          </div>
+
+          <!-- Top accent bar -->
+          <div
+            class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#1e3a8a] to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl">
+          </div>
+
+          <!-- Icon container — bigger, gradient bg -->
+          <div
+            class="relative w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 overflow-hidden">
+            <!-- Gradient background always visible, intensifies on hover -->
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-[#1e3a8a]/10 to-blue-400/10 group-hover:from-[#1e3a8a]/20 group-hover:to-blue-400/25 transition-all duration-300">
+            </div>
+            <!-- Icon -->
+            <i
+              [class]="feature.icon + ' text-2xl relative z-10 text-[#1e3a8a] group-hover:scale-110 transition-transform duration-300'"></i>
+          </div>
+
+          <!-- Text content -->
+          <div class="relative">
+            <h3
+              class="text-[17px] font-bold text-gray-900 mb-2.5 group-hover:text-[#1e3a8a] transition-colors duration-300 leading-snug">
+              {{ feature.title }}
+            </h3>
+            <p class="text-gray-500 text-sm leading-relaxed">
+              {{ feature.description }}
+            </p>
+          </div>
+
+          <!-- Bottom arrow — slides in on hover -->
+          <div
+            class="absolute bottom-5 right-5 opacity-0 group-hover:opacity-40 translate-x-3 group-hover:translate-x-0 transition-all duration-300">
+            <svg class="w-5 h-5 text-[#1e3a8a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ABOUT US SECTION ===== -->
+  <section class="w-full bg-gray-50 overflow-hidden">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 min-h-[540px]">
+
+      <!-- Left: Image (flush, no padding) -->
+      <div class="relative overflow-hidden min-h-[380px] lg:min-h-full">
+        <img src="/assets/about-garage.png" alt="Garage Mandi - Professional Auto Service"
+          class="absolute inset-0 w-full h-full object-cover object-center" />
+        <!-- Subtle right edge fade to blend with content -->
+        <div class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-gray-50 to-transparent hidden lg:block"></div>
+      </div>
+
+      <!-- Right: Content -->
+      <div class="flex flex-col justify-center px-10 py-14 lg:py-20 lg:pl-16 lg:pr-12 bg-gray-50">
+
+        <!-- Eyebrow label -->
+        <span
+          class="w-fit inline-flex items-center bg-[#1e3a8a]/10 text-[#1e3a8a] font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">About
+          Us</span>
+
+        <!-- Heading -->
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-5">
+          Connecting You to Trusted <br class="hidden sm:block" />
+          <span class="text-[#1e3a8a]">Garages & Spare Parts</span>
+        </h2>
+
+        <!-- Description -->
+        <p class="text-gray-600 text-base leading-relaxed mb-6 max-w-lg">
+          At Garage Mandi, we redefine the vehicle service experience by connecting car owners with verified mechanics,
+          workshops, and spare part vendors — all in one platform. Whether it's a routine check-up or an urgent repair,
+          find the right help near you.
+        </p>
+
+        <!-- Bullet Points -->
+        <ul class="space-y-3 mb-8">
+          <li class="flex items-start gap-3">
+            <span class="mt-1 w-5 h-5 rounded-full bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-[#1e3a8a]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414L8.414 15 3.293 9.879a1 1 0 111.414-1.414L8.414 12.172l6.879-6.879a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <p class="text-gray-700 text-sm"><span class="font-semibold text-gray-900">Verified Garages:</span> Every
+              service provider is reviewed and verified for quality.</p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-1 w-5 h-5 rounded-full bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-[#1e3a8a]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414L8.414 15 3.293 9.879a1 1 0 111.414-1.414L8.414 12.172l6.879-6.879a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <p class="text-gray-700 text-sm"><span class="font-semibold text-gray-900">New & Used Spare Parts:</span>
+              Browse thousands of parts from trusted vendors.</p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-1 w-5 h-5 rounded-full bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-[#1e3a8a]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414L8.414 15 3.293 9.879a1 1 0 111.414-1.414L8.414 12.172l6.879-6.879a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <p class="text-gray-700 text-sm"><span class="font-semibold text-gray-900">Multiple Quotes:</span> Get
+              competitive quotes and choose what fits your budget.</p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-1 w-5 h-5 rounded-full bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-[#1e3a8a]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414L8.414 15 3.293 9.879a1 1 0 111.414-1.414L8.414 12.172l6.879-6.879a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <p class="text-gray-700 text-sm"><span class="font-semibold text-gray-900">2W, 3W, 4W & Trucks:</span>
+              Solutions for every type of vehicle owner.</p>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="mt-1 w-5 h-5 rounded-full bg-[#1e3a8a]/10 flex items-center justify-center flex-shrink-0">
+              <svg class="w-3 h-3 text-[#1e3a8a]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414L8.414 15 3.293 9.879a1 1 0 111.414-1.414L8.414 12.172l6.879-6.879a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+            </span>
+            <p class="text-gray-700 text-sm"><span class="font-semibold text-gray-900">Doorstep Service:</span> Book a
+              field executive for on-site assistance anywhere.</p>
+          </li>
+        </ul>
+
+        <!-- Divider with CTA -->
+        <div class="pt-6 border-t border-gray-200 flex items-center gap-4">
+          <a routerLink="/about"
+            class="inline-flex items-center gap-2 bg-[#1e3a8a] hover:bg-[#1e40af] text-white font-semibold text-sm px-6 py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
+            Learn More
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+          <span class="text-gray-400 text-sm">Trusted by 50,000+ customers</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS ===== -->
+  <section class="w-full bg-white py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      
+      <!-- Section Header -->
+      <div class="text-center mb-16">
+        <span class="inline-flex items-center bg-[#1e3a8a]/10 text-[#1e3a8a] font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full">Wall of Trust</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-4 mb-3">
+          What Our <span class="text-[#1e3a8a]">Customers Say</span>
+        </h2>
+        <p class="text-gray-500 text-base max-w-xl mx-auto">Real experiences from vehicle owners who trust Garage Mandi for their service and spare part needs.</p>
+      </div>
+
+      <!-- Testimonials Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Review 1 -->
+        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group">
+          <!-- Quote Icon -->
+          <i class="fa-solid fa-quote-right absolute top-6 right-8 text-4xl text-[#1e3a8a]/10 group-hover:text-[#1e3a8a]/20 transition-colors duration-300"></i>
+          
+          <!-- Rating -->
+          <div class="flex gap-1 text-yellow-400 text-sm mb-4">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          
+          <p class="text-gray-600 text-sm leading-relaxed mb-6 italic relative z-10">
+            "I needed a genuine OEM part for my car and couldn't find it anywhere locally. Garage Mandi connected me with a vendor instantly. The price was great and delivery was fast!"
+          </p>
+          
+          <!-- User -->
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#1e3a8a] text-white flex items-center justify-center font-bold text-lg">
+              R
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-gray-900">Rahul Sharma</h4>
+              <span class="text-xs text-gray-500">4-Wheeler Owner</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 2 -->
+        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group">
+          <i class="fa-solid fa-quote-right absolute top-6 right-8 text-4xl text-[#1e3a8a]/10 group-hover:text-[#1e3a8a]/20 transition-colors duration-300"></i>
+          
+          <div class="flex gap-1 text-yellow-400 text-sm mb-4">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star-half-stroke"></i>
+          </div>
+          
+          <p class="text-gray-600 text-sm leading-relaxed mb-6 italic relative z-10">
+            "Getting multiple quotes for my bike's engine repair saved me so much hassle. I compared prices and reviews, chose a verified mechanic, and got the job done perfectly."
+          </p>
+          
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-[#e63946] text-white flex items-center justify-center font-bold text-lg">
+              A
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-gray-900">Amit Patel</h4>
+              <span class="text-xs text-gray-500">2-Wheeler Owner</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group">
+          <i class="fa-solid fa-quote-right absolute top-6 right-8 text-4xl text-[#1e3a8a]/10 group-hover:text-[#1e3a8a]/20 transition-colors duration-300"></i>
+          
+          <div class="flex gap-1 text-yellow-400 text-sm mb-4">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+          </div>
+          
+          <p class="text-gray-600 text-sm leading-relaxed mb-6 italic relative z-10">
+            "The doorstep service is a lifesaver! My car broke down midway, and through Garage Mandi, a field executive arrived within 45 minutes to fix the electrical issue."
+          </p>
+          
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-lg">
+              P
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-gray-900">Priya Singh</h4>
+              <span class="text-xs text-gray-500">Doorstep Service User</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Component -->
+  <app-footer></app-footer>
 </div>

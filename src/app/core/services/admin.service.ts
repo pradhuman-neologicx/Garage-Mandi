@@ -553,10 +553,10 @@ export class AdminService {
             url += `&search=${search}`;
         }
         if (startDate) {
-            url += `&start_date=${startDate}`;
+            url += `&fromdate=${startDate}`;
         }
         if (endDate) {
-            url += `&end_date=${endDate}`;
+            url += `&todate=${endDate}`;
         }
 
         return this.apiservice.get(url, headers).pipe(
@@ -565,6 +565,14 @@ export class AdminService {
                 this.erromessagefunction(error);
             })
         );
+    }
+    getProviderSubscriptionsByID(id: any): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+        return this.apiservice.get(`admin/subscriptions/${id}`, headers);
     }
     getProviderExpirySubscriptions(tableSize: any, page: any, search: any, startDate?: string, endDate?: string): Observable<any> {
         const token = this.jwtService.getToken();
@@ -584,10 +592,10 @@ export class AdminService {
             url += `&search=${search}`;
         }
         if (startDate) {
-            url += `&start_date=${startDate}`;
+            url += `&fromdate=${startDate}`;
         }
         if (endDate) {
-            url += `&end_date=${endDate}`;
+            url += `&todate=${endDate}`;
         }
 
         return this.apiservice.get(url, headers).pipe(

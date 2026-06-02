@@ -178,29 +178,45 @@ export class ApiService {
       );
   }
   handleError = (error: any) => {
+    console.error('API Error intercepted by handleError:', error);
+    
+    // Extract body if error is an HttpErrorResponse
+    const errBody = error?.error || error;
+
+    // Check if the error object contains the 'errors' object (typical for validation)
+    if (errBody && errBody.errors) {
+      const errorMessages: string[] = [];
+      for (const key in errBody.errors) {
+        if (Object.prototype.hasOwnProperty.call(errBody.errors, key)) {
+          const messages = errBody.errors[key];
+          if (Array.isArray(messages)) {
+            errorMessages.push(...messages);
+          } else {
+            errorMessages.push(messages);
+          }
+        }
+      }
+      
+      // If validation messages are found, show them and ignore the top-level message
+      if (errorMessages.length > 0) {
+        const finalMessage = errorMessages.join(' | ');
+        console.error('Validation Error:', finalMessage);
+        this.notificationService.show(finalMessage, 'error');
+        return throwError(() => new Error(finalMessage));
+      }
+    }
+
+    // Otherwise, fallback to the main error message or a default string
     let errorMessage = '';
-    if (error.error instanceof ErrorEvent) {
+    if (error?.error instanceof ErrorEvent) {
       // client-side error
       errorMessage = error.error.message || 'An unknown error occurred';
     } else {
       // server-side error
-      errorMessage = error.error?.message || error.message || 'An unknown server error occurred';
+      errorMessage = errBody?.message || error?.message || 'An unknown server error occurred';
     }
-    if (error.status === 422) {
-      const errorMessage =
-        error.errors?.name?.[0] ||
-        error.errors?.email?.[0] ||
-        error.errors?.mobile?.[0] ||
-        error.errors?.input_fields?.[0] ||
-        error.errors?.material_id?.[0];
-      console.error('Validation Error:', errorMessage);
-
-      return throwError(() => new Error(errorMessage));
-    }
-    //console.log(errorMessage+"er");
+    
     this.notificationService.show(errorMessage, 'error');
-    return throwError(() => {
-      return errorMessage;
-    });
+    return throwError(() => new Error(errorMessage));
   };
 }

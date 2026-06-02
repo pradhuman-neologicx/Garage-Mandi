@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { AdminService } from '../../core/services/admin.service';
 import { JwtService } from '../../core/services/jwt.service';
+import { NotificationService } from '../../core/services/notificationnew.service';
 
 @Component({
   selector: 'app-user-management',
@@ -86,7 +87,11 @@ export class UserManagementComponent implements OnInit {
 
   roles: string | null = null;
 
-  constructor(private adminService: AdminService, private jwtService: JwtService) { }
+  constructor(
+    private adminService: AdminService, 
+    private jwtService: JwtService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.roles = this.jwtService.getadmiRole() as string;
@@ -273,6 +278,10 @@ export class UserManagementComponent implements OnInit {
     this.selectedUser = user ? { ...user } : {};
     this.isModalOpen = true;
 
+    this.selectedFile = null;
+    this.selectedFiles = [];
+    this.imagePreviews = [];
+
     if (mode === 'add') {
       this.selectedUser.vehicle_category_id = [];
       this.selectedUser.spare_part_id = [];
@@ -280,8 +289,6 @@ export class UserManagementComponent implements OnInit {
       this.selectedUser.service_type_id = [];
       this.selectedUser.state_id = null;
       this.selectedUser.city_id = null;
-      this.selectedFiles = [];
-      this.imagePreviews = [];
       this.cities = [];
     }
 
@@ -322,10 +329,8 @@ export class UserManagementComponent implements OnInit {
             
             this.selectedFiles = [];
             this.imagePreviews = [];
-            if (profile.images && Array.isArray(profile.images)) {
-                this.imagePreviews = profile.images.map((img: any) => img.image_url || img);
-            } else if (profile.image_url) {
-                this.imagePreviews.push(profile.image_url);
+            if (profile.gallery && Array.isArray(profile.gallery)) {
+                this.imagePreviews = profile.gallery.map((img: any) => img.image_url || img);
             }
           }
         },
@@ -422,6 +427,7 @@ export class UserManagementComponent implements OnInit {
   closeModal() {
     this.isModalOpen = false;
     this.selectedUser = null;
+    this.selectedFile = null;
     this.selectedFiles = [];
     this.imagePreviews = [];
   }
@@ -449,28 +455,37 @@ export class UserManagementComponent implements OnInit {
       formData.append('spare_parts_old', this.selectedUser.spare_parts_old ? '1' : '0');
       if (this.selectedFiles && this.selectedFiles.length > 0) {
         this.selectedFiles.forEach((file) => {
-          formData.append('images[]', file); // Array of images
+          formData.append('gallery[]', file); // Array of images
         });
-      } else if (this.selectedFile) {
+      }
+      if (this.selectedFile) {
         formData.append('image', this.selectedFile);
       }
 
       if (this.modalMode === 'add') {
         this.adminService.addServiceProvider(formData).subscribe({
-          next: () => {
+          next: (res: any) => {
+            this.notificationService.show(res?.message || 'Service provider added successfully', 'success');
             this.closeModal();
             this.fetchServiceProviders();
           },
-          error: (err) => console.error(err)
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       } else if (this.modalMode === 'edit') {
         formData.append('id', this.selectedUser.id.toString());
         this.adminService.updateServiceProvider(this.selectedUser.id, formData).subscribe({
-          next: () => {
+          next: (res: any) => {
+            this.notificationService.show(res?.message || 'Service provider updated successfully', 'success');
             this.closeModal();
             this.fetchServiceProviders();
           },
-          error: (err) => console.error(err)
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       }
     } else if (this.activeTab === 'customers') {
@@ -484,20 +499,28 @@ export class UserManagementComponent implements OnInit {
 
       if (this.modalMode === 'add') {
         this.adminService.addCustomer(formData).subscribe({
-          next: () => {
+          next: (res: any) => {
+            this.notificationService.show(res?.message || 'Customer added successfully', 'success');
             this.closeModal();
             this.fetchCustomers();
           },
-          error: (err) => console.error(err)
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       } else if (this.modalMode === 'edit') {
         formData.append('id', this.selectedUser.id.toString());
         this.adminService.updateCustomer(this.selectedUser.id, formData).subscribe({
-          next: () => {
+          next: (res: any) => {
+            this.notificationService.show(res?.message || 'Customer updated successfully', 'success');
             this.closeModal();
             this.fetchCustomers();
           },
-          error: (err) => console.error(err)
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       }
     } else if (this.activeTab === 'field_executives') {
@@ -509,14 +532,28 @@ export class UserManagementComponent implements OnInit {
 
       if (this.modalMode === 'add') {
         this.adminService.addExecutive(formData).subscribe({
-          next: () => { this.closeModal(); this.fetchFieldExecutives(); },
-          error: (err) => console.error(err)
+          next: (res: any) => { 
+            this.notificationService.show(res?.message || 'Field executive added successfully', 'success');
+            this.closeModal(); 
+            this.fetchFieldExecutives(); 
+          },
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       } else if (this.modalMode === 'edit') {
         formData.append('id', this.selectedUser.id.toString());
         this.adminService.updateExecutive(this.selectedUser.id, formData).subscribe({
-          next: () => { this.closeModal(); this.fetchFieldExecutives(); },
-          error: (err) => console.error(err)
+          next: (res: any) => { 
+            this.notificationService.show(res?.message || 'Field executive updated successfully', 'success');
+            this.closeModal(); 
+            this.fetchFieldExecutives(); 
+          },
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       }
     } else if (this.activeTab === 'system_admins') {
@@ -528,14 +565,28 @@ export class UserManagementComponent implements OnInit {
 
       if (this.modalMode === 'add') {
         this.adminService.addSystemAdmin(formData).subscribe({
-          next: () => { this.closeModal(); this.fetchSystemAdmins(); },
-          error: (err) => console.error(err)
+          next: (res: any) => { 
+            this.notificationService.show(res?.message || 'System admin added successfully', 'success');
+            this.closeModal(); 
+            this.fetchSystemAdmins(); 
+          },
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       } else if (this.modalMode === 'edit') {
         formData.append('id', this.selectedUser.id.toString());
         this.adminService.updateSystemAdmin(this.selectedUser.id, formData).subscribe({
-          next: () => { this.closeModal(); this.fetchSystemAdmins(); },
-          error: (err) => console.error(err)
+          next: (res: any) => { 
+            this.notificationService.show(res?.message || 'System admin updated successfully', 'success');
+            this.closeModal(); 
+            this.fetchSystemAdmins(); 
+          },
+          error: (err) => {
+            console.error(err);
+
+          }
         });
       }
     } else {
@@ -547,9 +598,9 @@ export class UserManagementComponent implements OnInit {
   selectedFiles: File[] = [];
   imagePreviews: string[] = [];
 
-  onImageSelected(event: Event) {
+  onImageSelected(event: Event, type: 'single' | 'multi' = 'single') {
     const input = event.target as HTMLInputElement;
-    if (this.activeTab === 'service_providers') {
+    if (type === 'multi') {
       if (input.files && input.files.length > 0) {
         const files = Array.from(input.files);
         const remainingSlots = 3 - this.imagePreviews.length;
@@ -603,45 +654,61 @@ export class UserManagementComponent implements OnInit {
   toggleStatus(provider: any) {
     if (this.activeTab === 'service_providers') {
       this.adminService.updateServiceProviderStatus(provider.id).subscribe({
-        next: () => {
+        next: (res: any) => {
           provider.status = provider.status === 'Active' ? 'Inactive' : 'Active';
           if (provider.rawData) {
             provider.rawData.is_active = provider.rawData.is_active === 1 ? 0 : 1;
           }
+          this.notificationService.show(res?.message || 'Status updated successfully', 'success');
         },
-        error: (err) => console.error('Failed to toggle status', err)
+        error: (err) => {
+          console.error('Failed to toggle status', err);
+
+        }
       });
     } else if (this.activeTab === 'customers') {
       this.adminService.updateCustomerStatus(provider.id).subscribe({
-        next: () => {
+        next: (res: any) => {
           provider.status = provider.status === 'Active' ? 'Inactive' : 'Active';
           if (provider.rawData) {
             provider.rawData.is_active = provider.rawData.is_active === 1 ? 0 : 1;
           }
+          this.notificationService.show(res?.message || 'Status updated successfully', 'success');
         },
-        error: (err) => console.error('Failed to toggle status', err)
+        error: (err) => {
+          console.error('Failed to toggle status', err);
+
+        }
       });
     } else if (this.activeTab === 'field_executives') {
       this.adminService.updateExecutiveStatus(provider.id).subscribe({
-        next: () => {
+        next: (res: any) => {
           provider.status = provider.status === 'Active' ? 'Inactive' : 'Active';
           if (provider.rawData) {
             if (provider.rawData.user) provider.rawData.user.is_active = provider.status === 'Active' ? 1 : 0;
             else provider.rawData.is_active = provider.status === 'Active' ? 1 : 0;
           }
+          this.notificationService.show(res?.message || 'Status updated successfully', 'success');
         },
-        error: (err) => console.error('Failed to toggle status', err)
+        error: (err) => {
+          console.error('Failed to toggle status', err);
+
+        }
       });
     } else if (this.activeTab === 'system_admins') {
       this.adminService.updateSystemAdminStatus(provider.id).subscribe({
-        next: () => {
+        next: (res: any) => {
           provider.status = provider.status === 'Active' ? 'Inactive' : 'Active';
           if (provider.rawData) {
             if (provider.rawData.user) provider.rawData.user.is_active = provider.status === 'Active' ? 1 : 0;
             else provider.rawData.is_active = provider.status === 'Active' ? 1 : 0;
           }
+          this.notificationService.show(res?.message || 'Status updated successfully', 'success');
         },
-        error: (err) => console.error('Failed to toggle status', err)
+        error: (err) => {
+          console.error('Failed to toggle status', err);
+
+        }
       });
     }
   }

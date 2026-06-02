@@ -1,4 +1,8 @@
 import { HomeComponent } from './website/home/home.component';
+import { AboutComponent } from './website/about/about.component';
+import { ContactComponent } from './website/contact/contact.component';
+import { PrivacyComponent } from './website/privacy/privacy.component';
+import { TermsComponent } from './website/terms/terms.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminComponent } from './admin/admin.component';
@@ -20,15 +24,35 @@ import { CategoryManagementComponent } from './admin/category-management/categor
 
 const routes: Routes = [
   {
-    path: 'home',
+    path: '',
     component: HomeComponent,
+    pathMatch: 'full'
+  },
+  {
+    path: 'home',
+    redirectTo: '',
+    pathMatch: 'full'
+  },
+  {
+    path: 'about',
+    component: AboutComponent,
+  },
+  {
+    path: 'contact',
+    component: ContactComponent,
+  },
+  {
+    path: 'privacy',
+    component: PrivacyComponent,
+  },
+  {
+    path: 'terms',
+    component: TermsComponent,
   },
   {
     path: '',
-
     component: LoginpagesComponent,
     children: [
-      { path: '', redirectTo: 'sign_in', pathMatch: 'full' },
       { path: 'sign_in', component: SigninComponent },
       { path: 'reset-password/:id/:token', component: OtpComponent },
       { path: 'forgot_password', component: ForgotPasswordComponent },
@@ -36,10 +60,10 @@ const routes: Routes = [
   },
   {
     path: 'admin',
-
     component: AdminComponent,
+    canActivate: [AuthGuard],
     children: [
-      { path: '', redirectTo: 'DashboardComponent', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
         component: DashboardComponent,

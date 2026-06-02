@@ -44,6 +44,16 @@ export class SubscriptionManagementComponent implements OnInit {
   }
 
   onFilterChange() {
+    if (this.filterStartDate && this.filterEndDate) {
+      const start = new Date(this.filterStartDate);
+      const end = new Date(this.filterEndDate);
+      if (end < start) {
+        this.notificationService.show('To Date must be greater than or equal to From Date', 'error');
+        this.filterEndDate = ''; // Reset the invalid end date
+        return; // Stop the API call
+      }
+    }
+
     this.page = 1;
     if (this.activeTab === 'providers') {
       this.fetchProviderSubscriptions();
@@ -251,8 +261,43 @@ export class SubscriptionManagementComponent implements OnInit {
   }
 
   openPaymentModal(provider: any) {
-    this.selectedProvider = provider;
+    this.selectedProvider = { ...provider, isLoading: true, payments: [] };
     this.isPaymentModalOpen = true;
+
+    const idToFetch = provider.rawData?.id || provider.providerId;
+
+    if (idToFetch && idToFetch !== 'N/A') {
+      this.adminService.getProviderSubscriptionsByID(idToFetch).subscribe({
+        next: (res: any) => {
+          if (res && (res.status === 200 || res.status === true)) {
+            const data = res.data || {};
+            this.selectedProvider.rawData = data;
+            
+            // Map payments if they exist in the response
+            if (data.payments && Array.isArray(data.payments)) {
+              this.selectedProvider.payments = data.payments.map((p: any) => ({
+                txnId: p.transaction_id || p.id || 'N/A',
+                date: this.formatDate(p.created_at || p.payment_date),
+                amount: p.amount || 0,
+                method: p.payment_method || 'N/A',
+                status: p.status || 'Completed'
+              }));
+            } else {
+               // If there's a single payment object or different structure, adjust as needed
+               this.selectedProvider.payments = [];
+            }
+          }
+          this.selectedProvider.isLoading = false;
+        },
+        error: (err: any) => {
+          console.error('Failed to fetch subscription details', err);
+          this.selectedProvider.isLoading = false;
+          this.notificationService.show('Failed to load subscription details', 'error');
+        }
+      });
+    } else {
+      this.selectedProvider.isLoading = false;
+    }
   }
 
   closePaymentModal() {

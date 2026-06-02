@@ -1,0 +1,219 @@
+<app-navbar></app-navbar>
+
+<main class="w-full bg-white pt-20 min-h-screen flex flex-col justify-between">
+  <div>
+    <!-- ===== HERO SECTION ===== -->
+    <section class="relative bg-cover bg-center py-20 md:py-28 px-4 overflow-hidden"
+      style="background-image: url('/assets/about-bg.png');">
+      <!-- Dark overlay for readability and premium glassmorphism effect -->
+      <div class="absolute inset-0 bg-blue-950/55 backdrop-blur-[2px]"></div>
+
+      <div class="max-w-5xl mx-auto text-center relative z-10">
+        <span
+          class="bg-white/10 border border-white/20 text-white font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-6 inline-block">Who
+          We Are</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-white">
+          Revolutionizing Vehicle <br class="hidden md:block" />
+          <span class="text-[#60a5fa]">Service & Repair</span>
+        </h1>
+        <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto font-light leading-relaxed">
+          Garage Mandi is a modern automotive marketplace. We bring trust, transparency, and convenience to vehicle
+          servicing by connecting vehicle owners with verified service providers.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== THE MARKETPLACE CONCEPT ===== -->
+    <section class="py-20 px-4 bg-gray-50">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+          <!-- Left: Concept Description -->
+          <div class="lg:col-span-7">
+            <span
+              class="w-fit inline-flex items-center bg-[#1e3a8a]/10 text-[#1e3a8a] font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">Our
+              Core Philosophy</span>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
+              We connect customers directly with <br />
+              <span class="text-[#1e3a8a]">trusted service providers</span>
+            </h2>
+            <p class="text-gray-600 text-base leading-relaxed mb-6">
+              Finding the right garage or spare parts shouldn't feel like a guessing game. Garage Mandi is designed to
+              eliminate ambiguity. We operate as a neutral, modern marketplace platform where customers can easily
+              request quotes, compare deals, and make informed choices.
+            </p>
+            <p class="text-gray-600 text-base leading-relaxed">
+              Whether you need routine engine maintenance, paint detailing, or a hard-to-find spare part, we leverage
+              technology to match your specific requirements with the best matching service center or vendor in your
+              local area.
+            </p>
+          </div>
+
+          <!-- Right: Visual Badge / Card -->
+          <div class="lg:col-span-5">
+            <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-xl relative overflow-hidden group">
+              <!-- Accent bar -->
+              <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#1e3a8a] to-[#3b82f6]"></div>
+
+              <div
+                class="w-16 h-16 bg-[#1e3a8a]/10 text-[#1e3a8a] rounded-2xl flex items-center justify-center mb-6 text-2xl font-bold">
+                <i class="fa-solid fa-handshake-angle"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-gray-900 mb-3">Direct Collaboration</h3>
+              <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                No middleman, no hidden commission, and no markup on parts. We facilitate direct communication, so you
+                negotiate and pay directly to the provider.
+              </p>
+
+              <div class="flex items-center gap-3 bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span class="text-xs text-gray-600 font-semibold uppercase tracking-wider">100% Transparent
+                  Marketplace</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== BENEFITS FOR BOTH SIDES ===== -->
+    <section class="py-20 px-4 bg-white">
+      <div class="max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="text-center mb-16">
+          <span
+            class="inline-flex items-center bg-[#1e3a8a]/10 text-[#1e3a8a] font-semibold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full">Dual
+            Value Proposition</span>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-4 mb-4">
+            How Everyone Wins
+          </h2>
+          <p class="text-gray-500 text-base max-w-xl mx-auto">Our marketplace is built to deliver exceptional value to
+            both vehicle owners and service businesses.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+
+          <!-- COLUMN 1: FOR VEHICLE OWNERS -->
+          <div
+            class="bg-gray-50 rounded-3xl p-8 md:p-10 border border-gray-100 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-12 h-12 bg-blue-100 text-[#1e3a8a] rounded-xl flex items-center justify-center text-xl">
+                <i class="fa-solid fa-car"></i>
+              </div>
+              <div>
+                <span class="text-xs text-[#1e3a8a] uppercase font-bold tracking-wider">For Customers</span>
+                <h3 class="text-xl md:text-2xl font-bold text-gray-900">Vehicle Owners</h3>
+              </div>
+            </div>
+
+            <!-- List of Benefits -->
+            <ul class="space-y-6">
+              <li class="flex gap-4">
+                <div class="text-emerald-500 mt-1 flex-shrink-0">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-800 mb-1">Get Multiple Free Quotes</h4>
+                  <p class="text-gray-500 text-sm">Raise a single service request and receive competitive quotes from
+                    multiple nearby mechanics.</p>
+                </div>
+              </li>
+              <li class="flex gap-4">
+                <div class="text-emerald-500 mt-1 flex-shrink-0">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-800 mb-1">100% Verified Garages</h4>
+                  <p class="text-gray-500 text-sm">Every mechanic, workshop, and spare parts dealer goes through strict
+                    background verification checks.</p>
+                </div>
+              </li>
+              <li class="flex gap-4">
+                <div class="text-emerald-500 mt-1 flex-shrink-0">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-800 mb-1">Easy Cost Comparisons</h4>
+                  <p class="text-gray-500 text-sm">Compare reviews, prices, warranty coverage, and ratings side-by-side
+                    to choose what works for you.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- COLUMN 2: FOR SERVICE PROVIDERS -->
+          <div
+            class="bg-blue-900/5 rounded-3xl p-8 md:p-10 border border-blue-900/10 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-12 h-12 bg-blue-900 text-white rounded-xl flex items-center justify-center text-xl">
+                <i class="fa-solid fa-warehouse"></i>
+              </div>
+              <div>
+                <span class="text-xs text-[#1e3a8a] uppercase font-bold tracking-wider">For Partners</span>
+                <h3 class="text-xl md:text-2xl font-bold text-gray-900">Garages & Vendors</h3>
+              </div>
+            </div>
+
+            <!-- List of Benefits -->
+            <ul class="space-y-6">
+              <li class="flex gap-4">
+                <div class="text-[#1e3a8a] mt-1 flex-shrink-0">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-800 mb-1">Reach Active Customers</h4>
+                  <p class="text-gray-500 text-sm">Get direct exposure to local vehicle owners actively searching for
+                    repair or maintenance services.</p>
+                </div>
+              </li>
+              <li class="flex gap-4">
+                <div class="text-[#1e3a8a] mt-1 flex-shrink-0">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-800 mb-1">No Lead Commission</h4>
+                  <p class="text-gray-500 text-sm">Enjoy absolute freedom in pricing. We do not extract hefty commission
+                    fees out of your hard-earned revenue.</p>
+                </div>
+              </li>
+              <li class="flex gap-4">
+                <div class="text-[#1e3a8a] mt-1 flex-shrink-0">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-800 mb-1">Digital Storefront</h4>
+                  <p class="text-gray-500 text-sm">List your expertise, showcase client reviews, share pricing, and
+                    build a digital reputation instantly.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CALL TO ACTION ===== -->
+    <section class="py-16 px-4 bg-gray-50 border-t border-gray-100">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Ready to get started?</h2>
+        <p class="text-gray-500 mb-8 max-w-lg mx-auto text-sm leading-relaxed">Whether you are looking to get your car
+          serviced or you want to register your garage as our partner, we have got you covered.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a routerLink="/home"
+            class="inline-flex items-center justify-center bg-[#1e3a8a] hover:bg-[#1e40af] text-white font-semibold text-sm px-8 py-3.5 rounded-full transition-all duration-300 shadow-md">
+            Explore Services
+          </a>
+          <a routerLink="/sign_in"
+            class="inline-flex items-center justify-center bg-white border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold text-sm px-8 py-3.5 rounded-full transition-all duration-300 shadow-sm">
+            Partner Sign In
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <app-footer></app-footer>
+</main>
