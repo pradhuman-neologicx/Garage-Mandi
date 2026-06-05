@@ -37,7 +37,6 @@
             <th class="p-4">Date</th>
             <th class="p-4">Customer</th>
             <th class="p-4">Vehicle & Service</th>
-            <th class="p-4 text-center">Attachments</th>
             <th class="p-4 text-center">Quotes</th>
             <th class="p-4 text-center">Status</th>
             <th class="p-4 text-right">Actions</th>
@@ -51,15 +50,9 @@
             <td class="p-4">
               <div class="font-semibold text-gray-800 text-sm">{{ req.title || 'N/A' }}</div>
               <div class="text-xs text-gray-500 mt-1">
-                {{ req.vehicle_brand?.name || '' }} {{ req.vehicle_model || '' }}
-                <span *ngIf="!req.vehicle_brand?.name && !req.vehicle_model">N/A</span>
+                {{ req.vehicle_category?.name || '' }} {{ req.vehicle_model || '' }}
+                <span *ngIf="!req.vehicle_category?.name && !req.vehicle_model">N/A</span>
               </div>
-            </td>
-            <td class="p-4 text-center">
-              <span *ngIf="req.media_count > 0 || req.media?.length > 0" class="text-gray-500 hover:text-custom-primary cursor-pointer transition-colors" title="{{req.media_count || req.media?.length}} image(s) attached">
-                <i class="fa-solid fa-image text-lg"></i> <span class="text-xs ml-1 font-semibold">{{req.media_count || req.media?.length}}</span>
-              </span>
-              <span *ngIf="!(req.media_count > 0 || req.media?.length > 0)" class="text-gray-300 text-xs">-</span>
             </td>
             <td class="p-4 text-center">
               <span *ngIf="req.quotations_count > 0" class="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-xs">
@@ -169,8 +162,8 @@
           <div *ngIf="selectedRequest.media?.length > 0; else noImages" class="flex space-x-4 overflow-x-auto pb-2">
             <!-- Actual Images if provided by API -->
             <div *ngFor="let img of selectedRequest.media" class="w-32 h-32 rounded-lg bg-gray-200 border border-gray-300 flex items-center justify-center shrink-0 overflow-hidden">
-               <img [src]="img.url || img" alt="Attachment" class="w-full h-full object-cover" *ngIf="img.url || isString(img)" />
-               <i class="fa-solid fa-image text-3xl text-gray-400" *ngIf="!img.url && !isString(img)"></i>
+               <img [src]="img.file_url || img.url || img" alt="Attachment" class="w-full h-full object-cover" *ngIf="img.file_url || img.url || isString(img)" />
+               <i class="fa-solid fa-image text-3xl text-gray-400" *ngIf="!img.file_url && !img.url && !isString(img)"></i>
             </div>
           </div>
 
@@ -193,7 +186,6 @@
                   <th class="p-3">Provider</th>
                   <th class="p-3">Date</th>
                   <th class="p-3 text-right">Price</th>
-                  <th class="p-3 text-center">Status</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -204,11 +196,6 @@
                   <td class="p-3 text-right font-semibold text-sm">
                     <span *ngIf="quote.price">{{ quote.price | currency:'INR' }}</span>
                     <span *ngIf="!quote.price" class="text-gray-400">-</span>
-                  </td>
-                  <td class="p-3 text-center">
-                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize bg-gray-100 text-gray-700">
-                      {{ quote.status }}
-                    </span>
                   </td>
                 </tr>
               </tbody>
