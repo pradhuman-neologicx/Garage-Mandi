@@ -37,6 +37,7 @@
             <th class="p-4">Date</th>
             <th class="p-4">Customer</th>
             <th class="p-4">Vehicle & Service</th>
+            <th class="p-4">Type</th>
             <th class="p-4 text-center">Quotes</th>
             <th class="p-4 text-center">Status</th>
             <th class="p-4 text-right">Actions</th>
@@ -53,6 +54,11 @@
                 {{ req.vehicle_category?.name || '' }} {{ req.vehicle_model || '' }}
                 <span *ngIf="!req.vehicle_category?.name && !req.vehicle_model">N/A</span>
               </div>
+            </td>
+            <td class="p-4">
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 capitalize border border-gray-200">
+                {{ req.type ? req.type.split('_').join(' ') : 'N/A' }}
+              </span>
             </td>
             <td class="p-4 text-center">
               <span *ngIf="req.quotations_count > 0" class="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-xs">
@@ -118,40 +124,63 @@
       <div class="p-6 overflow-y-auto grow space-y-6" *ngIf="selectedRequest; else loadingTpl">
         
         <!-- Details Grid -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-            <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Request ID</div>
-            <div class="font-mono text-custom-primary font-bold">REQ-{{ selectedRequest.id }}</div>
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+          <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+             <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="text-[11px] text-gray-500 mb-1 uppercase font-bold tracking-wider">Request ID</div>
+                <div class="font-mono text-custom-primary font-bold text-base">REQ-{{ selectedRequest.id }}</div>
+             </div>
+             <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="text-[11px] text-gray-500 mb-1 uppercase font-bold tracking-wider">Date Submitted</div>
+                <div class="font-semibold text-gray-800">{{ selectedRequest.created_at | date:'medium' }}</div>
+             </div>
+             <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="text-[11px] text-gray-500 mb-1 uppercase font-bold tracking-wider">Type</div>
+                <div class="font-semibold text-gray-800 capitalize">{{ selectedRequest.type ? selectedRequest.type.split('_').join(' ') : 'N/A' }}</div>
+             </div>
           </div>
-          <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-            <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Date Submitted</div>
-            <div class="font-semibold text-gray-800">{{ selectedRequest.created_at | date:'medium' }}</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200 border-t border-gray-200">
+             <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="text-[11px] text-gray-500 mb-1 uppercase font-bold tracking-wider">Customer Name</div>
+                <div class="font-semibold text-gray-800">{{ selectedRequest.customer?.name || 'N/A' }}</div>
+                <div class="text-xs text-gray-500 mt-0.5" *ngIf="selectedRequest.customer?.phone_number">
+                  <i class="fa-solid fa-phone text-gray-400 mr-1"></i>{{ selectedRequest.customer.phone_number }}
+                </div>
+             </div>
+             <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="text-[11px] text-gray-500 mb-1 uppercase font-bold tracking-wider">Vehicle Details</div>
+                <div class="font-semibold text-gray-800">
+                  {{ selectedRequest.vehicle_brand?.name || '' }} {{ selectedRequest.vehicle_model || '' }}
+                  <span *ngIf="!selectedRequest.vehicle_brand?.name && !selectedRequest.vehicle_model">N/A</span>
+                </div>
+                <div class="text-xs text-gray-500 mt-0.5" *ngIf="selectedRequest.vehicle_category?.name">{{ selectedRequest.vehicle_category?.name }}</div>
+             </div>
+             <div class="p-4 hover:bg-gray-50 transition-colors">
+                <div class="text-[11px] text-gray-500 mb-1 uppercase font-bold tracking-wider">Status</div>
+                <div class="font-semibold capitalize"
+                  [ngClass]="{
+                    'text-amber-600': selectedRequest.status === 'new' || selectedRequest.status === 'open', 
+                    'text-blue-600': selectedRequest.status === 'quoted', 
+                    'text-green-600': selectedRequest.status === 'completed' || selectedRequest.status === 'closed',
+                    'text-gray-600': !['new', 'open', 'quoted', 'completed', 'closed'].includes(selectedRequest.status)
+                  }">
+                  {{ selectedRequest.status || 'N/A' }}
+                </div>
+             </div>
           </div>
-          <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-            <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Customer Name</div>
-            <div class="font-semibold text-gray-800">{{ selectedRequest.customer?.name || 'N/A' }}</div>
-            <div class="text-xs text-gray-500 mt-1">{{ selectedRequest.customer?.phone_number || '' }}</div>
-          </div>
-          <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-            <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Vehicle Details</div>
-            <div class="font-semibold text-gray-800">
-              {{ selectedRequest.vehicle_brand?.name || '' }} {{ selectedRequest.vehicle_model || '' }}
-              <span *ngIf="!selectedRequest.vehicle_brand?.name && !selectedRequest.vehicle_model">N/A</span>
-            </div>
-            <div class="text-xs text-gray-500 mt-1" *ngIf="selectedRequest.vehicle_category?.name">{{ selectedRequest.vehicle_category?.name }}</div>
-          </div>
-          <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 col-span-2">
-            <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Service Required</div>
-            <div class="font-semibold text-gray-800">{{ selectedRequest.title || 'N/A' }}</div>
-            <div class="flex flex-wrap gap-2 mt-2" *ngIf="selectedRequest.service_types?.length">
-               <span *ngFor="let st of selectedRequest.service_types" class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs border border-indigo-100">{{ st.name }}</span>
-            </div>
-            <p class="text-sm text-gray-600 mt-2" *ngIf="selectedRequest.description">{{ selectedRequest.description }}</p>
-          </div>
-          <!-- Additional fields if available -->
-          <div *ngIf="selectedRequest.status" class="bg-gray-50 p-4 rounded-xl border border-gray-100 col-span-2">
-            <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Status</div>
-            <div class="font-semibold text-gray-800 capitalize">{{ selectedRequest.status }}</div>
+          <div class="border-t border-gray-200 p-4 hover:bg-gray-50 transition-colors">
+             <div class="text-[11px] text-gray-500 mb-1 uppercase font-bold tracking-wider">Service Required</div>
+             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div>
+                   <div class="font-semibold text-gray-800 text-base mb-1">{{ selectedRequest.title || 'N/A' }}</div>
+                   <div class="flex flex-wrap gap-1.5 mb-2" *ngIf="selectedRequest.service_types?.length">
+                      <span *ngFor="let st of selectedRequest.service_types" class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs border border-indigo-100 font-medium">{{ st.name }}</span>
+                   </div>
+                </div>
+             </div>
+             <div class="text-sm text-gray-600 mt-2 bg-white p-3 rounded-lg border border-gray-100 leading-relaxed shadow-sm" *ngIf="selectedRequest.description">
+                {{ selectedRequest.description }}
+             </div>
           </div>
         </div>
 
