@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { AdminService } from '../../core/services/admin.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-requests',
   standalone: true,
-  imports: [CommonModule, NgxPaginationModule],
+  imports: [CommonModule, NgxPaginationModule, FormsModule],
   templateUrl: './requests.component.html',
   styleUrl: './requests.component.scss'
 })
@@ -14,53 +16,71 @@ export class RequestsComponent implements OnInit {
   tableSize: any = 10;
   tableSizes: any = [10, 20, 50, 100, 'all'];
   page: number = 1;
+  totalRecords: number = 0;
+  searchText: string = '';
+
+  customerRequests: any[] = [];
+  
+  isViewModalOpen: boolean = false;
+  selectedRequest: any = null;
+
+  constructor(private adminService: AdminService) { }
+
+  ngOnInit(): void {
+    this.fetchRequests();
+  }
+
+  fetchRequests(): void {
+    this.adminService.getRequests(this.tableSize, this.page, this.searchText).subscribe({
+      next: (res: any) => {
+        if (res && res.status === 200) {
+          this.customerRequests = res.data;
+          this.totalRecords = res.pagination?.total || this.customerRequests.length;
+        }
+      },
+      error: (err) => console.error(err)
+    });
+  }
 
   onTableSizeChange(event: any): void {
     this.tableSize = event.target.value;
     this.page = 1;
+    this.fetchRequests();
   }
 
   onTableDataChange(event: any) {
     this.page = event;
+    this.fetchRequests();
   }
 
-  get totalRecords(): number {
-    return this.customerRequests.length;
-  }
-
-  customerRequests: any[] = [
-    { reqId: 'REQ-1001', customer: 'Amit Kumar', vehicle: 'Hyundai i20', service: 'Engine Repair', date: '22-May-2026', images: 2, status: 'Open' },
-    { reqId: 'REQ-1002', customer: 'Priya Singh', vehicle: 'Honda Activa', service: 'General Service', date: '21-May-2026', images: 0, status: 'Quoted' },
-    { reqId: 'REQ-1003', customer: 'Rahul Verma', vehicle: 'Maruti Swift', service: 'AC Gas Refill', date: '21-May-2026', images: 1, status: 'Closed' }
-  ];
-
-  quotations = [
-    { quoteId: 'QT-5001', reqId: 'REQ-1002', provider: 'Bike Masters', customer: 'Priya Singh', vehicle: 'Honda Activa', service: 'General Service', date: '21-May-2026', status: 'Submitted', pricing: 'Hidden', images: 0 },
-    { quoteId: 'QT-5002', reqId: 'REQ-1002', provider: 'Speedy Auto', customer: 'Priya Singh', vehicle: 'Honda Activa', service: 'General Service', date: '21-May-2026', status: 'Submitted', pricing: 'Hidden', images: 0 },
-    { quoteId: 'QT-5003', reqId: 'REQ-1003', provider: 'Elite Motors', customer: 'Rahul Verma', vehicle: 'Maruti Swift', service: 'AC Gas Refill', date: '21-May-2026', status: 'Accepted', pricing: 'Hidden', images: 1 }
-  ];
-
-  isViewModalOpen: boolean = false;
-  selectedRequest: any = null;
-
-  constructor() { }
-
-  ngOnInit(): void {
-    // Attach quotes to customer requests
-    this.customerRequests.forEach(req => {
-      const relatedQuotes = this.quotations.filter(q => q.reqId === req.reqId);
-      (req as any).quotes = relatedQuotes;
-      (req as any).quoteCount = relatedQuotes.length;
-    });
+  onSearchChange() {
+    this.page = 1;
+    this.fetchRequests();
   }
 
   openViewModal(data: any) {
-    this.selectedRequest = data;
+    this.selectedRequest = null; // Will populate via API
     this.isViewModalOpen = true;
+
+    this.adminService.getRequestById(data.id).subscribe({
+      next: (res: any) => {
+        if (res && res.status === 200) {
+          this.selectedRequest = res.data;
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        this.isViewModalOpen = false;
+      }
+    });
   }
 
   closeViewModal() {
     this.isViewModalOpen = false;
     this.selectedRequest = null;
+  }
+
+  isString(val: any): boolean {
+    return typeof val === 'string';
   }
 }

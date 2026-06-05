@@ -41,6 +41,15 @@ export class LoginService {
     );
   }
 
+  AdminVerifyOtpApi(body: any): Observable<any> {
+    return this.apiservice.postWithoutHeader(`password/verify`, body).pipe(
+      tap((error: any) => {
+        console.log('Response received:', error);
+        this.erromessagefunction(error);
+      })
+    );
+  }
+
   AdminResetPasswordV1(body: any): Observable<any> {
     return this.apiservice.postWithoutHeader(`password/reset`, body);
   }

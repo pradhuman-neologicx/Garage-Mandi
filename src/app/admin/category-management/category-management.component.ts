@@ -101,6 +101,9 @@ export class CategoryManagementComponent implements OnInit {
   showModal = signal(false);
   editingCategory = signal<CategoryItem | null>(null);
 
+  showViewModal = signal(false);
+  viewingCategoryData = signal<any>(null);
+
   newCategory: Partial<CategoryItem> = {
     name: '',
     description: '',
@@ -399,6 +402,51 @@ export class CategoryManagementComponent implements OnInit {
 
   closeModal() {
     this.showModal.set(false);
+  }
+
+  openViewModal(category: any) {
+    this.viewingCategoryData.set(null);
+    this.showViewModal.set(true);
+
+    const id = category.id;
+    let apiCall;
+    switch (this.activeTab()) {
+      case 'vehicle':
+        apiCall = this.adminService.getCategoryById(id);
+        break;
+      case 'spare':
+        apiCall = this.adminService.getSparePartById(id);
+        break;
+      case 'service':
+        apiCall = this.adminService.getServiceById(id);
+        break;
+      case 'sub_category':
+        apiCall = this.adminService.getSubCategoryById(id);
+        break;
+    }
+
+    if (apiCall) {
+      apiCall.subscribe({
+        next: (res: any) => {
+          if (res && res.status === 200) {
+            this.viewingCategoryData.set(res.data);
+          } else {
+            this.notificationService.show('Failed to load details', 'error');
+            this.closeViewModal();
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.notificationService.show('Error loading details', 'error');
+          this.closeViewModal();
+        }
+      });
+    }
+  }
+
+  closeViewModal() {
+    this.showViewModal.set(false);
+    this.viewingCategoryData.set(null);
   }
 
   saveCategory() {

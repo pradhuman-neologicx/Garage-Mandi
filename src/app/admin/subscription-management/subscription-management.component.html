@@ -8,7 +8,7 @@
   </div>
 
   <!-- Platform Plan Banner -->
-  <div
+  <div *ngIf="roles == 'super-admin'"
     class="bg-custom-primary rounded-2xl shadow-sm p-6 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center text-white relative overflow-hidden gap-4">
     <div class="relative z-10">
       <h2 class="text-xl font-bold mb-1 flex items-center">
@@ -92,7 +92,6 @@
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
             <th class="p-4">Provider Name & Number</th>
-            <th class="p-4">Current Plan</th>
             <th class="p-4">Start Date</th>
             <th class="p-4">End Date</th>
             <th class="p-4 text-center">Status</th>
@@ -107,7 +106,6 @@
               <div class="font-bold text-gray-800 text-sm">{{ sub.name }}</div>
               <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ sub.phoneNumber }}</div>
             </td>
-            <td class="p-4 font-semibold text-custom-primary text-sm">{{ sub.plan }}</td>
             <td class="p-4 text-sm text-gray-600">{{ sub.startDate }}</td>
             <td class="p-4 text-sm text-gray-600">{{ sub.endDate }}</td>
             <td class="p-4 text-center">
@@ -133,7 +131,6 @@
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
             <th class="p-4">Provider Name & Number</th>
-            <th class="p-4">Current Plan</th>
             <th class="p-4">Expiry Date</th>
             <th class="p-4 text-center">Days Left</th>
             <th class="p-4 text-right">Actions</th>
@@ -148,7 +145,6 @@
               <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ alert.phoneNumber }}
               </div>
             </td>
-            <td class="p-4 font-semibold text-gray-700 text-sm">{{ alert.plan }}</td>
             <td class="p-4 text-sm text-red-600 font-semibold">{{ alert.expiryDate }}</td>
             <td class="p-4 text-center font-bold text-red-700 text-lg">{{ alert.daysLeft }}</td>
             <td class="p-4 text-right space-x-2">

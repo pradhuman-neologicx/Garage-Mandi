@@ -19,10 +19,12 @@ export class ForgotPasswordComponent implements OnInit {
     isEmailCorrect: boolean = false;
     otp: string = '';
     isOtpSent: boolean = false;
+    isOtpVerified: boolean = false;
     showPassword1: boolean = false;
     showPassword2: boolean = false;
   
     ForgotForm!: FormGroup;
+    OtpForm!: FormGroup;
     ResetForm!: FormGroup;
     loginAS!: number;
     email_pattern = "^[A-Za-z0-9_.]+@[a-zA-Z]+(\\.[a-zA-Z]{2,4})+$";
@@ -43,8 +45,11 @@ export class ForgotPasswordComponent implements OnInit {
         Email: ['', [Validators.required, Validators.pattern(this.email_pattern)]],
       });
 
-      this.ResetForm = this.formBuilder.group({
+      this.OtpForm = this.formBuilder.group({
         otp: ['', [Validators.required]],
+      });
+
+      this.ResetForm = this.formBuilder.group({
         new_password: ['', [Validators.required, Validators.minLength(8)]],
         new_password_confirmation: ['', [Validators.required]]
       }, { validator: this.passwordMatchValidator });
@@ -102,13 +107,44 @@ export class ForgotPasswordComponent implements OnInit {
       }
     }
 
+    VerifyOtpfun() {
+      this.errorMessage = '';
+      if (this.OtpForm.valid) {
+        this.submitted = true;
+        const formData: FormData = new FormData();
+        formData.append('email', this.ForgotForm.get('Email')?.value);
+        formData.append('otp', this.OtpForm.get('otp')?.value);
+        
+        this.loginService.AdminVerifyOtpApi(formData).subscribe({
+          next: (response: any) => {
+            if (response && (response.status === 200 || response.status === 201 || response.status === true || response.message)) {
+              this.notificationService.show(response.message || 'OTP verified successfully.', 'success');
+              this.isOtpVerified = true;
+              this.submitted = false;
+            } else {
+              this.errorMessage = response.message || 'Failed to verify OTP';
+              this.submitted = false;
+            }
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.errorMessage = err?.message || err?.error?.message || 'Request failed';
+            this.submitted = false;
+          }
+        });
+      } else {
+        this.submitted = false;
+        this.errorMessage = 'Please Enter OTP';
+        this.OtpForm.markAllAsTouched();
+      }
+    }
+
     ResetPasswordfun() {
       this.errorMessage = '';
       if (this.ResetForm.valid) {
         this.submitted = true;
         const formData: FormData = new FormData();
         formData.append('email', this.ForgotForm.get('Email')?.value);
-        formData.append('otp', this.ResetForm.get('otp')?.value);
         formData.append('new_password', this.ResetForm.get('new_password')?.value);
         formData.append('new_password_confirmation', this.ResetForm.get('new_password_confirmation')?.value);
         

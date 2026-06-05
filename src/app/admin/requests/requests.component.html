@@ -10,14 +10,21 @@
 
   <!-- Content Container -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <!-- Show Entries -->
-    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
+    <!-- Show Entries & Search -->
+    <div class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-b border-gray-100 bg-white gap-4">
       <div class="flex items-center text-sm text-gray-500">
         <span class="mr-2">Show</span>
         <select (change)="onTableSizeChange($event)" class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
           <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
         </select>
         <span class="ml-1">entries</span>
+      </div>
+
+      <div class="relative w-full sm:w-64">
+        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input type="text" [(ngModel)]="searchText" (keyup.enter)="onSearchChange()"
+          placeholder="Search requests..."
+          class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary">
       </div>
     </div>
     
@@ -38,29 +45,38 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr *ngFor="let req of customerRequests | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }" class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-mono text-custom-primary font-semibold text-sm">{{ req.reqId }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ req.date }}</td>
-            <td class="p-4 font-bold text-gray-800 text-sm">{{ req.customer }}</td>
+            <td class="p-4 font-mono text-custom-primary font-semibold text-sm">REQ-{{ req.id }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ req.created_at | date:'dd-MMM-yyyy hh:mm a' }}</td>
+            <td class="p-4 font-bold text-gray-800 text-sm">{{ req.customer?.name || 'N/A' }}</td>
             <td class="p-4">
-              <div class="font-semibold text-gray-800 text-sm">{{ req.service }}</div>
-              <div class="text-xs text-gray-500 mt-1">{{ req.vehicle }}</div>
+              <div class="font-semibold text-gray-800 text-sm">{{ req.title || 'N/A' }}</div>
+              <div class="text-xs text-gray-500 mt-1">
+                {{ req.vehicle_brand?.name || '' }} {{ req.vehicle_model || '' }}
+                <span *ngIf="!req.vehicle_brand?.name && !req.vehicle_model">N/A</span>
+              </div>
             </td>
             <td class="p-4 text-center">
-              <span *ngIf="req.images > 0" class="text-gray-500 hover:text-custom-primary cursor-pointer transition-colors" title="{{req.images}} image(s) attached">
-                <i class="fa-solid fa-image text-lg"></i> <span class="text-xs ml-1 font-semibold">{{req.images}}</span>
+              <span *ngIf="req.media_count > 0 || req.media?.length > 0" class="text-gray-500 hover:text-custom-primary cursor-pointer transition-colors" title="{{req.media_count || req.media?.length}} image(s) attached">
+                <i class="fa-solid fa-image text-lg"></i> <span class="text-xs ml-1 font-semibold">{{req.media_count || req.media?.length}}</span>
               </span>
-              <span *ngIf="req.images === 0" class="text-gray-300 text-xs">-</span>
+              <span *ngIf="!(req.media_count > 0 || req.media?.length > 0)" class="text-gray-300 text-xs">-</span>
             </td>
             <td class="p-4 text-center">
-              <span *ngIf="req.quoteCount > 0" class="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-xs">
-                {{ req.quoteCount }}
+              <span *ngIf="req.quotations_count > 0" class="bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-xs">
+                {{ req.quotations_count }}
               </span>
-              <span *ngIf="!req.quoteCount || req.quoteCount === 0" class="text-gray-400 font-semibold text-xs">
+              <span *ngIf="!req.quotations_count || req.quotations_count === 0" class="text-gray-400 font-semibold text-xs">
                 -
               </span>
             </td>
             <td class="p-4 text-center">
-              <span [ngClass]="{'bg-amber-100 text-amber-700': req.status === 'Open', 'bg-blue-100 text-blue-700': req.status === 'Quoted', 'bg-gray-100 text-gray-600': req.status === 'Closed'}" class="text-xs px-2.5 py-1 rounded-full font-semibold">
+              <span class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize"
+                [ngClass]="{
+                  'bg-amber-100 text-amber-700': req.status === 'new' || req.status === 'open', 
+                  'bg-blue-100 text-blue-700': req.status === 'quoted', 
+                  'bg-green-100 text-green-700': req.status === 'completed' || req.status === 'closed',
+                  'bg-gray-100 text-gray-600': !['new', 'open', 'quoted', 'completed', 'closed'].includes(req.status)
+                }">
                 {{ req.status }}
               </span>
             </td>
@@ -106,29 +122,43 @@
       </div>
 
       <!-- Body -->
-      <div class="p-6 overflow-y-auto grow space-y-6">
+      <div class="p-6 overflow-y-auto grow space-y-6" *ngIf="selectedRequest; else loadingTpl">
         
         <!-- Details Grid -->
         <div class="grid grid-cols-2 gap-4">
           <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
             <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Request ID</div>
-            <div class="font-mono text-custom-primary font-bold">{{ selectedRequest.reqId }}</div>
+            <div class="font-mono text-custom-primary font-bold">REQ-{{ selectedRequest.id }}</div>
           </div>
           <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
             <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Date Submitted</div>
-            <div class="font-semibold text-gray-800">{{ selectedRequest.date }}</div>
+            <div class="font-semibold text-gray-800">{{ selectedRequest.created_at | date:'medium' }}</div>
           </div>
           <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
             <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Customer Name</div>
-            <div class="font-semibold text-gray-800">{{ selectedRequest.customer }}</div>
+            <div class="font-semibold text-gray-800">{{ selectedRequest.customer?.name || 'N/A' }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ selectedRequest.customer?.phone_number || '' }}</div>
           </div>
           <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
             <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Vehicle Details</div>
-            <div class="font-semibold text-gray-800">{{ selectedRequest.vehicle || 'N/A' }}</div>
+            <div class="font-semibold text-gray-800">
+              {{ selectedRequest.vehicle_brand?.name || '' }} {{ selectedRequest.vehicle_model || '' }}
+              <span *ngIf="!selectedRequest.vehicle_brand?.name && !selectedRequest.vehicle_model">N/A</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-1" *ngIf="selectedRequest.vehicle_category?.name">{{ selectedRequest.vehicle_category?.name }}</div>
           </div>
           <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 col-span-2">
             <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Service Required</div>
-            <div class="font-semibold text-gray-800">{{ selectedRequest.service || 'N/A' }}</div>
+            <div class="font-semibold text-gray-800">{{ selectedRequest.title || 'N/A' }}</div>
+            <div class="flex flex-wrap gap-2 mt-2" *ngIf="selectedRequest.service_types?.length">
+               <span *ngFor="let st of selectedRequest.service_types" class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs border border-indigo-100">{{ st.name }}</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-2" *ngIf="selectedRequest.description">{{ selectedRequest.description }}</p>
+          </div>
+          <!-- Additional fields if available -->
+          <div *ngIf="selectedRequest.status" class="bg-gray-50 p-4 rounded-xl border border-gray-100 col-span-2">
+            <div class="text-xs text-gray-500 mb-1 uppercase font-semibold">Status</div>
+            <div class="font-semibold text-gray-800 capitalize">{{ selectedRequest.status }}</div>
           </div>
         </div>
 
@@ -136,20 +166,23 @@
         <div>
           <h4 class="font-semibold text-gray-700 mb-3 border-b pb-2"><i class="fa-solid fa-images mr-2"></i>Attached Images</h4>
           
-          <div *ngIf="selectedRequest?.images > 0" class="flex space-x-4 overflow-x-auto pb-2">
-            <!-- Mock Images -->
-            <div *ngFor="let img of [].constructor(selectedRequest.images); let i = index" class="w-32 h-32 rounded-lg bg-gray-200 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 shrink-0">
-              <i class="fa-solid fa-image text-3xl"></i>
+          <div *ngIf="selectedRequest.media?.length > 0; else noImages" class="flex space-x-4 overflow-x-auto pb-2">
+            <!-- Actual Images if provided by API -->
+            <div *ngFor="let img of selectedRequest.media" class="w-32 h-32 rounded-lg bg-gray-200 border border-gray-300 flex items-center justify-center shrink-0 overflow-hidden">
+               <img [src]="img.url || img" alt="Attachment" class="w-full h-full object-cover" *ngIf="img.url || isString(img)" />
+               <i class="fa-solid fa-image text-3xl text-gray-400" *ngIf="!img.url && !isString(img)"></i>
             </div>
           </div>
 
-          <div *ngIf="!selectedRequest?.images || selectedRequest.images === 0" class="text-sm text-gray-500 italic bg-gray-50 p-4 rounded-lg text-center border border-gray-100">
-            No images attached to this request.
-          </div>
+          <ng-template #noImages>
+            <div class="text-sm text-gray-500 italic bg-gray-50 p-4 rounded-lg text-center border border-gray-100">
+              No images attached to this request.
+            </div>
+          </ng-template>
         </div>
 
         <!-- Quotations Section -->
-        <div *ngIf="selectedRequest?.quotes && selectedRequest.quotes.length > 0">
+        <div *ngIf="selectedRequest.quotations?.length > 0">
           <h4 class="font-semibold text-gray-700 mb-3 border-b pb-2"><i class="fa-solid fa-file-invoice mr-2"></i>Received Quotations</h4>
           
           <div class="overflow-x-auto border border-gray-100 rounded-lg">
@@ -159,22 +192,21 @@
                   <th class="p-3">Quote ID</th>
                   <th class="p-3">Provider</th>
                   <th class="p-3">Date</th>
-                  <th class="p-3 text-center">Price</th>
+                  <th class="p-3 text-right">Price</th>
                   <th class="p-3 text-center">Status</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
-                <tr *ngFor="let quote of selectedRequest.quotes" class="hover:bg-gray-50/50">
-                  <td class="p-3 font-mono text-gray-600 text-sm">{{ quote.quoteId }}</td>
-                  <td class="p-3 font-bold text-gray-800 text-sm">{{ quote.provider }}</td>
-                  <td class="p-3 text-sm text-gray-600">{{ quote.date }}</td>
-                  <td class="p-3 text-center">
-                    <span class="text-gray-400 bg-gray-50 border border-gray-200 px-2 py-1 rounded text-xs font-mono">
-                      <i class="fa-solid fa-lock text-gray-300 mr-1"></i>***
-                    </span>
+                <tr *ngFor="let quote of selectedRequest.quotations" class="hover:bg-gray-50/50">
+                  <td class="p-3 font-mono text-gray-600 text-sm">QT-{{ quote.id }}</td>
+                  <td class="p-3 font-bold text-gray-800 text-sm">{{ quote.provider?.name || quote.vendor?.name || 'N/A' }}</td>
+                  <td class="p-3 text-sm text-gray-600">{{ quote.created_at | date:'short' }}</td>
+                  <td class="p-3 text-right font-semibold text-sm">
+                    <span *ngIf="quote.price">{{ quote.price | currency:'INR' }}</span>
+                    <span *ngIf="!quote.price" class="text-gray-400">-</span>
                   </td>
                   <td class="p-3 text-center">
-                    <span [ngClass]="{'bg-purple-100 text-purple-700': quote.status === 'Submitted', 'bg-green-100 text-green-700': quote.status === 'Accepted'}" class="text-xs px-2.5 py-1 rounded-full font-semibold">
+                    <span class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize bg-gray-100 text-gray-700">
                       {{ quote.status }}
                     </span>
                   </td>
@@ -185,6 +217,13 @@
         </div>
 
       </div>
+
+      <ng-template #loadingTpl>
+        <div class="p-10 flex flex-col items-center justify-center space-y-4">
+          <div class="w-8 h-8 border-4 border-custom-primary border-t-transparent rounded-full animate-spin"></div>
+          <p class="text-gray-500 text-sm">Loading details...</p>
+        </div>
+      </ng-template>
 
       <!-- Footer -->
       <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 shrink-0 text-right">

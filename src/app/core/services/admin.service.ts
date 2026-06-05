@@ -504,6 +504,44 @@ export class AdminService {
 
     // Users Management APIs end
 
+    // --- Requests APIs ---
+    getRequests(tableSize: any, page: any, search: any): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+
+        let url = tableSize !== 'all' ? `system-admin/requests?limit=${tableSize}&page=${page}` : `system-admin/requests?`;
+        if (search) url += `&search=${search}`;
+
+        return this.apiservice.get(url, headers).pipe(
+            tap((error: any) => { this.erromessagefunction(error); })
+        );
+    }
+
+    getRequestById(id: number | string): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+        return this.apiservice.get(`system-admin/requests/${id}`, headers);
+    }
+
+    // --- Feedback APIs ---
+    getFeedbacks(tableSize: any, page: any, search: any): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+
+        let url = tableSize !== 'all' ? `system-admin/feedbacks?limit=${tableSize}&page=${page}` : `system-admin/feedbacks?`;
+        if (search) url += `&search=${search}`;
+
+        return this.apiservice.get(url, headers).pipe(
+            tap((error: any) => { this.erromessagefunction(error); })
+        );
+    }
+
     // Subscription APIs start
     getSubscriptionPlan(): Observable<any> {
         const token = this.jwtService.getToken();
@@ -651,6 +689,21 @@ export class AdminService {
         return this.apiservice.patchWithHeader(`system-admin/vehicle-brands/${id}/status`, {}, headers);
     }
     // Vehicle-Brand APIs end
+
+    getDashboardStatistics(): Observable<any> {
+        const token = this.jwtService.getToken();
+        const headers = new HttpHeaders({
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        });
+
+        return this.apiservice.get('system-admin/dashboard', headers).pipe(
+            tap((error: any) => {
+                console.log('Response received:', error);
+                this.erromessagefunction(error);
+            })
+        );
+    }
 
     // Subscription APIs end
 

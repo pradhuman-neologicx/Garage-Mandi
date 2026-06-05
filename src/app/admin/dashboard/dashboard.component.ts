@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { EmployeeService } from 'src/app/core/services/Employee.service';
 import { JwtService } from 'src/app/core/services/jwt.service';
 import { NotificationService } from 'src/app/core/services/notificationnew.service';
+import { AdminService } from 'src/app/core/services/admin.service';
 import {
   trigger,
   state,
@@ -56,6 +57,7 @@ export class DashboardComponent implements OnInit {
   openSecondsuccess = false;
   name: string | null = '';
   firstlogin: boolean | undefined;
+  dashboardData: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -63,6 +65,7 @@ export class DashboardComponent implements OnInit {
     private formBuilder: FormBuilder,
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
+    private adminService: AdminService,
   ) {
     this.route.queryParams.subscribe((params) => {
       this.firstlogin = this.jwtService.getfirstLoggedIn();
@@ -82,5 +85,19 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.name = this.jwtService.getName();
     this.userRole = this.jwtService.getadmiRole();
+    this.loadDashboardData();
+  }
+
+  loadDashboardData() {
+    this.adminService.getDashboardStatistics().subscribe({
+      next: (res: any) => {
+        if (res.status === 200) {
+          this.dashboardData = res.data;
+        }
+      },
+      error: (err: any) => {
+        console.error('Error fetching dashboard statistics:', err);
+      }
+    });
   }
 }

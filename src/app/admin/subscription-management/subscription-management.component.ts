@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notificationnew.service';
+import { JwtService } from '../../core/services/jwt.service';
 
 @Component({
   selector: 'app-subscription-management',
@@ -14,6 +15,7 @@ import { NotificationService } from '../../core/services/notificationnew.service
 })
 export class SubscriptionManagementComponent implements OnInit {
   activeTab: string = 'providers';
+  roles: any;
 
   tableSize: any = 10;
   tableSizes: any = [10, 20, 50, 100, 'all'];
@@ -108,10 +110,12 @@ export class SubscriptionManagementComponent implements OnInit {
 
   constructor(
     private adminService: AdminService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private jwtService: JwtService
   ) { }
 
   ngOnInit(): void {
+    this.roles = this.jwtService.getadmiRole();
     this.fetchSubscriptionPlan();
     this.fetchProviderSubscriptions();
   }

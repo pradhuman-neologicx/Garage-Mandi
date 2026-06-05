@@ -49,7 +49,7 @@
         </div>
       </div>
       <div class="flex items-baseline space-x-2">
-        <span class="text-3xl font-bold text-gray-800">4,521</span>
+        <span class="text-3xl font-bold text-gray-800">{{ dashboardData?.counters?.total_customers || 0 }}</span>
       </div>
     </div>
 
@@ -64,7 +64,7 @@
         </div>
       </div>
       <div class="flex items-baseline space-x-2">
-        <span class="text-3xl font-bold text-gray-800">842</span>
+        <span class="text-3xl font-bold text-gray-800">{{ dashboardData?.counters?.service_providers || 0 }}</span>
       </div>
     </div>
 
@@ -79,7 +79,7 @@
         </div>
       </div>
       <div class="flex items-baseline space-x-2">
-        <span class="text-3xl font-bold text-gray-800">756</span>
+        <span class="text-3xl font-bold text-gray-800">{{ dashboardData?.counters?.active_subscriptions || 0 }}</span>
       </div>
     </div>
 
@@ -94,7 +94,7 @@
         </div>
       </div>
       <div class="flex items-baseline space-x-2">
-        <span class="text-3xl font-bold text-gray-800">34</span>
+        <span class="text-3xl font-bold text-gray-800">{{ dashboardData?.counters?.renewals_due || 0 }}</span>
         <span class="text-xs font-semibold text-rose-600 bg-rose-50 px-2 py-1 rounded-full">Action Needed</span>
       </div>
     </div>
@@ -114,7 +114,7 @@
             </div>
             <div>
               <p class="text-sm text-gray-500 font-medium">Total Customer Requests</p>
-              <p class="text-xl font-bold text-gray-800">12,450</p>
+              <p class="text-xl font-bold text-gray-800">{{ dashboardData?.activity_overview?.total_customer_requests || 0 }}</p>
             </div>
           </div>
           <div class="text-indigo-600">
@@ -130,7 +130,7 @@
             </div>
             <div>
               <p class="text-sm text-gray-500 font-medium">Total Quotations Submitted</p>
-              <p class="text-xl font-bold text-gray-800">38,912</p>
+              <p class="text-xl font-bold text-gray-800">{{ dashboardData?.activity_overview?.total_quotations_submitted || 0 }}</p>
             </div>
           </div>
           <div class="text-emerald-600">
@@ -149,13 +149,13 @@
         <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 hover:shadow-sm transition-shadow">
           <p class="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">This Month</p>
           <div class="flex items-end space-x-2">
-            <span class="text-3xl font-extrabold text-blue-900">128</span>
+            <span class="text-3xl font-extrabold text-blue-900">{{ dashboardData?.onboarding_performance?.this_month || 0 }}</span>
           </div>
         </div>
         <div class="bg-purple-50 rounded-xl p-4 border border-purple-100 hover:shadow-sm transition-shadow">
           <p class="text-xs text-purple-600 font-bold uppercase tracking-wider mb-1">Total Onboarded</p>
           <div class="flex items-end space-x-2">
-            <span class="text-3xl font-extrabold text-purple-900">842</span>
+            <span class="text-3xl font-extrabold text-purple-900">{{ dashboardData?.onboarding_performance?.total_onboarded || 0 }}</span>
           </div>
         </div>
       </div>
@@ -163,38 +163,18 @@
       <div class="flex-grow">
         <h3 class="text-sm font-semibold text-gray-600 uppercase mb-4 tracking-wider">Top Field Executives</h3>
         <ul class="space-y-3">
-          <li
-            class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-transparent hover:border-purple-200 transition-colors">
+          <li *ngFor="let exec of dashboardData?.top_field_executives; let i = index"
+            class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-transparent transition-colors"
+            [ngClass]="{'hover:border-purple-200': i%3===0, 'hover:border-blue-200': i%3===1, 'hover:border-teal-200': i%3===2}">
             <div class="flex items-center space-x-3">
               <div
-                class="w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-xs">
-                RJ</div>
-              <span class="text-sm font-medium text-gray-700">Rahul Jain <span
-                  class="text-gray-400 text-xs ml-1">(EMP001)</span></span>
+                class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs"
+                [ngClass]="{'bg-purple-100 text-purple-700': i%3===0, 'bg-blue-100 text-blue-700': i%3===1, 'bg-teal-100 text-teal-700': i%3===2}">
+                {{ exec.name ? ((exec.name + '') | slice:0:2 | uppercase) : 'NA' }}</div>
+              <span class="text-sm font-medium text-gray-700">{{ exec.name }} <span
+                  class="text-gray-400 text-xs ml-1">({{ exec.executive_code }})</span></span>
             </div>
-            <span class="text-sm font-bold text-gray-800">142</span>
-          </li>
-          <li
-            class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-transparent hover:border-blue-200 transition-colors">
-            <div class="flex items-center space-x-3">
-              <div
-                class="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-xs">
-                AS</div>
-              <span class="text-sm font-medium text-gray-700">Amit Sharma <span
-                  class="text-gray-400 text-xs ml-1">(EMP045)</span></span>
-            </div>
-            <span class="text-sm font-bold text-gray-800">98</span>
-          </li>
-          <li
-            class="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-transparent hover:border-teal-200 transition-colors">
-            <div class="flex items-center space-x-3">
-              <div
-                class="w-8 h-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold text-xs">
-                SK</div>
-              <span class="text-sm font-medium text-gray-700">Sunil Kumar <span
-                  class="text-gray-400 text-xs ml-1">(EMP023)</span></span>
-            </div>
-            <span class="text-sm font-bold text-gray-800">76</span>
+            <span class="text-sm font-bold text-gray-800">{{ exec.onboarded_count }}</span>
           </li>
         </ul>
       </div>

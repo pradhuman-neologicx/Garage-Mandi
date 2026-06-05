@@ -166,10 +166,18 @@
           class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
           <i class="material-icons text-2xl">{{item.icon || 'settings'}}</i>
         </div>
-        <button (click)="openEditModal(item)"
-          class="rounded-lg p-2 text-gray-400 transition-all hover:bg-gray-50 hover:text-primary">
-          <i class="material-icons text-[20px]">edit</i>
-        </button>
+        <div class="flex gap-1">
+          <button (click)="openViewModal(item)"
+            class="rounded-lg p-2 text-gray-400 transition-all hover:bg-gray-50 hover:text-primary"
+            title="View Details">
+            <i class="material-icons text-[20px]">visibility</i>
+          </button>
+          <button (click)="openEditModal(item)"
+            class="rounded-lg p-2 text-gray-400 transition-all hover:bg-gray-50 hover:text-primary"
+            title="Edit">
+            <i class="material-icons text-[20px]">edit</i>
+          </button>
+        </div>
       </div>
 
       <h3 class="mb-1 mt-2 text-lg font-bold text-gray-900">{{item.name}}</h3>
@@ -310,6 +318,93 @@
             {{ editingCategory() ? 'Update ' : 'Create ' }}
             {{ activeTab() === 'vehicle' ? 'Category' : activeTab() === 'spare' ? 'Spare Part' : activeTab() ===
             'service' ? 'Service' : 'Sub Category' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Modal -->
+    <div *ngIf="showViewModal()"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
+      <div class="w-full max-w-md scale-100 rounded-2xl bg-white shadow-2xl transition-all">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          <h3 class="text-lg font-bold text-gray-900">
+            View Details
+          </h3>
+          <button (click)="closeViewModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+
+        <div class="px-6 py-6 space-y-4">
+          <ng-container *ngIf="viewingCategoryData() as data; else loadingTpl">
+            
+            <div class="flex items-center gap-3 mb-2">
+              <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-custom-primary">
+                <i class="material-icons text-2xl">{{ activeTab() === 'vehicle' ? 'directions_car' : activeTab() === 'spare' ? 'settings' : activeTab() === 'service' ? 'build' : 'category' }}</i>
+              </div>
+              <div>
+                <h4 class="text-lg font-bold text-gray-900">{{ data.name }}</h4>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="relative flex h-2 w-2">
+                    <span [class]="(data.is_active === 1 || data.is_active === '1') ? 'bg-green-500' : 'bg-red-500'"
+                      class="relative inline-flex h-2 w-2 rounded-full"></span>
+                  </span>
+                  <span class="text-xs font-medium text-gray-600">{{ (data.is_active === 1 || data.is_active === '1') ? 'Active' : 'Inactive' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div *ngIf="data.description" class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+              <p class="text-sm text-gray-600 leading-relaxed">{{ data.description }}</p>
+            </div>
+
+            <!-- Extra Details for Spare / Service -->
+            <div *ngIf="['spare', 'service'].includes(activeTab()) && data.vehicle_category" class="pt-2">
+              <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Linked Vehicle Categories</h5>
+              <div class="flex flex-wrap gap-2">
+                <!-- If array -->
+                <ng-container *ngIf="data.vehicle_category?.length; else singleVc">
+                  <span *ngFor="let vc of data.vehicle_category" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                    {{ vc.name }}
+                  </span>
+                </ng-container>
+                <!-- If object -->
+                <ng-template #singleVc>
+                  <span *ngIf="data.vehicle_category?.name" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                    {{ data.vehicle_category.name }}
+                  </span>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Extra Details for Sub Category -->
+            <div *ngIf="activeTab() === 'sub_category' && (data.vehicle_spare_part || data.spare_part)" class="pt-2">
+              <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Linked Spare Part</h5>
+              <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  {{ data.vehicle_spare_part?.name || data.spare_part?.name }}
+                </span>
+              </div>
+            </div>
+
+          </ng-container>
+
+          <ng-template #loadingTpl>
+            <div class="flex flex-col items-center justify-center py-8">
+              <div class="w-8 h-8 border-4 border-custom-primary border-t-transparent rounded-full animate-spin"></div>
+              <p class="mt-4 text-sm text-gray-500">Loading details...</p>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 bg-gray-50/50 rounded-b-2xl">
+          <button (click)="closeViewModal()"
+            class="rounded-xl px-6 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 transition-all">
+            Close
           </button>
         </div>
       </div>

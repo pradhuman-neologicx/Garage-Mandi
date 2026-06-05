@@ -76,7 +76,7 @@ export class VechicleBrandComponent implements OnInit {
 
   ngOnInit(): void {
     this.searchbarform = this.formBuilder.group({
-      searchbar: ['', [Validators.required]],
+      searchbar: [''],
     });
 
     this.createBrandForm = this.formBuilder.group({
@@ -105,12 +105,15 @@ export class VechicleBrandComponent implements OnInit {
   }
 
   searchfun() {
-    if (this.searchbarform.valid) {
+    const searchValue = this.searchbarform.get('searchbar')?.value;
+    if (searchValue && searchValue.trim() !== '') {
       this.showreset = true;
       this.page = 1;
       this.GetBrandsFun();
     } else {
-      this.searchbarform.markAllAsTouched();
+      this.showreset = false;
+      this.page = 1;
+      this.GetBrandsFun();
     }
   }
 
@@ -199,8 +202,8 @@ export class VechicleBrandComponent implements OnInit {
     this.adminService.getVehicleBrand(this.tableSize, this.page, search).subscribe({
       next: (response: any) => {
         if (response.status === 200) {
-          this.brandList = response.data.items || response.data || [];
-          this.totalRecords = response.data.total_count || response.data.total || this.brandList.length;
+          this.brandList = response.data || [];
+          this.totalRecords = response.pagination?.total || this.brandList.length;
         }
       },
       error: (error: any) => {
