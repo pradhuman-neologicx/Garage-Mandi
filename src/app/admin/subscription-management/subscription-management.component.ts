@@ -15,8 +15,6 @@ import { JwtService } from '../../core/services/jwt.service';
 })
 export class SubscriptionManagementComponent implements OnInit {
   activeTab: string = 'providers';
-  roles: any;
-
   tableSize: any = 10;
   tableSizes: any = [10, 20, 50, 100, 'all'];
   page: number = 1;
@@ -115,7 +113,6 @@ export class SubscriptionManagementComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.roles = this.jwtService.getadmiRole();
     this.fetchSubscriptionPlan();
     this.fetchProviderSubscriptions();
   }

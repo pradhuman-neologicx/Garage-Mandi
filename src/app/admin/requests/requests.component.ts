@@ -62,7 +62,7 @@ export class RequestsComponent implements OnInit {
     this.selectedRequest = null; // Will populate via API
     this.isViewModalOpen = true;
 
-    this.adminService.getRequestById(data.id).subscribe({
+    this.adminService.getRequestById(data.id, data.type).subscribe({
       next: (res: any) => {
         if (res && res.status === 200) {
           this.selectedRequest = res.data;

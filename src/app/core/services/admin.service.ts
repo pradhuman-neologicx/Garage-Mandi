@@ -520,10 +520,14 @@ export class AdminService {
         );
     }
 
-    getRequestById(id: number | string): Observable<any> {
+    getRequestById(id: number | string, type?: string): Observable<any> {
         const token = this.jwtService.getToken();
         const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-        return this.apiservice.get(`system-admin/requests/${id}`, headers);
+        let url = `system-admin/requests/${id}`;
+        if (type) {
+            url += `?type=${type}`;
+        }
+        return this.apiservice.get(url, headers);
     }
 
     // --- Feedback APIs ---
@@ -565,7 +569,7 @@ export class AdminService {
             'Content-Type': 'application/json'
         });
 
-        return this.apiservice.put('subscription-plan', data, headers).pipe(
+        return this.apiservice.put('system-admin/subscription-plan', data, headers).pipe(
             tap((error: any) => {
                 console.log('Response received:', error);
                 this.erromessagefunction(error);
@@ -582,9 +586,9 @@ export class AdminService {
 
         let url = '';
         if (tableSize !== 'all') {
-            url = `admin/subscriptions?limit=${tableSize}&page=${page}`;
+            url = `system-admin/subscriptions?limit=${tableSize}&page=${page}`;
         } else {
-            url = `admin/subscriptions?`;
+            url = `system-admin/subscriptions?`;
         }
 
         if (search) {
@@ -610,7 +614,7 @@ export class AdminService {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
         });
-        return this.apiservice.get(`admin/subscriptions/${id}`, headers);
+        return this.apiservice.get(`system-admin/subscriptions/${id}`, headers);
     }
     getProviderExpirySubscriptions(tableSize: any, page: any, search: any, startDate?: string, endDate?: string): Observable<any> {
         const token = this.jwtService.getToken();
@@ -621,9 +625,9 @@ export class AdminService {
 
         let url = '';
         if (tableSize !== 'all') {
-            url = `admin/subscriptions/expiring?limit=${tableSize}&page=${page}`;
+            url = `system-admin/subscriptions/expiring?limit=${tableSize}&page=${page}`;
         } else {
-            url = `admin/subscriptions/expiring?`;
+            url = `system-admin/subscriptions/expiring?`;
         }
 
         if (search) {

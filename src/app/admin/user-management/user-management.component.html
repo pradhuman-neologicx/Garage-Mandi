@@ -43,8 +43,8 @@
 
   <!-- Content Area -->
   <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <!-- Show Entries -->
-    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white">
+    <!-- Show Entries & Search -->
+    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white flex-wrap gap-4">
       <div class="flex items-center text-sm text-gray-500">
         <span class="mr-2">Show</span>
         <select (change)="onTableSizeChange($event)"
@@ -52,6 +52,17 @@
           <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
         </select>
         <span class="ml-1">entries</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="relative">
+          <input type="text" [(ngModel)]="searchText" (keyup.enter)="onSearch()" placeholder="Search..."
+            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-custom-primary focus:ring-1 focus:ring-custom-primary w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-custom-primary" (click)="onSearch()"></i>
+        </div>
+        <button *ngIf="searchText" (click)="onResetSearch()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors font-medium">
+          Reset
+        </button>
       </div>
     </div>
 

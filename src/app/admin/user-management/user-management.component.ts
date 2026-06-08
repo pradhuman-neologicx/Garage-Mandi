@@ -52,6 +52,24 @@ export class UserManagementComponent implements OnInit {
   apiTotalRecords: number = 0;
   searchText: string = '';
 
+  onSearch() {
+    this.page = 1;
+    if (this.activeTab === 'service_providers') {
+      this.fetchServiceProviders();
+    } else if (this.activeTab === 'customers') {
+      this.fetchCustomers();
+    } else if (this.activeTab === 'field_executives') {
+      this.fetchFieldExecutives();
+    } else if (this.activeTab === 'system_admins') {
+      this.fetchSystemAdmins();
+    }
+  }
+
+  onResetSearch() {
+    this.searchText = '';
+    this.onSearch();
+  }
+
   get totalRecords(): number {
     switch (this.activeTab) {
       case 'service_providers': return this.apiTotalRecords || this.serviceProviders.length;
@@ -189,6 +207,7 @@ export class UserManagementComponent implements OnInit {
     this.activeTab = tabName;
     this.page = 1;
     this.apiTotalRecords = 0;
+    this.searchText = '';
     if (tabName === 'service_providers') {
       this.fetchServiceProviders();
     } else if (tabName === 'customers') {
