@@ -47,7 +47,7 @@
     <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-white flex-wrap gap-4">
       <div class="flex items-center text-sm text-gray-500">
         <span class="mr-2">Show</span>
-        <select (change)="onTableSizeChange($event)"
+        <select [(ngModel)]="tableSize" (change)="onTableSizeChange($event)"
           class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
           <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
         </select>
@@ -71,7 +71,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-            <th class="p-4">Provider ID</th>
+            <th class="p-4 text-center">S.No.</th>
             <th class="p-4">Garage Name</th>
             <th class="p-4">Owner / Contact</th>
             <th class="p-4">Category</th>
@@ -81,9 +81,9 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr
-            *ngFor="let provider of serviceProviders | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            *ngFor="let provider of serviceProviders | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm">{{ provider.id }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ provider.name }}</div>
               <div class="text-xs text-yellow-500 mt-1"><i class="fa-solid fa-star mr-1"></i>{{ provider.rating }}</div>
@@ -129,7 +129,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-            <th class="p-4">Customer ID</th>
+            <th class="p-4 text-center">S.No.</th>
             <th class="p-4">Customer</th>
             <th class="p-4">Contact</th>
             <th class="p-4 text-center">Status</th>
@@ -138,9 +138,9 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr
-            *ngFor="let customer of customers | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            *ngFor="let customer of customers | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm">CUS-{{ customer.id }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
@@ -189,7 +189,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-            <th class="p-4">Employee ID</th>
+            <th class="p-4 text-center">S.No.</th>
             <th class="p-4">Name</th>
             <th class="p-4">Contact</th>
             <th class="p-4 text-center">Status</th>
@@ -198,9 +198,9 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr
-            *ngFor="let exec of fieldExecutives | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            *ngFor="let exec of fieldExecutives | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm">{{ exec.id }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
@@ -251,7 +251,7 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-            <th class="p-4">Admin ID</th>
+            <th class="p-4 text-center">S.No.</th>
             <th class="p-4">Name</th>
             <th class="p-4">Contact</th>
             <th class="p-4">Role</th>
@@ -261,9 +261,9 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <tr
-            *ngFor="let admin of systemAdmins | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }"
+            *ngFor="let admin of systemAdmins | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm">ADM-00{{ admin.id }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">

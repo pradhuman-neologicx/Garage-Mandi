@@ -71,13 +71,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   get totalRecords(): number {
-    switch (this.activeTab) {
-      case 'service_providers': return this.apiTotalRecords || this.serviceProviders.length;
-      case 'customers': return this.customers.length;
-      case 'field_executives': return this.fieldExecutives.length;
-      case 'system_admins': return this.systemAdmins.length;
-      default: return 0;
-    }
+    return this.apiTotalRecords || 0;
   }
 
   get addButtonText(): string {
@@ -208,6 +202,7 @@ export class UserManagementComponent implements OnInit {
     this.page = 1;
     this.apiTotalRecords = 0;
     this.searchText = '';
+    this.tableSize = 10;
     if (tabName === 'service_providers') {
       this.fetchServiceProviders();
     } else if (tabName === 'customers') {
