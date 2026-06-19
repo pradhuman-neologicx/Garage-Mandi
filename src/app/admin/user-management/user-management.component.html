@@ -75,6 +75,7 @@
             <th class="p-4">Garage Name</th>
             <th class="p-4">Owner / Contact</th>
             <th class="p-4">Category</th>
+            <th class="p-4">Verification</th>
             <th class="p-4 text-center">Status</th>
             <th class="p-4 text-right">Actions</th>
           </tr>
@@ -94,9 +95,15 @@
               <div class="text-xs text-gray-400 mt-1">{{ provider.email }}</div>
             </td>
             <td class="p-4">
-              <span
-                class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-blue-100">{{
-                provider.category }}</span>
+              <div *ngIf="provider.categories && provider.categories.length > 0" class="flex flex-col gap-1 items-start">
+                <span *ngFor="let cat of provider.categories" class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-blue-100">{{ cat }}</span>
+              </div>
+              <span *ngIf="!provider.categories || provider.categories.length === 0" class="text-gray-500 text-xs font-semibold">N/A</span>
+            </td>
+            <td class="p-4">
+              <span [ngClass]="provider.is_verified ? 'bg-green-100 text-green-700 border-green-200' : 'bg-yellow-100 text-yellow-700 border-yellow-200'" class="text-xs px-2.5 py-1 rounded-full font-semibold border">
+                {{ provider.is_verified ? 'Verified' : 'Unverified' }}
+              </span>
             </td>
             <td class="p-4 text-center">
               <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
@@ -108,6 +115,16 @@
               </div>
             </td>
             <td class="p-4 text-right space-x-2 whitespace-nowrap">
+              <button *ngIf="!provider.is_verified" (click)="verifyProvider(provider, true)"
+                class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded-lg transition-colors"
+                title="Verify Provider">
+                <i class="fa-solid fa-check"></i>
+              </button>
+              <button *ngIf="provider.is_verified" (click)="verifyProvider(provider, false)"
+                class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                title="Unverify Provider">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
               <button (click)="openModal('view', provider)"
                 class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors"
                 title="View Profile">
@@ -385,6 +402,10 @@
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.owner || 'N/A' }}</span>
                 </div>
                 <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Username</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.username || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">Email</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.email || 'N/A' }}</span>
                 </div>
@@ -397,6 +418,30 @@
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.status || 'N/A' }}</span>
                 </div>
                 <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Verified User</span>
+                  <span class="text-sm text-gray-800 font-medium">
+                    <i class="fa-solid fa-circle-check text-green-500 mr-1" *ngIf="selectedUser?.is_verified"></i>
+                    <i class="fa-solid fa-circle-xmark text-red-400 mr-1" *ngIf="!selectedUser?.is_verified"></i>
+                    {{ selectedUser?.is_verified ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">State</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.state_name || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">City</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.city_name || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">District</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.district_name || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Pincode</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.pincode || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2 md:col-span-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">Vehicle Categories</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.category || 'N/A' }}</span>
                 </div>
@@ -452,6 +497,10 @@
                   <span class="text-sm font-semibold text-gray-500 capitalize">Full Name</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.name || 'N/A' }}</span>
                 </div>
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Username</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.username || 'N/A' }}</span>
+                </div>
                 <div class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">Email Address</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.email || 'N/A' }}</span>
@@ -460,13 +509,21 @@
                   <span class="text-sm font-semibold text-gray-500 capitalize">Phone Number</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.phone || 'N/A' }}</span>
                 </div>
-                <div *ngIf="activeTab === 'customers'" class="flex flex-col border-b border-gray-50 pb-2">
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">State</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.state_name || 'N/A' }}</span>
                 </div>
-                <div *ngIf="activeTab === 'customers'" class="flex flex-col border-b border-gray-50 pb-2">
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">City</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.city_name || 'N/A' }}</span>
+                </div>
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">District</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.district_name || 'N/A' }}</span>
+                </div>
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Pincode</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.pincode || 'N/A' }}</span>
                 </div>
                 <div *ngIf="activeTab === 'system_admins'" class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">Role</span>
@@ -561,6 +618,15 @@
                     Owner Name is required.</div>
                 </div>
                 <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Username <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.username" name="spUsername" required #spUsername="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spUsername.invalid && (spUsername.dirty || spUsername.touched), 'border-gray-300': !(spUsername.invalid && (spUsername.dirty || spUsername.touched))}">
+                  <div *ngIf="spUsername.invalid && (spUsername.dirty || spUsername.touched)" class="text-red-500 text-xs mt-1">
+                    Username is required.</div>
+                </div>
+                <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Email Address <span
                       class="text-red-500">*</span></label>
                   <input type="email" [(ngModel)]="selectedUser.email" name="spEmail" required email #spEmail="ngModel"
@@ -584,6 +650,44 @@
                   </div>
                 </div>
 
+                <!-- State and City -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">State <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.state_id" name="spState" required #spState="ngModel"
+                    (change)="onStateChange(selectedUser.state_id)"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spState.invalid && (spState.dirty || spState.touched), 'border-gray-300': !(spState.invalid && (spState.dirty || spState.touched))}">
+                    <option [ngValue]="null" disabled>Select State</option>
+                    <option *ngFor="let state of states" [ngValue]="state.id">{{ state.name }}</option>
+                  </select>
+                  <div *ngIf="spState.invalid && (spState.dirty || spState.touched)" class="text-red-500 text-xs mt-1">State is required.</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.city_id" name="spCity" required #spCity="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spCity.invalid && (spCity.dirty || spCity.touched), 'border-gray-300': !(spCity.invalid && (spCity.dirty || spCity.touched))}">
+                    <option [ngValue]="null" disabled>Select City</option>
+                    <option *ngFor="let city of cities" [ngValue]="city.id">{{ city.name }}</option>
+                  </select>
+                  <div *ngIf="spCity.invalid && (spCity.dirty || spCity.touched)" class="text-red-500 text-xs mt-1">City is required.</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.district_id" name="spDistrict" required #spDistrict="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': spDistrict.invalid && (spDistrict.dirty || spDistrict.touched), 'border-gray-300': !(spDistrict.invalid && (spDistrict.dirty || spDistrict.touched))}">
+                    <option [ngValue]="null" disabled>Select District</option>
+                    <option *ngFor="let district of districts" [ngValue]="district.id">{{ district.name }}</option>
+                  </select>
+                  <div *ngIf="spDistrict.invalid && (spDistrict.dirty || spDistrict.touched)" class="text-red-500 text-xs mt-1">District is required.</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Pincode (Optional)</label>
+                  <input type="text" [(ngModel)]="selectedUser.pincode" name="spPincode"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm border-gray-300">
+                </div>
+
                 <!-- Supported Vehicle Categories -->
                 <div class="md:col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
                   <label class="block text-sm font-medium text-gray-700 mb-2">Supported Vehicle Categories</label>
@@ -591,19 +695,24 @@
                     <label *ngFor="let cat of publicCategories" class="inline-flex items-center cursor-pointer">
                       <input type="checkbox" [value]="cat.id"
                         [checked]="isSelectionChecked('vehicle_category_id', cat.id)"
-                        (change)="toggleSelection('vehicle_category_id', cat.id)"
+                        (change)="toggleSelection('vehicle_category_id', cat.id, $event)"
                         class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
                       <span class="ml-2 text-sm text-gray-600">{{ cat.name }}</span>
                     </label>
                   </div>
                 </div>
 
-                <!-- Is Service Available -->
-                <div class="col-span-1 border border-gray-100 rounded-lg p-3 bg-gray-50/50 flex items-center">
+                <!-- Is Service Available & Verified User -->
+                <div class="col-span-1 border border-gray-100 rounded-lg p-3 bg-gray-50/50 flex flex-col justify-center gap-3">
                   <label class="inline-flex items-center cursor-pointer">
                     <input type="checkbox" [(ngModel)]="selectedUser.is_service_available" name="isServiceAvailable"
                       class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
                     <span class="ml-2 text-sm font-medium text-gray-700">Is service available</span>
+                  </label>
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [(ngModel)]="selectedUser.is_verified" name="isVerifiedUser"
+                      class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                    <span class="ml-2 text-sm font-medium text-gray-700">Verified User</span>
                   </label>
                 </div>
 
@@ -667,6 +776,18 @@
                     Full Name is required.
                   </div>
                 </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Username <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.username" name="customerUsername" required
+                    #customerUsername="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': customerUsername.invalid && (customerUsername.dirty || customerUsername.touched), 'border-gray-300': !(customerUsername.invalid && (customerUsername.dirty || customerUsername.touched))}">
+                  <div *ngIf="customerUsername.invalid && (customerUsername.dirty || customerUsername.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    Username is required.
+                  </div>
+                </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span
                       class="text-red-500">*</span></label>
@@ -718,6 +839,21 @@
                   <div *ngIf="customerCity.invalid && (customerCity.dirty || customerCity.touched)"
                     class="text-red-500 text-xs mt-1">City is required.</div>
                 </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.district_id" name="customerDistrict" required #customerDistrict="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': customerDistrict.invalid && (customerDistrict.dirty || customerDistrict.touched), 'border-gray-300': !(customerDistrict.invalid && (customerDistrict.dirty || customerDistrict.touched))}">
+                    <option [ngValue]="null" disabled>Select District</option>
+                    <option *ngFor="let district of districts" [ngValue]="district.id">{{ district.name }}</option>
+                  </select>
+                  <div *ngIf="customerDistrict.invalid && (customerDistrict.dirty || customerDistrict.touched)" class="text-red-500 text-xs mt-1">District is required.</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Pincode (Optional)</label>
+                  <input type="text" [(ngModel)]="selectedUser.pincode" name="customerPincode"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm border-gray-300">
+                </div>
 
               </div>
             </div>
@@ -732,6 +868,18 @@
                     [ngClass]="{'border-red-500': execName.invalid && (execName.dirty || execName.touched), 'border-gray-300': !(execName.invalid && (execName.dirty || execName.touched))}">
                   <div *ngIf="execName.invalid && (execName.dirty || execName.touched)"
                     class="text-red-500 text-xs mt-1">Full Name is required.</div>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Username <span
+                      class="text-red-500">*</span></label>
+                  <input type="text" [(ngModel)]="selectedUser.username" name="execUsername" required
+                    #execUsername="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': execUsername.invalid && (execUsername.dirty || execUsername.touched), 'border-gray-300': !(execUsername.invalid && (execUsername.dirty || execUsername.touched))}">
+                  <div *ngIf="execUsername.invalid && (execUsername.dirty || execUsername.touched)"
+                    class="text-red-500 text-xs mt-1">
+                    Username is required.
+                  </div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number <span
@@ -758,6 +906,42 @@
                     <span *ngIf="execEmail.errors?.['required']">Email Address is required.</span>
                     <span *ngIf="execEmail.errors?.['email']">Enter a valid email address.</span>
                   </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">State <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.state_id" name="execState" required #execState="ngModel"
+                    (change)="onStateChange(selectedUser.state_id)"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': execState.invalid && (execState.dirty || execState.touched), 'border-gray-300': !(execState.invalid && (execState.dirty || execState.touched))}">
+                    <option [ngValue]="null" disabled>Select State</option>
+                    <option *ngFor="let state of states" [ngValue]="state.id">{{ state.name }}</option>
+                  </select>
+                  <div *ngIf="execState.invalid && (execState.dirty || execState.touched)" class="text-red-500 text-xs mt-1">State is required.</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.city_id" name="execCity" required #execCity="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': execCity.invalid && (execCity.dirty || execCity.touched), 'border-gray-300': !(execCity.invalid && (execCity.dirty || execCity.touched))}">
+                    <option [ngValue]="null" disabled>Select City</option>
+                    <option *ngFor="let city of cities" [ngValue]="city.id">{{ city.name }}</option>
+                  </select>
+                  <div *ngIf="execCity.invalid && (execCity.dirty || execCity.touched)" class="text-red-500 text-xs mt-1">City is required.</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.district_id" name="execDistrict" required #execDistrict="ngModel"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
+                    [ngClass]="{'border-red-500': execDistrict.invalid && (execDistrict.dirty || execDistrict.touched), 'border-gray-300': !(execDistrict.invalid && (execDistrict.dirty || execDistrict.touched))}">
+                    <option [ngValue]="null" disabled>Select District</option>
+                    <option *ngFor="let district of districts" [ngValue]="district.id">{{ district.name }}</option>
+                  </select>
+                  <div *ngIf="execDistrict.invalid && (execDistrict.dirty || execDistrict.touched)" class="text-red-500 text-xs mt-1">District is required.</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Pincode (Optional)</label>
+                  <input type="text" [(ngModel)]="selectedUser.pincode" name="execPincode"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm border-gray-300">
                 </div>
 
               </div>

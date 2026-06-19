@@ -5,11 +5,12 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notificationnew.service';
 import { JwtService } from '../../core/services/jwt.service';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-subscription-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxPaginationModule],
+  imports: [CommonModule, FormsModule, NgxPaginationModule, NgSelectModule],
   templateUrl: './subscription-management.component.html',
   styleUrl: './subscription-management.component.scss'
 })
@@ -23,6 +24,7 @@ export class SubscriptionManagementComponent implements OnInit {
   searchText: string = '';
   filterStartDate: string = '';
   filterEndDate: string = '';
+  filterStatus: string = '';
 
   onTableSizeChange(event: any): void {
     this.tableSize = event.target.value;
@@ -66,6 +68,7 @@ export class SubscriptionManagementComponent implements OnInit {
     this.searchText = '';
     this.filterStartDate = '';
     this.filterEndDate = '';
+    this.filterStatus = '';
     this.page = 1;
     if (this.activeTab === 'providers') {
       this.fetchProviderSubscriptions();
@@ -82,21 +85,11 @@ export class SubscriptionManagementComponent implements OnInit {
     }
   }
 
-  platformPlan: any = {
-    id: null,
-    name: 'Standard Plan',
-    duration: 'First 2 Months Free',
-    price: 999,
-    features: 'Unlimited leads, Priority listing'
-  };
+  platformPlans: any[] = [];
 
   providerSubscriptions: any[] = [];
 
-  paymentHistory = [
-    { txnId: 'TXN892374', date: '01-Jan-2026', provider: 'AutoCare Garage', amount: 2499, method: 'UPI', status: 'Success' },
-    { txnId: 'TXN892341', date: '15-Dec-2025', provider: 'Bike Masters', amount: 999, method: 'Credit Card', status: 'Success' },
-    { txnId: 'TXN892300', date: '10-May-2026', provider: 'Speedy Tyres', amount: 2499, method: 'UPI', status: 'Failed' }
-  ];
+
 
   renewalAlerts: any[] = [];
 
@@ -124,11 +117,11 @@ export class SubscriptionManagementComponent implements OnInit {
   }
 
   fetchProviderSubscriptions() {
-    this.adminService.getProviderSubscriptions(this.tableSize, this.page, this.searchText, this.filterStartDate, this.filterEndDate).subscribe({
+    this.adminService.getProviderSubscriptions(this.tableSize, this.page, this.searchText, this.filterStartDate, this.filterEndDate, this.filterStatus).subscribe({
       next: (res: any) => {
         if (res && (res.status === 200 || res.status === true)) {
           const apiData = res.data?.data || res.data || [];
-          
+
           this.providerSubscriptions = apiData.map((item: any) => {
             const providerName = item.provider?.name || 'Unknown';
             return {
@@ -140,12 +133,14 @@ export class SubscriptionManagementComponent implements OnInit {
               endDate: this.formatDate(item.current_period_end || item.trial_ends_at),
               trialEndsAt: item.trial_ends_at ? this.formatDate(item.trial_ends_at) : null,
               status: item.status || 'Active',
-              payments: this.paymentHistory.filter(p => p.provider === providerName),
+              payments: [],
               rawData: item
             };
           });
 
-          if (res.data && res.data.total !== undefined) {
+          if (res.pagination && res.pagination.total !== undefined) {
+            this.apiTotalRecords = res.pagination.total;
+          } else if (res.data && res.data.total !== undefined) {
             this.apiTotalRecords = res.data.total;
           }
         }
@@ -159,10 +154,10 @@ export class SubscriptionManagementComponent implements OnInit {
       next: (res: any) => {
         if (res && (res.status === 200 || res.status === true)) {
           const apiData = res.data?.data || res.data || [];
-          
+
           this.renewalAlerts = apiData.map((item: any) => {
             const providerName = item.provider?.name || 'Unknown';
-            
+
             // Calculate days left if not provided by backend
             let daysLeft = item.days_left;
             if (daysLeft === undefined && item.current_period_end) {
@@ -188,7 +183,9 @@ export class SubscriptionManagementComponent implements OnInit {
             };
           });
 
-          if (res.data && res.data.total !== undefined) {
+          if (res.pagination && res.pagination.total !== undefined) {
+            this.apiTotalRecords = res.pagination.total;
+          } else if (res.data && res.data.total !== undefined) {
             this.apiTotalRecords = res.data.total;
           }
         }
@@ -201,17 +198,27 @@ export class SubscriptionManagementComponent implements OnInit {
     this.adminService.getSubscriptionPlan().subscribe({
       next: (res: any) => {
         if (res && (res.status === 200 || res.status === true)) {
-          const data = res.data?.data || res.data || {};
-          this.platformPlan = {
-            id: data.id || null,
-            name: data.name || this.platformPlan.name,
-            duration: data.duration || this.platformPlan.duration,
-            price: data.amount !== undefined ? data.amount : (data.price !== undefined ? data.price : this.platformPlan.price),
-            features: data.features || this.platformPlan.features
-          };
+          const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+
+          this.platformPlans = data.map((plan: any) => {
+            let featuresList: string[] = [];
+            if (plan.features) {
+              featuresList = typeof plan.features === 'string' ? plan.features.split(',').map((f: string) => f.trim()) : plan.features;
+            }
+
+            return {
+              id: plan.id,
+              name: plan.name || 'Plan',
+              price: plan.amount !== undefined ? Number(plan.amount) : 0,
+              features: featuresList,
+              vehicle_category: plan.vehicle_category,
+              type: plan.type,
+              is_active: plan.is_active
+            };
+          });
         }
       },
-      error: (err: any) => console.error('Failed to fetch subscription plan', err)
+      error: (err: any) => console.error('Failed to fetch subscription plans', err)
     });
   }
 
@@ -226,14 +233,21 @@ export class SubscriptionManagementComponent implements OnInit {
     }
   }
 
-  openEditPlanModal() {
-    this.editPlanData = { ...this.platformPlan };
+  openEditPlanModal(plan?: any) {
+    if (plan) {
+      // Deep copy to allow editing array without affecting original until save
+      this.editPlanData = JSON.parse(JSON.stringify(plan));
+    } else {
+      this.editPlanData = JSON.parse(JSON.stringify(this.platformPlans[0]));
+    }
     this.isEditPlanModalOpen = true;
   }
 
   closeEditPlanModal() {
     this.isEditPlanModalOpen = false;
   }
+
+
 
   savePlan() {
     if (this.editPlanData.price === null || this.editPlanData.price === undefined || this.editPlanData.price === '') {
@@ -243,13 +257,19 @@ export class SubscriptionManagementComponent implements OnInit {
 
     const payload = {
       amount: this.editPlanData.price
+      // Future: add features/name if backend supports updating them for multiple plans
     };
-    
-    this.adminService.updateSubscriptionPlan(payload).subscribe({
+
+    // Send to API. Since API currently handles single plan, it will update it.
+    this.adminService.updateSubscriptionPlan(this.editPlanData.id, payload).subscribe({
       next: (response: any) => {
         if (response && (response.status === 200 || response.status === 201 || response.status === true)) {
           this.notificationService.show(response.message || 'Subscription plan updated successfully', 'success');
-          this.platformPlan.price = this.editPlanData.price;
+
+          const index = this.platformPlans.findIndex(p => p.id === this.editPlanData.id);
+          if (index !== -1) {
+            this.platformPlans[index] = JSON.parse(JSON.stringify(this.editPlanData));
+          }
           this.closeEditPlanModal();
         } else {
           this.notificationService.show(response.message || 'Failed to update plan', 'error');
@@ -273,19 +293,18 @@ export class SubscriptionManagementComponent implements OnInit {
           if (res && (res.status === 200 || res.status === true)) {
             const data = res.data || {};
             this.selectedProvider.rawData = data;
-            
-            // Map payments if they exist in the response
-            if (data.payments && Array.isArray(data.payments)) {
-              this.selectedProvider.payments = data.payments.map((p: any) => ({
-                txnId: p.transaction_id || p.id || 'N/A',
-                date: this.formatDate(p.created_at || p.payment_date),
-                amount: p.amount || 0,
-                method: p.payment_method || 'N/A',
-                status: p.status || 'Completed'
+
+            // Map previous history if they exist in the response
+            if (data.previous && Array.isArray(data.previous)) {
+              this.selectedProvider.history = data.previous.map((p: any) => ({
+                planName: p.plan?.name || 'N/A',
+                amount: p.plan?.amount || p.amount_at_purchase || 0,
+                startDate: this.formatDate(p.subscription_starts_at || p.current_period_start),
+                endDate: this.formatDate(p.current_period_end),
+                status: p.status || 'N/A'
               }));
             } else {
-               // If there's a single payment object or different structure, adjust as needed
-               this.selectedProvider.payments = [];
+              this.selectedProvider.history = [];
             }
           }
           this.selectedProvider.isLoading = false;

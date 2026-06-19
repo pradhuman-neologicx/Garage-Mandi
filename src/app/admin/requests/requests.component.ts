@@ -13,8 +13,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class RequestsComponent implements OnInit {
 
-  tableSize: any = 10;
-  tableSizes: any = [10, 20, 50, 100, 'all'];
+  tableSize: any = 9;
+  tableSizes: any = [9, 12, 15, 18, 'all'];
   page: number = 1;
   totalRecords: number = 0;
   searchText: string = '';
@@ -34,8 +34,14 @@ export class RequestsComponent implements OnInit {
     this.adminService.getRequests(this.tableSize, this.page, this.searchText).subscribe({
       next: (res: any) => {
         if (res && res.status === 200) {
-          this.customerRequests = res.data;
-          this.totalRecords = res.pagination?.total || this.customerRequests.length;
+          const data = res.data || [];
+          this.totalRecords = res.pagination?.total || data.length;
+          
+          this.customerRequests = data.map((req: any, index: number) => {
+            const baseIndex = this.tableSize !== 'all' ? (this.page - 1) * this.tableSize : 0;
+            req.srNo = baseIndex + index + 1;
+            return req;
+          });
         }
       },
       error: (err) => console.error(err)
@@ -58,6 +64,11 @@ export class RequestsComponent implements OnInit {
     this.fetchRequests();
   }
 
+  clearSearch() {
+    this.searchText = '';
+    this.onSearchChange();
+  }
+
   openViewModal(data: any) {
     this.selectedRequest = null; // Will populate via API
     this.isViewModalOpen = true;
@@ -66,6 +77,7 @@ export class RequestsComponent implements OnInit {
       next: (res: any) => {
         if (res && res.status === 200) {
           this.selectedRequest = res.data;
+          this.selectedRequest.srNo = data.srNo;
         }
       },
       error: (err) => {

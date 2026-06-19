@@ -1,0 +1,329 @@
+<div class="min-h-screen container mx-auto">
+  <!-- Header -->
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-1">Vehicle Resale Module</h1>
+      <p class="text-sm text-gray-500">Monitor vehicle listings and customer interest requests.</p>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div
+    class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8 p-1 inline-flex w-full sm:w-auto overflow-x-auto">
+    <button (click)="switchTab('listings')"
+      [ngClass]="activeTab === 'listings' ? 'bg-indigo-50 text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+      class="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">
+      <i class="fa-solid fa-car mr-2"></i>Vehicle Listings
+    </button>
+    <button (click)="switchTab('requests')"
+      [ngClass]="activeTab === 'requests' ? 'bg-indigo-50 text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+      class="px-6 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">
+      <i class="fa-solid fa-hand-holding-heart mr-2"></i>Interest Requests
+    </button>
+  </div>
+
+  <!-- Content Container -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <!-- Show Entries & Search -->
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-b border-gray-100 bg-white gap-4">
+      <div class="flex items-center text-sm text-gray-500">
+        <span class="mr-2">Show</span>
+        <select [(ngModel)]="tableSize" (change)="onTableSizeChange($event)"
+          class="border border-gray-300 rounded px-2 py-1 mx-1 text-gray-700 focus:outline-none focus:border-custom-primary">
+          <option *ngFor="let size of tableSizes" [value]="size">{{ size }}</option>
+        </select>
+        <span class="ml-1">entries</span>
+      </div>
+
+      <div class="relative w-full sm:w-64">
+        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input type="text" [(ngModel)]="searchText" (keyup.enter)="onSearchChange()" placeholder="Search..."
+          class="w-full pl-9 pr-10 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-custom-primary focus:border-custom-primary">
+        <i *ngIf="searchText" (click)="clearSearch()"
+          class="fa-solid fa-xmark absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm cursor-pointer hover:text-gray-600 transition-colors"></i>
+      </div>
+    </div>
+
+    <!-- Vehicle Listings Tab -->
+    <div *ngIf="activeTab === 'listings'" class="p-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div
+          *ngFor="let listing of vehicleListings | paginate: { id: 'listing_pagination', itemsPerPage: tableSize !== 'all' ? tableSize : listingTotalRecords, currentPage: listingPage, totalItems: listingTotalRecords }"
+          class="bg-white rounded-xl border border-gray-200 hover:border-custom-primary/30 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden"
+          [ngClass]="{'opacity-60 grayscale-[20%]': !listing.isActive}">
+
+          <!-- Image Section -->
+          <div class="h-48 relative overflow-hidden bg-gray-100">
+            <img [src]="listing.image" alt="Vehicle Image" class="w-full h-full object-cover">
+            <div
+              class="absolute top-3 left-3 bg-black/60 text-white text-[11px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider backdrop-blur-sm">
+              {{ listing.vehicleType }}
+            </div>
+            <div class="absolute top-3 right-3">
+              <span class="text-[11px] px-2.5 py-1 rounded-md font-bold shadow-sm"
+                [ngClass]="listing.isActive ? 'bg-emerald-500 text-white' : 'bg-gray-500 text-white'">
+                {{ listing.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Content Section -->
+          <div class="p-4 flex flex-col flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-lg font-bold text-gray-800 leading-tight">{{ listing.brandModel }}</h3>
+              <div class="flex items-center gap-2 shrink-0 ml-2">
+                <span class="text-lg font-extrabold text-custom-primary">₹{{ listing.price }}</span>
+                <button (click)="openViewModal(listing)" class="text-indigo-500 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 w-8 h-8 rounded-lg flex items-center justify-center transition-colors" title="View Details">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-3 font-medium">
+              <span class="bg-gray-100 px-2 py-1 rounded border border-gray-200" title="Mfg Year"><i class="fa-regular fa-calendar mr-1"></i>{{ listing.mfgYear }}</span>
+              <span class="bg-gray-100 px-2 py-1 rounded border border-gray-200" title="Fuel Type"><i class="fa-solid fa-gas-pump mr-1"></i>{{ listing.fuelType }}</span>
+            </div>
+
+            <p class="text-sm text-gray-600 line-clamp-2 mb-4 leading-relaxed">{{ listing.description }}</p>
+
+            <div class="mt-auto pt-3 border-t border-gray-100">
+              <div class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide mb-1.5">Provider Details</div>
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-store text-blue-500 text-xs"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-[13px] text-gray-800 font-bold block truncate leading-tight">{{
+                    listing.provider.business }}</div>
+                  <div class="text-[11px] text-gray-500 block truncate leading-tight mt-0.5">Owner: {{
+                    listing.provider.name }}</div>
+                </div>
+                <div class="shrink-0 flex items-center gap-2">
+                  <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" [checked]="listing.isActive" id="toggle-listing-{{listing.id}}"
+                      (change)="toggleListingStatus(listing)"
+                      class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-gray-300 checked:border-green-400 checked:right-0 transition-all" />
+                    <label for="toggle-listing-{{listing.id}}"
+                      class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="vehicleListings.length > 0"
+        class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
+        <div>
+          Showing {{ tableSize !== 'all' ? ((listingPage - 1) * tableSize + 1) : 1 }} to {{ tableSize !== 'all' ?
+          (listingPage * tableSize <= listingTotalRecords ? listingPage * tableSize : listingTotalRecords) :
+            listingTotalRecords }} of {{ listingTotalRecords }} entries </div>
+            <pagination-controls id="listing_pagination" previousLabel="Prev" nextLabel="Next" [responsive]="true"
+              (pageChange)="onListingPageChange($event)"></pagination-controls>
+        </div>
+      </div>
+
+      <!-- Interest Requests Tab -->
+      <div *ngIf="activeTab === 'requests'" class="p-5 bg-gray-50/30">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div
+            *ngFor="let req of interestRequests | paginate: { id: 'request_pagination', itemsPerPage: tableSize !== 'all' ? tableSize : requestTotalRecords, currentPage: requestPage, totalItems: requestTotalRecords }"
+            class="bg-white rounded-xl border border-gray-200 hover:border-indigo-500/30 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden">
+
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-custom-primary"></div>
+
+            <div class="p-4 pl-5">
+              <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">#{{ req.id }}</span>
+                  <span class="text-[11px] text-gray-500 font-medium"><i class="fa-regular fa-clock mr-1"></i>{{
+                    req.requestDate }}</span>
+                </div>
+                <span
+                  class="bg-amber-100 text-amber-800 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider">Interest
+                  Request</span>
+              </div>
+
+              <!-- Customer Block -->
+              <div class="mb-4 bg-indigo-50/50 rounded-lg p-3 border border-indigo-100/50">
+                <div class="text-[10px] text-primary font-bold uppercase tracking-wider mb-2">Interested Customer
+                </div>
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 border border-indigo-200">
+                    <i class="fa-solid fa-user text-primary text-sm"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-[14px] text-gray-800 font-bold block truncate">{{ req.customer.name }}</div>
+                    <div class="flex flex-col gap-0.5 mt-0.5">
+                      <span class="text-[11px] text-gray-500 flex items-center gap-1.5"><i
+                          class="fa-solid fa-phone text-[10px] text-gray-400"></i>{{ req.customer.phone }}</span>
+                      <span class="text-[11px] text-gray-500 flex items-center gap-1.5 truncate"><i
+                          class="fa-solid fa-envelope text-[10px] text-gray-400"></i>{{ req.customer.email }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-3">
+                <!-- Vehicle Details -->
+                <div class="flex gap-3 items-center pb-3 border-b border-gray-100">
+                  <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-car text-gray-500 text-xs"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <span
+                      class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide block mb-0.5">Vehicle</span>
+                    <div class="text-[13px] text-gray-800 font-bold truncate">{{ req.vehicle.brandModel }}</div>
+                    <div class="text-[12px] font-extrabold text-custom-primary">₹{{ req.vehicle.price }}</div>
+                  </div>
+                </div>
+
+                <!-- Provider Details -->
+                <div class="flex gap-3 items-center">
+                  <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-store text-blue-500 text-xs"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <span
+                      class="text-[10px] text-gray-400 font-semibold uppercase tracking-wide block mb-0.5">Provider</span>
+                    <div class="text-[13px] text-gray-800 font-bold truncate">{{ req.provider.business }}</div>
+                    <div class="text-[11px] text-gray-500 truncate">Owner: {{ req.provider.name }}</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div *ngIf="interestRequests.length > 0"
+          class="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
+          <div>
+            Showing {{ tableSize !== 'all' ? ((requestPage - 1) * tableSize + 1) : 1 }} to {{ tableSize !== 'all' ?
+            (requestPage * tableSize <= requestTotalRecords ? requestPage * tableSize : requestTotalRecords) :
+              requestTotalRecords }} of {{ requestTotalRecords }} entries </div>
+              <pagination-controls id="request_pagination" previousLabel="Prev" nextLabel="Next" [responsive]="true"
+                (pageChange)="onRequestPageChange($event)"></pagination-controls>
+          </div>
+        </div>
+      </div>
+
+    <!-- View Modal -->
+    <div *ngIf="isViewModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4 sm:p-0">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden transform transition-all">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+          <h3 class="text-lg font-bold text-gray-800">
+            {{ selectedVehicle?.brandModel }} Details
+          </h3>
+          <button (click)="closeViewModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
+          
+          <!-- Image Gallery -->
+          <div *ngIf="selectedVehicle?.images && selectedVehicle.images.length > 0" class="space-y-2">
+            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Images</h4>
+            <div class="flex overflow-x-auto gap-4 pb-2">
+              <div *ngFor="let img of selectedVehicle.images" class="w-48 h-32 rounded-xl overflow-hidden shrink-0 border border-gray-200 bg-gray-50 cursor-pointer" (click)="openImageInNewTab(img.file_url)">
+                <img [src]="img.file_url" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" alt="Vehicle Image">
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!selectedVehicle?.images || selectedVehicle.images.length === 0" class="bg-gray-50 p-4 rounded-xl text-center text-gray-500 italic text-sm border border-gray-100">
+            No images available for this vehicle.
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Vehicle Info -->
+            <div>
+              <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Vehicle Information</h4>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Brand & Model</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.brandModel }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Category</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.vehicleType }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Registration No.</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.registrationNumber }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Manufacturing Year</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.mfgYear }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Fuel Type</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.fuelType }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Price</span>
+                  <span class="font-extrabold text-custom-primary">₹{{ selectedVehicle?.price }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Listing Status</span>
+                  <span class="font-medium" [ngClass]="selectedVehicle?.isActive ? 'text-green-600' : 'text-red-600'">
+                    {{ selectedVehicle?.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Provider Info -->
+            <div>
+              <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Provider Details</h4>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Business Name</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.provider?.business }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Owner Name</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.provider?.name }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Phone</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.provider?.phone }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Email</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.provider?.email }}</span>
+                </div>
+                <div class="flex justify-between border-b border-gray-50 pb-2">
+                  <span class="text-gray-500">Date Added</span>
+                  <span class="font-medium text-gray-900">{{ selectedVehicle?.dateAdded }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div *ngIf="selectedVehicle?.description">
+            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Description</h4>
+            <div class="text-sm text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 whitespace-pre-line">
+              {{ selectedVehicle?.description }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end shrink-0">
+          <button (click)="closeViewModal()" class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+    </div>

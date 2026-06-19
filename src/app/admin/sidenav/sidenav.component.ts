@@ -99,6 +99,12 @@ export class SidenavComponent {
           label: 'Feedbacks',
           route: '/admin/feedback-monitoring',
         },
+        {
+          index: 8,
+          icon: 'car_rental',
+          label: 'Vehicle Resale',
+          route: '/admin/vehicle-resale',
+        },
 
         // {
         //   index: 9,

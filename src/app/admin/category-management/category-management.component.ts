@@ -184,7 +184,9 @@ export class CategoryManagementComponent implements OnInit {
           }));
           this.sparePartCategories.set(mappedList);
 
-          if (res.data && res.data.total !== undefined) {
+          if (res.pagination && res.pagination.total !== undefined) {
+            this.sparePartsTotalRecords = res.pagination.total;
+          } else if (res.data && res.data.total !== undefined) {
             this.sparePartsTotalRecords = res.data.total;
           } else {
             this.sparePartsTotalRecords = mappedList.length;
@@ -228,7 +230,7 @@ export class CategoryManagementComponent implements OnInit {
             vehicleCategoryName: item.vehicle_category?.name || '',
             rawData: item
           })));
-          this.serviceTotalRecords = res.data?.total || dataList.length;
+          this.serviceTotalRecords = res.pagination?.total || res.data?.total || dataList.length;
         }
       },
       error: (err) => console.error(err)
@@ -266,7 +268,7 @@ export class CategoryManagementComponent implements OnInit {
             sparePartName: item.vehicle_spare_part?.name || item.spare_part?.name || '',
             rawData: item
           })));
-          this.subCategoryTotalRecords = res.data?.total || dataList.length;
+          this.subCategoryTotalRecords = res.pagination?.total || res.data?.total || dataList.length;
         }
       },
       error: (err) => console.error(err)

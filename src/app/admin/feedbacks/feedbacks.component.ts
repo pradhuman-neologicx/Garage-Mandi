@@ -12,8 +12,8 @@ import { AdminService } from '../../core/services/admin.service';
   styleUrl: './feedbacks.component.scss'
 })
 export class FeedbacksComponent implements OnInit {
-  tableSize: any = 10;
-  tableSizes: any = [10, 20, 50, 100, 'all'];
+  tableSize: any = 9;
+  tableSizes: any = [9, 12, 15, 18, 'all'];
   page: number = 1;
   totalRecords: number = 0;
   searchText: string = '';
@@ -30,8 +30,13 @@ export class FeedbacksComponent implements OnInit {
     this.adminService.getFeedbacks(this.tableSize, this.page, this.searchText).subscribe({
       next: (res: any) => {
         if (res && res.status === 200) {
-          this.feedbacks = res.data;
-          this.totalRecords = res.pagination?.total || this.feedbacks.length;
+          const data = res.data || [];
+          this.totalRecords = res.pagination?.total || data.length;
+          this.feedbacks = data.map((fb: any, index: number) => {
+            const baseIndex = this.tableSize !== 'all' ? (this.page - 1) * this.tableSize : 0;
+            fb.srNo = baseIndex + index + 1;
+            return fb;
+          });
         }
       },
       error: (err) => console.error(err)
@@ -52,6 +57,11 @@ export class FeedbacksComponent implements OnInit {
   onSearchChange() {
     this.page = 1;
     this.fetchFeedbacks();
+  }
+
+  clearSearch() {
+    this.searchText = '';
+    this.onSearchChange();
   }
 
   toggleVisibility(feedback: any) {
