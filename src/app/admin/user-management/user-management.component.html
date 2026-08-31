@@ -58,9 +58,11 @@
         <div class="relative">
           <input type="text" [(ngModel)]="searchText" (keyup.enter)="onSearch()" placeholder="Search..."
             class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-custom-primary focus:ring-1 focus:ring-custom-primary w-64">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-custom-primary" (click)="onSearch()"></i>
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-custom-primary"
+            (click)="onSearch()"></i>
         </div>
-        <button *ngIf="searchText" (click)="onResetSearch()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors font-medium">
+        <button *ngIf="searchText" (click)="onResetSearch()"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors font-medium">
           Reset
         </button>
       </div>
@@ -84,7 +86,8 @@
           <tr
             *ngFor="let provider of serviceProviders | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) *
+              tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="font-bold text-gray-800 text-sm">{{ provider.name }}</div>
               <div class="text-xs text-yellow-500 mt-1"><i class="fa-solid fa-star mr-1"></i>{{ provider.rating }}</div>
@@ -95,13 +98,19 @@
               <div class="text-xs text-gray-400 mt-1">{{ provider.email }}</div>
             </td>
             <td class="p-4">
-              <div *ngIf="provider.categories && provider.categories.length > 0" class="flex flex-col gap-1 items-start">
-                <span *ngFor="let cat of provider.categories" class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-blue-100">{{ cat }}</span>
+              <div *ngIf="provider.categories && provider.categories.length > 0"
+                class="flex flex-col gap-1 items-start">
+                <span *ngFor="let cat of provider.categories"
+                  class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-blue-100">{{
+                  cat }}</span>
               </div>
-              <span *ngIf="!provider.categories || provider.categories.length === 0" class="text-gray-500 text-xs font-semibold">N/A</span>
+              <span *ngIf="!provider.categories || provider.categories.length === 0"
+                class="text-gray-500 text-xs font-semibold">N/A</span>
             </td>
             <td class="p-4">
-              <span [ngClass]="provider.is_verified ? 'bg-green-100 text-green-700 border-green-200' : 'bg-yellow-100 text-yellow-700 border-yellow-200'" class="text-xs px-2.5 py-1 rounded-full font-semibold border">
+              <span
+                [ngClass]="provider.is_verified ? 'bg-green-100 text-green-700 border-green-200' : 'bg-yellow-100 text-yellow-700 border-yellow-200'"
+                class="text-xs px-2.5 py-1 rounded-full font-semibold border">
                 {{ provider.is_verified ? 'Verified' : 'Unverified' }}
               </span>
             </td>
@@ -157,7 +166,8 @@
           <tr
             *ngFor="let customer of customers | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) *
+              tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
@@ -217,7 +227,8 @@
           <tr
             *ngFor="let exec of fieldExecutives | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) *
+              tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
@@ -280,7 +291,8 @@
           <tr
             *ngFor="let admin of systemAdmins | paginate: { itemsPerPage: tableSize !== 'all' ? tableSize : totalRecords, currentPage: page, totalItems: totalRecords }; let i = index"
             class="hover:bg-gray-50/50 transition-colors">
-            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}</td>
+            <td class="p-4 font-semibold text-gray-700 text-sm text-center">{{ tableSize !== 'all' ? (page - 1) *
+              tableSize + i + 1 : i + 1 }}</td>
             <td class="p-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-gray-50 flex-shrink-0">
@@ -364,12 +376,14 @@
           <div *ngIf="modalMode === 'view'" class="space-y-4">
 
             <div *ngIf="activeTab === 'service_providers'" class="space-y-6">
-              
+
               <!-- Profile Image (View Mode) -->
               <div class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
                 <label class="block text-sm font-bold text-gray-700 mb-1">Profile Image</label>
-                <div class="w-32 h-24 rounded-xl overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50">
-                  <img *ngIf="selectedUser?.imagePreview" [src]="selectedUser.imagePreview" class="w-full h-full object-cover" alt="Profile" />
+                <div
+                  class="w-32 h-24 rounded-xl overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50">
+                  <img *ngIf="selectedUser?.imagePreview" [src]="selectedUser.imagePreview"
+                    class="w-full h-full object-cover" alt="Profile" />
                   <i *ngIf="!selectedUser?.imagePreview" class="fa-solid fa-image text-3xl text-gray-300"></i>
                 </div>
               </div>
@@ -385,7 +399,8 @@
                     </div>
                   </ng-container>
                   <ng-template #noImages>
-                    <div class="w-32 h-24 rounded-xl overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400">
+                    <div
+                      class="w-32 h-24 rounded-xl overflow-hidden border-2 border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400">
                       No Images
                     </div>
                   </ng-template>
@@ -445,6 +460,72 @@
                   <span class="text-sm font-semibold text-gray-500 capitalize">Vehicle Categories</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.category || 'N/A' }}</span>
                 </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Is Service Provider</span>
+                  <span class="text-sm text-gray-800 font-medium">
+                    <i class="fa-solid fa-circle-check text-green-500 mr-1"
+                      *ngIf="selectedUser?.is_service_provider"></i>
+                    <i class="fa-solid fa-circle-xmark text-red-400 mr-1"
+                      *ngIf="!selectedUser?.is_service_provider"></i>
+                    {{ selectedUser?.is_service_provider ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Is Spare Part Seller</span>
+                  <span class="text-sm text-gray-800 font-medium">
+                    <i class="fa-solid fa-circle-check text-green-500 mr-1"
+                      *ngIf="selectedUser?.is_spare_part_seller"></i>
+                    <i class="fa-solid fa-circle-xmark text-red-400 mr-1"
+                      *ngIf="!selectedUser?.is_spare_part_seller"></i>
+                    {{ selectedUser?.is_spare_part_seller ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Is Vehicle Reseller</span>
+                  <span class="text-sm text-gray-800 font-medium">
+                    <i class="fa-solid fa-circle-check text-green-500 mr-1"
+                      *ngIf="selectedUser?.is_vehicle_reseller"></i>
+                    <i class="fa-solid fa-circle-xmark text-red-400 mr-1"
+                      *ngIf="!selectedUser?.is_vehicle_reseller"></i>
+                    {{ selectedUser?.is_vehicle_reseller ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Latitude</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.latitude || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Longitude</span>
+                  <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.longitude || 'N/A' }}</span>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2 md:col-span-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Business Categories</span>
+                  <div class="flex flex-wrap gap-1 mt-1"
+                    *ngIf="(selectedUser?.business_categories && selectedUser.business_categories.length > 0) || (selectedUser?.business_category_id && selectedUser.business_category_id.length > 0); else noBCat">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      *ngFor="let item of (selectedUser.business_categories && selectedUser.business_categories.length > 0 ? selectedUser.business_categories : selectedUser.business_category_id)">
+                      {{ item.name || getBusinessCategoryName(item.id || item) }}
+                    </span>
+                  </div>
+                  <ng-template #noBCat>
+                    <span class="text-sm text-gray-800 font-medium">N/A</span>
+                  </ng-template>
+                </div>
+                <div class="flex flex-col border-b border-gray-50 pb-2 md:col-span-2">
+                  <span class="text-sm font-semibold text-gray-500 capitalize">Tags</span>
+                  <div class="flex flex-wrap gap-1 mt-1"
+                    *ngIf="(selectedUser?.tags && selectedUser.tags.length > 0) || (selectedUser?.tag_id && selectedUser.tag_id.length > 0); else noTagsView">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                      *ngFor="let item of (selectedUser.tags && selectedUser.tags.length > 0 ? selectedUser.tags : selectedUser.tag_id)">
+                      {{ item.name || getTagName(item.id || item) }}
+                    </span>
+                  </div>
+                  <ng-template #noTagsView>
+                    <span class="text-sm text-gray-800 font-medium">N/A</span>
+                  </ng-template>
+                </div>
                 <div class="flex flex-col border-b border-gray-50 pb-2 md:col-span-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">Address</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.address || 'N/A' }}</span>
@@ -497,7 +578,8 @@
                   <span class="text-sm font-semibold text-gray-500 capitalize">Full Name</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.name || 'N/A' }}</span>
                 </div>
-                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'"
+                  class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">Username</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.username || 'N/A' }}</span>
                 </div>
@@ -509,19 +591,23 @@
                   <span class="text-sm font-semibold text-gray-500 capitalize">Phone Number</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.phone || 'N/A' }}</span>
                 </div>
-                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'"
+                  class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">State</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.state_name || 'N/A' }}</span>
                 </div>
-                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'"
+                  class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">City</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.city_name || 'N/A' }}</span>
                 </div>
-                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'"
+                  class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">District</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.district_name || 'N/A' }}</span>
                 </div>
-                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'" class="flex flex-col border-b border-gray-50 pb-2">
+                <div *ngIf="activeTab === 'customers' || activeTab === 'field_executives'"
+                  class="flex flex-col border-b border-gray-50 pb-2">
                   <span class="text-sm font-semibold text-gray-500 capitalize">Pincode</span>
                   <span class="text-sm text-gray-800 font-medium">{{ selectedUser?.pincode || 'N/A' }}</span>
                 </div>
@@ -544,7 +630,8 @@
 
             <!-- Profile Image Upload for All Tabs -->
             <div class="flex flex-col items-center gap-3 pb-4 border-b border-gray-100">
-              <label *ngIf="activeTab === 'service_providers'" class="block text-sm font-bold text-gray-700 mb-1">Profile Image</label>
+              <label *ngIf="activeTab === 'service_providers'"
+                class="block text-sm font-bold text-gray-700 mb-1">Profile Image</label>
               <div class="relative group cursor-pointer" (click)="profileImageInput.click()">
                 <!-- Avatar preview -->
                 <div
@@ -620,10 +707,12 @@
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Username <span
                       class="text-red-500">*</span></label>
-                  <input type="text" [(ngModel)]="selectedUser.username" name="spUsername" required #spUsername="ngModel"
+                  <input type="text" [(ngModel)]="selectedUser.username" name="spUsername" required
+                    #spUsername="ngModel"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
                     [ngClass]="{'border-red-500': spUsername.invalid && (spUsername.dirty || spUsername.touched), 'border-gray-300': !(spUsername.invalid && (spUsername.dirty || spUsername.touched))}">
-                  <div *ngIf="spUsername.invalid && (spUsername.dirty || spUsername.touched)" class="text-red-500 text-xs mt-1">
+                  <div *ngIf="spUsername.invalid && (spUsername.dirty || spUsername.touched)"
+                    class="text-red-500 text-xs mt-1">
                     Username is required.</div>
                 </div>
                 <div>
@@ -652,7 +741,8 @@
 
                 <!-- State and City -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">State <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">State <span
+                      class="text-red-500">*</span></label>
                   <select [(ngModel)]="selectedUser.state_id" name="spState" required #spState="ngModel"
                     (change)="onStateChange(selectedUser.state_id)"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
@@ -660,27 +750,32 @@
                     <option [ngValue]="null" disabled>Select State</option>
                     <option *ngFor="let state of states" [ngValue]="state.id">{{ state.name }}</option>
                   </select>
-                  <div *ngIf="spState.invalid && (spState.dirty || spState.touched)" class="text-red-500 text-xs mt-1">State is required.</div>
+                  <div *ngIf="spState.invalid && (spState.dirty || spState.touched)" class="text-red-500 text-xs mt-1">
+                    State is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">City <span
+                      class="text-red-500">*</span></label>
                   <select [(ngModel)]="selectedUser.city_id" name="spCity" required #spCity="ngModel"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
                     [ngClass]="{'border-red-500': spCity.invalid && (spCity.dirty || spCity.touched), 'border-gray-300': !(spCity.invalid && (spCity.dirty || spCity.touched))}">
                     <option [ngValue]="null" disabled>Select City</option>
                     <option *ngFor="let city of cities" [ngValue]="city.id">{{ city.name }}</option>
                   </select>
-                  <div *ngIf="spCity.invalid && (spCity.dirty || spCity.touched)" class="text-red-500 text-xs mt-1">City is required.</div>
+                  <div *ngIf="spCity.invalid && (spCity.dirty || spCity.touched)" class="text-red-500 text-xs mt-1">City
+                    is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span
+                      class="text-red-500">*</span></label>
                   <select [(ngModel)]="selectedUser.district_id" name="spDistrict" required #spDistrict="ngModel"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
                     [ngClass]="{'border-red-500': spDistrict.invalid && (spDistrict.dirty || spDistrict.touched), 'border-gray-300': !(spDistrict.invalid && (spDistrict.dirty || spDistrict.touched))}">
                     <option [ngValue]="null" disabled>Select District</option>
                     <option *ngFor="let district of districts" [ngValue]="district.id">{{ district.name }}</option>
                   </select>
-                  <div *ngIf="spDistrict.invalid && (spDistrict.dirty || spDistrict.touched)" class="text-red-500 text-xs mt-1">District is required.</div>
+                  <div *ngIf="spDistrict.invalid && (spDistrict.dirty || spDistrict.touched)"
+                    class="text-red-500 text-xs mt-1">District is required.</div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Pincode (Optional)</label>
@@ -690,7 +785,7 @@
 
                 <!-- Supported Vehicle Categories -->
                 <div class="md:col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Supported Vehicle Categories</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Supported Vehicle Categories <span class="text-red-500">*</span></label>
                   <div class="flex flex-wrap gap-4">
                     <label *ngFor="let cat of publicCategories" class="inline-flex items-center cursor-pointer">
                       <input type="checkbox" [value]="cat.id"
@@ -702,8 +797,78 @@
                   </div>
                 </div>
 
+                <!-- Business Types -->
+                <div class="md:col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Business Type <span
+                      class="text-red-500">*</span></label>
+                  <div class="flex flex-wrap gap-6">
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [(ngModel)]="selectedUser.is_service_provider"
+                        (change)="onBusinessTypeChange()" name="isServiceProvider"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-700 font-medium">Service Provider</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [(ngModel)]="selectedUser.is_spare_part_seller"
+                        (change)="onBusinessTypeChange()" name="isSparePartSeller"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-700 font-medium">Spare Part Seller</span>
+                    </label>
+                    <label class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [(ngModel)]="selectedUser.is_vehicle_reseller"
+                        (change)="onBusinessTypeChange()" name="isVehicleReseller"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-700 font-medium">Vehicle Reseller</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Business Categories -->
+                <div class="md:col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Business Categories <span class="text-red-500">*</span></label>
+                  <div class="flex flex-wrap gap-4">
+                    <label *ngFor="let bCat of publicBusinessCategories"
+                      class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [value]="bCat.id"
+                        [checked]="isSelectionChecked('business_category_id', bCat.id)"
+                        (change)="toggleSelection('business_category_id', bCat.id, $event)"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">{{ bCat.name }}</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="md:col-span-2 border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Tags <span class="text-red-500">*</span></label>
+                  <div class="flex flex-wrap gap-4" *ngIf="publicTags && publicTags.length > 0; else noTagsAvailable">
+                    <label *ngFor="let tag of publicTags" class="inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [value]="tag.id" [checked]="isSelectionChecked('tag_id', tag.id)"
+                        (change)="toggleSelection('tag_id', tag.id, $event)"
+                        class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
+                      <span class="ml-2 text-sm text-gray-600">{{ tag.name }}</span>
+                    </label>
+                  </div>
+                  <ng-template #noTagsAvailable>
+                    <span class="text-xs text-gray-400">No tags available</span>
+                  </ng-template>
+                </div>
+
+                <!-- Latitude & Longitude -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                  <input type="text" [(ngModel)]="selectedUser.latitude" name="spLatitude" placeholder="e.g. 28.6139"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm border-gray-300">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                  <input type="text" [(ngModel)]="selectedUser.longitude" name="spLongitude" placeholder="e.g. 77.2090"
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm border-gray-300">
+                </div>
+
                 <!-- Is Service Available & Verified User -->
-                <div class="col-span-1 border border-gray-100 rounded-lg p-3 bg-gray-50/50 flex flex-col justify-center gap-3">
+                <div
+                  class="col-span-1 border border-gray-100 rounded-lg p-3 bg-gray-50/50 flex flex-col justify-center gap-3">
                   <label class="inline-flex items-center cursor-pointer">
                     <input type="checkbox" [(ngModel)]="selectedUser.is_service_available" name="isServiceAvailable"
                       class="w-4 h-4 rounded border-gray-300 text-custom-primary focus:ring-custom-primary">
@@ -840,14 +1005,17 @@
                     class="text-red-500 text-xs mt-1">City is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
-                  <select [(ngModel)]="selectedUser.district_id" name="customerDistrict" required #customerDistrict="ngModel"
+                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span
+                      class="text-red-500">*</span></label>
+                  <select [(ngModel)]="selectedUser.district_id" name="customerDistrict" required
+                    #customerDistrict="ngModel"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
                     [ngClass]="{'border-red-500': customerDistrict.invalid && (customerDistrict.dirty || customerDistrict.touched), 'border-gray-300': !(customerDistrict.invalid && (customerDistrict.dirty || customerDistrict.touched))}">
                     <option [ngValue]="null" disabled>Select District</option>
                     <option *ngFor="let district of districts" [ngValue]="district.id">{{ district.name }}</option>
                   </select>
-                  <div *ngIf="customerDistrict.invalid && (customerDistrict.dirty || customerDistrict.touched)" class="text-red-500 text-xs mt-1">District is required.</div>
+                  <div *ngIf="customerDistrict.invalid && (customerDistrict.dirty || customerDistrict.touched)"
+                    class="text-red-500 text-xs mt-1">District is required.</div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Pincode (Optional)</label>
@@ -908,7 +1076,8 @@
                   </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">State <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">State <span
+                      class="text-red-500">*</span></label>
                   <select [(ngModel)]="selectedUser.state_id" name="execState" required #execState="ngModel"
                     (change)="onStateChange(selectedUser.state_id)"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
@@ -916,27 +1085,32 @@
                     <option [ngValue]="null" disabled>Select State</option>
                     <option *ngFor="let state of states" [ngValue]="state.id">{{ state.name }}</option>
                   </select>
-                  <div *ngIf="execState.invalid && (execState.dirty || execState.touched)" class="text-red-500 text-xs mt-1">State is required.</div>
+                  <div *ngIf="execState.invalid && (execState.dirty || execState.touched)"
+                    class="text-red-500 text-xs mt-1">State is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">City <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">City <span
+                      class="text-red-500">*</span></label>
                   <select [(ngModel)]="selectedUser.city_id" name="execCity" required #execCity="ngModel"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
                     [ngClass]="{'border-red-500': execCity.invalid && (execCity.dirty || execCity.touched), 'border-gray-300': !(execCity.invalid && (execCity.dirty || execCity.touched))}">
                     <option [ngValue]="null" disabled>Select City</option>
                     <option *ngFor="let city of cities" [ngValue]="city.id">{{ city.name }}</option>
                   </select>
-                  <div *ngIf="execCity.invalid && (execCity.dirty || execCity.touched)" class="text-red-500 text-xs mt-1">City is required.</div>
+                  <div *ngIf="execCity.invalid && (execCity.dirty || execCity.touched)"
+                    class="text-red-500 text-xs mt-1">City is required.</div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span class="text-red-500">*</span></label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">District <span
+                      class="text-red-500">*</span></label>
                   <select [(ngModel)]="selectedUser.district_id" name="execDistrict" required #execDistrict="ngModel"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"
                     [ngClass]="{'border-red-500': execDistrict.invalid && (execDistrict.dirty || execDistrict.touched), 'border-gray-300': !(execDistrict.invalid && (execDistrict.dirty || execDistrict.touched))}">
                     <option [ngValue]="null" disabled>Select District</option>
                     <option *ngFor="let district of districts" [ngValue]="district.id">{{ district.name }}</option>
                   </select>
-                  <div *ngIf="execDistrict.invalid && (execDistrict.dirty || execDistrict.touched)" class="text-red-500 text-xs mt-1">District is required.</div>
+                  <div *ngIf="execDistrict.invalid && (execDistrict.dirty || execDistrict.touched)"
+                    class="text-red-500 text-xs mt-1">District is required.</div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Pincode (Optional)</label>

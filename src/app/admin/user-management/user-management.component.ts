@@ -109,11 +109,15 @@ export class UserManagementComponent implements OnInit {
     this.roles = this.jwtService.getadmiRole() as string;
     this.fetchServiceProviders();
     this.fetchPublicCategories();
+    this.fetchPublicBusinessCategories();
+    this.fetchPublicTags();
     this.fetchStates();
   }
 
   publicCategories: any[] = [];
   publicSpareParts: any[] = [];
+  publicBusinessCategories: any[] = [];
+  publicTags: any[] = [];
   fetchPublicCategories() {
     this.adminService.getPublicVehicleCategories().subscribe({
       next: (res: any) => {
@@ -134,6 +138,90 @@ export class UserManagementComponent implements OnInit {
       },
       error: (err) => console.error(err)
     });
+  }
+
+  getSelectedBusinessTypesString(): string {
+    if (!this.selectedUser) return '';
+    const types: string[] = [];
+    if (this.selectedUser.is_service_provider) types.push('service_provider');
+    if (this.selectedUser.is_spare_part_seller)
+      types.push('spare_part_seller');
+    if (this.selectedUser.is_vehicle_reseller) types.push('vehicle_reseller');
+    return types.join(',');
+  }
+
+  onBusinessTypeChange() {
+    const types = this.getSelectedBusinessTypesString();
+    this.fetchPublicBusinessCategories(types);
+    this.fetchPublicTagsFiltered();
+  }
+
+  fetchPublicBusinessCategories(types?: string) {
+    this.adminService.getPublicBusinessCategories(types).subscribe({
+      next: (res: any) => {
+        if (res && (res.status === 200 || res.status === true)) {
+          this.publicBusinessCategories = res.data || [];
+          if (
+            this.selectedUser &&
+            Array.isArray(this.selectedUser.business_category_id)
+          ) {
+            const validIds = this.publicBusinessCategories.map((b: any) =>
+              Number(b.id),
+            );
+            this.selectedUser.business_category_id =
+              this.selectedUser.business_category_id.filter((id: number) =>
+                validIds.includes(Number(id)),
+              );
+          }
+        }
+      },
+      error: (err) => console.error(err),
+    });
+  }
+
+  fetchPublicTagsFiltered() {
+    const bTypes = this.getSelectedBusinessTypesString();
+    const bCats = this.selectedUser?.business_category_id || [];
+    const vCats = this.selectedUser?.vehicle_category_id || [];
+    this.adminService.getPublicTags(bTypes, bCats, vCats).subscribe({
+      next: (res: any) => {
+        if (res && (res.status === 200 || res.status === true)) {
+          this.publicTags = res.data || [];
+          if (this.selectedUser && Array.isArray(this.selectedUser.tag_id)) {
+            const validIds = this.publicTags.map((t: any) => Number(t.id));
+            this.selectedUser.tag_id = this.selectedUser.tag_id.filter(
+              (id: number) => validIds.includes(Number(id)),
+            );
+          }
+        }
+      },
+      error: (err) => console.error(err),
+    });
+  }
+
+  fetchPublicTags() {
+    this.fetchPublicTagsFiltered();
+  }
+
+  getBusinessCategoryName(id: any): string {
+    let cat = this.publicBusinessCategories.find(
+      (b: any) => Number(b.id) === Number(id),
+    );
+    if (!cat && this.selectedUser?.business_categories && Array.isArray(this.selectedUser.business_categories)) {
+      cat = this.selectedUser.business_categories.find((b: any) => Number(b.id) === Number(id));
+    }
+    if (!cat && this.selectedUser?.business_category && Array.isArray(this.selectedUser.business_category)) {
+      cat = this.selectedUser.business_category.find((b: any) => Number(b.id) === Number(id));
+    }
+    return cat ? cat.name : `Category #${id}`;
+  }
+
+  getTagName(id: any): string {
+    let tag = this.publicTags.find((t: any) => Number(t.id) === Number(id));
+    if (!tag && this.selectedUser?.tags && Array.isArray(this.selectedUser.tags)) {
+      tag = this.selectedUser.tags.find((t: any) => Number(t.id) === Number(id));
+    }
+    return tag ? tag.name : `Tag #${id}`;
   }
 
   states: any[] = [];
@@ -313,6 +401,13 @@ export class UserManagementComponent implements OnInit {
       this.selectedUser.spare_part_id = [];
       this.selectedUser.sub_spare_part_id = [];
       this.selectedUser.service_type_id = [];
+      this.selectedUser.is_service_provider = true;
+      this.selectedUser.is_spare_part_seller = false;
+      this.selectedUser.is_vehicle_reseller = false;
+      this.selectedUser.business_category_id = [];
+      this.selectedUser.tag_id = [];
+      this.selectedUser.latitude = '';
+      this.selectedUser.longitude = '';
       this.selectedUser.state_id = null;
       this.selectedUser.city_id = null;
       this.selectedUser.district_id = null;
@@ -323,6 +418,9 @@ export class UserManagementComponent implements OnInit {
     if (this.activeTab === 'service_providers') {
       this.fetchPublicCategories();
       // this.fetchPublicSpareParts();
+      if (mode === 'add') {
+        this.onBusinessTypeChange();
+      }
     }
 
     if (user && user.id && this.activeTab === 'service_providers') {
@@ -349,6 +447,40 @@ export class UserManagementComponent implements OnInit {
               imagePreview: profile.image_url || null,
               category: profile.vehicle_category && profile.vehicle_category.length ? profile.vehicle_category.map((c: any) => c.name).join(', ') : 'N/A',
               vehicle_category_id: ensureArray(profile.vehicle_category_id),
+              business_category_id: ensureArray(
+                profile.business_category_id ||
+                  rawData.business_category_id ||
+                  (profile.business_categories
+                    ? profile.business_categories.map((b: any) => b.id)
+                    : []),
+              ),
+              tag_id: ensureArray(
+                profile.tag_id ||
+                  rawData.tag_id ||
+                  (profile.tags ? profile.tags.map((t: any) => t.id) : []),
+              ),
+              tags: profile.tags || rawData.tags || [],
+              business_categories: profile.business_categories || profile.business_category || rawData.business_categories || rawData.business_category || [],
+              is_service_provider:
+                rawData.is_service_provider === 1 ||
+                rawData.is_service_provider === true ||
+                profile.is_service_provider === 1 ||
+                profile.is_service_provider === true ||
+                true,
+              is_spare_part_seller:
+                rawData.is_spare_part_seller === 1 ||
+                rawData.is_spare_part_seller === true ||
+                profile.is_spare_part_seller === 1 ||
+                profile.is_spare_part_seller === true ||
+                false,
+              is_vehicle_reseller:
+                rawData.is_vehicle_reseller === 1 ||
+                rawData.is_vehicle_reseller === true ||
+                profile.is_vehicle_reseller === 1 ||
+                profile.is_vehicle_reseller === true ||
+                false,
+              latitude: profile.latitude || rawData.latitude || '',
+              longitude: profile.longitude || rawData.longitude || '',
               is_service_available: profile.is_service_available === 1 || profile.is_service_available === true || profile.is_service_available === '1',
               is_verified: profile.is_verified === 1 || profile.is_verified === true || profile.is_verified === '1',
               state_id: profile.state_id || null,
@@ -371,6 +503,9 @@ export class UserManagementComponent implements OnInit {
             }
             if (this.selectedUser.state_id) {
               this.onStateChange(this.selectedUser.state_id);
+            }
+            if (mode !== 'view') {
+              this.onBusinessTypeChange();
             }
           }
         },
@@ -483,6 +618,7 @@ export class UserManagementComponent implements OnInit {
         }
         this.selectedUser[field].push(id);
       }
+      this.fetchPublicTagsFiltered();
       return;
     }
 
@@ -491,6 +627,10 @@ export class UserManagementComponent implements OnInit {
       this.selectedUser[field].splice(index, 1);
     } else {
       this.selectedUser[field].push(id);
+    }
+
+    if (field === 'business_category_id') {
+      this.fetchPublicTagsFiltered();
     }
   }
 
@@ -519,13 +659,44 @@ export class UserManagementComponent implements OnInit {
       formData.append('username', this.selectedUser.username || '');
       const appendArrayToFormData = (field: string) => {
         if (this.selectedUser[field] && Array.isArray(this.selectedUser[field])) {
-          this.selectedUser[field].forEach((id: number) => {
-            formData.append(`${field}[]`, id.toString());
+          this.selectedUser[field].forEach((id: number, idx: number) => {
+            formData.append(`${field}[${idx}]`, id.toString());
           });
         }
       };
 
       appendArrayToFormData('vehicle_category_id');
+      appendArrayToFormData('business_category_id');
+      appendArrayToFormData('tag_id');
+
+      formData.append(
+        'is_service_provider',
+        this.selectedUser.is_service_provider ? '1' : '0',
+      );
+      formData.append(
+        'is_spare_part_seller',
+        this.selectedUser.is_spare_part_seller ? '1' : '0',
+      );
+      formData.append(
+        'is_vehicle_reseller',
+        this.selectedUser.is_vehicle_reseller ? '1' : '0',
+      );
+
+      if (
+        this.selectedUser.latitude !== null &&
+        this.selectedUser.latitude !== undefined &&
+        this.selectedUser.latitude !== ''
+      ) {
+        formData.append('latitude', this.selectedUser.latitude.toString());
+      }
+      if (
+        this.selectedUser.longitude !== null &&
+        this.selectedUser.longitude !== undefined &&
+        this.selectedUser.longitude !== ''
+      ) {
+        formData.append('longitude', this.selectedUser.longitude.toString());
+      }
+
       formData.append('is_service_available', this.selectedUser.is_service_available ? '1' : '0');
       formData.append('is_verified', this.selectedUser.is_verified ? '1' : '0');
       if (this.selectedUser.state_id) formData.append('state_id', this.selectedUser.state_id.toString());

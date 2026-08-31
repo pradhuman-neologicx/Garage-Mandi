@@ -76,6 +76,18 @@ export class SidenavComponent {
         },
         {
           index: 5,
+          icon: 'business_center',
+          label: 'Business Categories',
+          route: '/admin/business-categories',
+        },
+        {
+          index: 6,
+          icon: 'sell',
+          label: 'Tags Master',
+          route: '/admin/tags-master',
+        },
+        {
+          index: 6,
           icon: 'payments',
           label: 'Subscriptions',
           route: '/admin/subscription-management',

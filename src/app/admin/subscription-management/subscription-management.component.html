@@ -74,7 +74,8 @@
 
         <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto flex-grow sm:flex-grow-0">
           <ng-select *ngIf="activeTab === 'providers'" [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()"
-            placeholder="All Statuses" class="w-full sm:w-40 text-sm bg-white" [clearable]="true" [multiple]="false" [searchable]="false">
+            placeholder="All Statuses" class="w-full sm:w-40 text-sm bg-white" [clearable]="true" [multiple]="false"
+            [searchable]="false">
             <ng-option value="">All Statuses</ng-option>
             <ng-option value="active">Active</ng-option>
             <ng-option value="expired">Expired</ng-option>
@@ -144,9 +145,10 @@
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
             <th class="p-4 w-16 text-center">S.No.</th>
             <th class="p-4">Provider Name & Number</th>
+            <th class="p-4">Start Date</th>
             <th class="p-4">Expiry Date</th>
             <th class="p-4 text-center">Days Left</th>
-            <th class="p-4 text-right">Actions</th>
+            <!-- <th class="p-4 text-right">Actions</th> -->
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -161,14 +163,15 @@
               <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ alert.phoneNumber }}
               </div>
             </td>
+            <td class="p-4 text-sm text-gray-600">{{ alert.startDate }}</td>
             <td class="p-4 text-sm text-red-600 font-semibold">{{ alert.expiryDate }}</td>
             <td class="p-4 text-center font-bold text-red-700 text-lg">{{ alert.daysLeft }}</td>
-            <td class="p-4 text-right space-x-2">
+            <!-- <td class="p-4 text-right space-x-2">
               <button
                 class="bg-custom-primary hover:opacity-90 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
                 Send Reminder
               </button>
-            </td>
+            </td> -->
           </tr>
         </tbody>
       </table>
@@ -248,46 +251,23 @@
           </div>
 
           <!-- Details Section -->
-          <div *ngIf="selectedProvider?.rawData"
-            class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+          <div *ngIf="selectedProvider?.rawData" class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm mb-6">
             <!-- Provider Details -->
             <div>
               <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Provider Details</h4>
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between border-b border-gray-50 pb-2">
-                  <span class="text-gray-500">Name</span>
-                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.name || 'N/A' }}</span>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="border-b md:border-b-0 md:border-r border-gray-50 pb-2 md:pb-0 pr-4">
+                  <div class="text-gray-500 mb-1">Name</div>
+                  <div class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.name || 'N/A' }}</div>
                 </div>
-                <div class="flex justify-between border-b border-gray-50 pb-2">
-                  <span class="text-gray-500">Email</span>
-                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.email || 'N/A' }}</span>
+                <div class="border-b md:border-b-0 md:border-r border-gray-50 pb-2 md:pb-0 pr-4 pl-0 md:pl-4">
+                  <div class="text-gray-500 mb-1">Email</div>
+                  <div class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.email || 'N/A' }}</div>
                 </div>
-                <div class="flex justify-between border-b border-gray-50 pb-2">
-                  <span class="text-gray-500">Phone</span>
-                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.phone_number || 'N/A'
-                    }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Subscription Details -->
-            <div>
-              <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Subscription Details</h4>
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between border-b border-gray-50 pb-2">
-                  <span class="text-gray-500">Plan Name</span>
-                  <span class="font-medium text-gray-900">{{ selectedProvider.rawData.plan?.name || 'N/A' }}</span>
-                </div>
-                <div class="flex justify-between border-b border-gray-50 pb-2">
-                  <span class="text-gray-500">Amount</span>
-                  <span class="font-medium text-gray-900">₹{{ selectedProvider.rawData.plan?.amount || 'N/A' }}</span>
-                </div>
-                <div class="flex justify-between border-b border-gray-50 pb-2">
-                  <span class="text-gray-500">Sub Status</span>
-                  <span class="font-medium capitalize"
-                    [ngClass]="selectedProvider.rawData.status === 'active' ? 'text-green-600' : 'text-red-600'">
-                    {{ selectedProvider.rawData.status || 'N/A' }}
-                  </span>
+                <div class="pb-2 md:pb-0 pl-0 md:pl-4">
+                  <div class="text-gray-500 mb-1">Phone</div>
+                  <div class="font-medium text-gray-900">{{ selectedProvider.rawData.provider?.phone_number || 'N/A' }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -299,39 +279,76 @@
             </div>
           </div>
 
-          <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1 mt-4">History</h4>
-          <div *ngIf="selectedProvider?.history && selectedProvider.history.length > 0"
-            class="overflow-x-auto border border-gray-100 rounded-lg shadow-sm">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr
-                  class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-                  <th class="p-4 w-[250px]">Plan Name</th>
-                  <th class="p-4">Amount</th>
-                  <th class="p-4">Start Date</th>
-                  <th class="p-4">End Date</th>
-                  <!-- <th class="p-4 text-center">Status</th> -->
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                <tr *ngFor="let item of selectedProvider.history" class="hover:bg-gray-50/50 transition-colors">
-                  <td class="p-4 text-sm text-gray-900 font-medium">{{ item.planName }}</td>
-                  <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ item.amount }}</td>
-                  <td class="p-4 text-sm text-gray-600">{{ item.startDate }}</td>
-                  <td class="p-4 text-sm text-gray-600">{{ item.endDate }}</td>
-                  <!-- <td class="p-4 text-center">
-                    <span
-                      [ngClass]="{'bg-green-100 text-green-700': item.status === 'active', 'bg-red-100 text-red-700': item.status === 'expired', 'bg-gray-100 text-gray-700': item.status !== 'active' && item.status !== 'expired'}"
-                      class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize">
-                      {{ item.status }}
-                    </span>
-                  </td> -->
-                </tr>
-              </tbody>
-            </table>
+          <!-- Current Plans Table -->
+          <div *ngIf="selectedProvider?.currentSubs && selectedProvider.currentSubs.length > 0">
+            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">Current Plans</h4>
+            <div class="overflow-x-auto border border-gray-100 rounded-lg shadow-sm mb-6">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr
+                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+                    <th class="p-4 w-[250px]">Plan Name</th>
+                    <th class="p-4">Amount</th>
+                    <th class="p-4">Start Date</th>
+                    <th class="p-4">End Date</th>
+                    <th class="p-4 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr *ngFor="let item of selectedProvider.currentSubs" class="hover:bg-gray-50/50 transition-colors">
+                    <td class="p-4 text-sm text-gray-900 font-medium">{{ item.planName }}</td>
+                    <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ item.amount }}</td>
+                    <td class="p-4 text-sm text-gray-600">{{ item.startDate }}</td>
+                    <td class="p-4 text-sm text-gray-600">{{ item.endDate }}</td>
+                    <td class="p-4 text-center">
+                      <span
+                        [ngClass]="{'bg-green-100 text-green-700': item.status === 'active', 'bg-red-100 text-red-700': item.status === 'expired', 'bg-gray-100 text-gray-700': item.status !== 'active' && item.status !== 'expired'}"
+                        class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize">
+                        {{ item.status }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div *ngIf="!selectedProvider?.history || selectedProvider.history.length === 0"
+          <!-- History Table -->
+          <div *ngIf="selectedProvider?.history && selectedProvider.history.length > 0">
+            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">History</h4>
+            <div class="overflow-x-auto border border-gray-100 rounded-lg shadow-sm">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr
+                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
+                    <th class="p-4 w-[250px]">Plan Name</th>
+                    <th class="p-4">Amount</th>
+                    <th class="p-4">Start Date</th>
+                    <th class="p-4">End Date</th>
+                    <th class="p-4 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr *ngFor="let item of selectedProvider.history" class="hover:bg-gray-50/50 transition-colors">
+                    <td class="p-4 text-sm text-gray-900 font-medium">{{ item.planName }}</td>
+                    <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ item.amount }}</td>
+                    <td class="p-4 text-sm text-gray-600">{{ item.startDate }}</td>
+                    <td class="p-4 text-sm text-gray-600">{{ item.endDate }}</td>
+                    <td class="p-4 text-center">
+                      <span
+                        [ngClass]="{'bg-green-100 text-green-700': item.status === 'active', 'bg-red-100 text-red-700': item.status === 'expired', 'bg-gray-100 text-gray-700': item.status !== 'active' && item.status !== 'expired'}"
+                        class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize">
+                        {{ item.status }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div
+            *ngIf="(!selectedProvider?.currentSubs || selectedProvider.currentSubs.length === 0) && (!selectedProvider?.history || selectedProvider.history.length === 0)"
             class="text-sm text-gray-500 italic bg-gray-50 p-6 rounded-lg text-center border border-gray-100">
             No history found for this provider.
           </div>

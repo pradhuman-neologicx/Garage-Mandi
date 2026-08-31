@@ -133,6 +133,16 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
+        path: 'business-categories',
+        loadComponent: () => import('./admin/business-categories/business-categories.component').then(m => m.BusinessCategoriesComponent),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'tags-master',
+        loadComponent: () => import('./admin/tags-master/tags-master.component').then(m => m.TagsMasterComponent),
+        canActivate: [AuthGuard],
+      },
+      {
         path: 'vehicle-resale',
         loadComponent: () => import('./admin/vehicle-resale/vehicle-resale.component').then(m => m.VehicleResaleComponent),
         canActivate: [AuthGuard],

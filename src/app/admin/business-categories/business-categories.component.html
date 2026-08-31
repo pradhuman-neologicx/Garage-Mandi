@@ -1,0 +1,361 @@
+<div class="container mb-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap">
+    <h1 class="text-primary table-heading-detail">Business Categories Management</h1>
+    <div>
+      <button
+        class="btn btn-custom-primary px-4 py-2 me-2"
+        (click)="openAddModal()"
+      >
+        Add Category
+      </button>
+    </div>
+  </div>
+
+  <div class="card border-0 my-4 px-4 py-4">
+    <div class="d-md-flex justify-content-between align-items-center my-3 flex-wrap gap-3">
+      <div class="d-flex align-items-center mb-md-0 mb-2">
+        <span class="me-1 show-entery-text">Show</span>
+        <select
+          class="form-control form-select show-entries-select"
+          (change)="onTableSizeChange($event)"
+        >
+          <option *ngFor="let size of tableSizes" [ngValue]="size">
+            {{ size }}
+          </option>
+        </select>
+        <span class="ms-1 show-entery-text">entries</span>
+      </div>
+
+      <!-- Filters and Search -->
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center">
+          <select
+            class="form-select form-control"
+            style="min-width: 170px;"
+            [(ngModel)]="selectedBusinessType"
+            (change)="onFilterChange()"
+          >
+            <option value="all">All Business Types</option>
+            <option *ngFor="let type of businessTypes" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <select
+            class="form-select form-control"
+            style="min-width: 140px;"
+            [(ngModel)]="selectedStatus"
+            (change)="onFilterChange()"
+          >
+            <option value="all">All Status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+
+        <form [formGroup]="searchbarform" class="d-flex align-items-center">
+          <span class="me-1 ms-1">Search:</span>
+          <div>
+            <input
+              type="text"
+              class="form-control search-user position-relative"
+              autocomplete="off"
+              placeholder="Search category..."
+              formControlName="searchbar"
+              [ngClass]="{
+                'is-invalid':
+                  searchbarform.controls['searchbar'].errors &&
+                  (searchbarform.controls['searchbar'].touched ||
+                    searchbarform.controls['searchbar'].dirty)
+              }"
+            />
+          </div>
+
+          <button class="btn btn-primary search-btn ms-2" (click)="searchfun()">
+            <span><i class="fa-solid fa-magnifying-glass form-control-feedback text-white"></i></span>
+          </button>
+          <button
+            class="btn btn-primary search-btn ms-2"
+            (click)="resetsearchbar()"
+            type="button"
+            *ngIf="showreset == true"
+          >
+            <span><i class="fa-solid fa-rotate-right form-control-feedback text-white"></i></span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="categoryList && categoryList.length === 0" class="text-center py-5 my-4">
+      <div class="d-inline-flex align-items-center justify-content-center bg-light text-muted rounded-circle mb-3" style="width: 80px; height: 80px; font-size: 32px;">
+        <i class="fa-solid fa-business-time"></i>
+      </div>
+      <h5 class="fw-bold text-dark">No Business Categories Found</h5>
+      <p class="text-muted small">Try adjusting your filters or search terms, or add a new category.</p>
+    </div>
+
+    <!-- Cards Layout -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 mt-2" *ngIf="categoryList && categoryList.length > 0">
+      <div
+        class="col"
+        *ngFor="
+          let category of categoryList
+            | paginate: {
+                itemsPerPage: tableSize != 'all' ? tableSize : totalRecords,
+                currentPage: page,
+                totalItems: totalRecords
+              };
+          index as i
+        "
+      >
+        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative hover-shadow transition-all bg-white">
+          <div class="position-absolute top-0 start-0 m-3">
+            <span class="badge bg-light text-secondary border fw-medium px-2 py-1" style="font-size: 13px;">
+              #{{ tableSize != 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}
+            </span>
+          </div>
+
+          <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+            
+            <div>
+              <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 70px; height: 70px; font-size: 28px; font-weight: bold;">
+                {{ category.name.charAt(0) | uppercase }}
+              </div>
+              <h5 class="card-title fw-bold text-dark mb-3 text-truncate" [title]="category.name">{{ category.name }}</h5>
+              
+              <div class="mb-2 d-flex justify-content-center gap-2 flex-wrap">
+                <span
+                  class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1"
+                  [ngClass]="getBusinessTypeBadgeClass(category.business_type)"
+                >
+                  {{ getBusinessTypeLabel(category.business_type) }}
+                </span>
+
+                <span
+                  class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1"
+                  [ngClass]="category.is_active ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'"
+                >
+                  <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+                  {{ category.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+
+              <p class="text-muted small mt-2 mb-3 text-truncate" [title]="category.description || 'No description'" *ngIf="category.description">
+                {{ category.description }}
+              </p>
+            </div>
+
+            <!-- Action Icons -->
+            <div class="d-flex justify-content-center align-items-center gap-3 pt-3 border-top border-light">
+              <button 
+                class="btn btn-sm btn-light rounded-circle text-primary d-flex align-items-center justify-content-center shadow-sm hover-elevate transition-all" 
+                style="width: 40px; height: 40px;"
+                title="Edit Category"
+                (click)="OpenEditModal(category)">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              
+              <button 
+                class="btn btn-sm btn-light rounded-circle text-info d-flex align-items-center justify-content-center shadow-sm hover-elevate transition-all" 
+                style="width: 40px; height: 40px;"
+                title="View Details"
+                (click)="openviewModal(category)">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+
+              <button 
+                class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-elevate transition-all" 
+                [ngClass]="category.is_active ? 'text-danger' : 'text-success'"
+                style="width: 40px; height: 40px;"
+                [title]="category.is_active ? 'Deactivate' : 'Activate'"
+                (click)="Status(category.id, category.is_active ? 0 : 1)">
+                <i class="fa-solid" [ngClass]="category.is_active ? 'fa-power-off' : 'fa-check'"></i>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-md-flex justify-content-between align-items-center mt-4" *ngIf="categoryList && categoryList.length > 0">
+      <span class="showalltext text-muted">
+        Showing
+        {{ tableSize * (page - 1) > 0 ? tableSize * (page - 1) + 1 : 1 }} to
+        {{ tableSize * page <= totalRecords ? tableSize * page : totalRecords }}
+        of {{ totalRecords != undefined ? totalRecords : "" }} entries
+      </span>
+      <pagination-controls
+        previousLabel="Prev"
+        nextLabel="Next"
+        [responsive]="true"
+        (pageChange)="onTableDataChange($event)"
+      ></pagination-controls>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div *ngIf="createModalOpen" class="modal-container" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="createForm">
+      <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="modal-title pt-1 mb-0 tt-color">Add Business Category</h5>
+          <button class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1" type="button" (click)="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Category Name <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control form-input-custom"
+              placeholder="Enter category name"
+              formControlName="name"
+              [ngClass]="{'is-invalid': createForm.controls['name'].errors && (createForm.controls['name'].touched || createForm.controls['name'].dirty)}"
+            />
+            <div class="text-danger error-message" *ngIf="createForm.controls['name'].errors && (createForm.controls['name'].touched || createForm.controls['name'].dirty)">
+              <p class="fw-light text-danger m-0" *ngIf="createForm.controls['name'].errors['required']">Category Name is required</p>
+              <p class="fw-light text-danger m-0" *ngIf="createForm.controls['name'].errors['minlength']">Must be at least 2 characters</p>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Business Type <span class="text-danger">*</span></label>
+            <select
+              class="form-select form-input-custom"
+              formControlName="business_type"
+              [ngClass]="{'is-invalid': createForm.controls['business_type'].errors && (createForm.controls['business_type'].touched || createForm.controls['business_type'].dirty)}"
+            >
+              <option value="">Select Business Type</option>
+              <option *ngFor="let type of businessTypes" [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+            <div class="text-danger error-message" *ngIf="createForm.controls['business_type'].errors && (createForm.controls['business_type'].touched || createForm.controls['business_type'].dirty)">
+              <p class="fw-light text-danger m-0" *ngIf="createForm.controls['business_type'].errors['required']">Business Type is required</p>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Description</label>
+            <textarea
+              class="form-control form-input-custom"
+              rows="3"
+              placeholder="Enter category description (optional)"
+              formControlName="description"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer text-end">
+          <button class="btn btn-secondary main-btnfs px-4 py-2 me-3 text-white" type="button" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-custom-primary px-4 py-2" type="button" (click)="createCategory()">Create</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div *ngIf="updateModalOpen" class="modal-container" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="updateForm">
+      <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="modal-title pt-1 mb-0 tt-color">Update Business Category</h5>
+          <button class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1" type="button" (click)="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Category Name <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control form-input-custom"
+              placeholder="Enter category name"
+              formControlName="name"
+              [ngClass]="{'is-invalid': updateForm.controls['name'].errors && (updateForm.controls['name'].touched || updateForm.controls['name'].dirty)}"
+            />
+            <div class="text-danger error-message" *ngIf="updateForm.controls['name'].errors && (updateForm.controls['name'].touched || updateForm.controls['name'].dirty)">
+              <p class="fw-light text-danger m-0" *ngIf="updateForm.controls['name'].errors['required']">Category Name is required</p>
+              <p class="fw-light text-danger m-0" *ngIf="updateForm.controls['name'].errors['minlength']">Must be at least 2 characters</p>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Business Type <span class="text-danger">*</span></label>
+            <select
+              class="form-select form-input-custom"
+              formControlName="business_type"
+              [ngClass]="{'is-invalid': updateForm.controls['business_type'].errors && (updateForm.controls['business_type'].touched || updateForm.controls['business_type'].dirty)}"
+            >
+              <option value="">Select Business Type</option>
+              <option *ngFor="let type of businessTypes" [value]="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+            <div class="text-danger error-message" *ngIf="updateForm.controls['business_type'].errors && (updateForm.controls['business_type'].touched || updateForm.controls['business_type'].dirty)">
+              <p class="fw-light text-danger m-0" *ngIf="updateForm.controls['business_type'].errors['required']">Business Type is required</p>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Description</label>
+            <textarea
+              class="form-control form-input-custom"
+              rows="3"
+              placeholder="Enter category description (optional)"
+              formControlName="description"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer text-end">
+          <button class="btn btn-secondary main-btnfs px-4 py-2 me-3 text-white" type="button" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-custom-primary px-4 py-2" type="button" (click)="updateCategory()">Update</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Modal -->
+<div *ngIf="viewModalOpen" class="modal-container" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="modal-contenttop modal-content-50" [@fadeIn]>
+    <form [formGroup]="viewForm">
+      <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="modal-title pt-1 mb-0 tt-color">View Business Category</h5>
+          <button class="cross-btn-icon main-btn bg-transparent border-0 pb-0 pt-1" type="button" (click)="closeModal()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-content-widthtop card-body mb-0">
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Category Name</label>
+            <input type="text" formControlName="name" readonly class="form-control form-input-custom bg-light" />
+          </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Business Type</label>
+            <input type="text" formControlName="business_type" readonly class="form-control form-input-custom bg-light" />
+          </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Description</label>
+            <textarea formControlName="description" readonly rows="3" class="form-control form-input-custom bg-light"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer text-end">
+          <button class="btn btn-secondary main-btnfs px-4 py-2 text-white" type="button" (click)="closeModal()">Close</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

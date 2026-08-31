@@ -1,0 +1,430 @@
+<div class="container-fluid py-4">
+  <div class="d-md-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <h3 class="fw-bold mb-1 text-dark">Tags Management</h3>
+      <p class="text-muted mb-0 small">
+        Manage service & spare part tags, and assign business and vehicle categories.
+      </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-custom-primary px-4 py-2 d-flex align-items-center gap-2 shadow-sm rounded-3"
+        (click)="openCreateModal()">
+        <i class="fa-solid fa-plus"></i>
+        <span>Add Tag</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card border-0 my-4 px-4 py-4">
+    <div class="d-md-flex justify-content-between align-items-center my-3 flex-wrap gap-3">
+      <div class="d-flex align-items-center mb-md-0 mb-2">
+        <span class="me-1 show-entery-text">Show</span>
+        <select class="form-control form-select show-entries-select" (change)="onTableSizeChange($event)">
+          <option *ngFor="let size of tableSizes" [ngValue]="size">
+            {{ size }}
+          </option>
+        </select>
+        <span class="ms-1 show-entery-text">entries</span>
+      </div>
+
+      <!-- Filters and Search -->
+      <div class="d-flex align-items-center flex-wrap gap-2">
+        <!-- Business Category Filter -->
+        <div class="d-flex align-items-center">
+          <select class="form-select form-control" style="min-width: 170px;" [(ngModel)]="selectedBusinessCategory"
+            (change)="page = 1; GetTagsFun()">
+            <option value="all">All Business Categories</option>
+            <option *ngFor="let bCat of publicBusinessCategoriesList" [value]="bCat.id">
+              {{ bCat.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Business Type Filter -->
+        <div class="d-flex align-items-center">
+          <select class="form-select form-control" style="min-width: 160px;" [(ngModel)]="selectedBusinessType"
+            (change)="page = 1; GetTagsFun()">
+            <option value="all">All Business Types</option>
+            <option *ngFor="let bType of businessTypes" [value]="bType.value">
+              {{ bType.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Vehicle Category Filter -->
+        <div class="d-flex align-items-center">
+          <select class="form-select form-control" style="min-width: 160px;" [(ngModel)]="selectedVehicleCategory"
+            (change)="page = 1; GetTagsFun()">
+            <option value="all">All Vehicle Categories</option>
+            <option *ngFor="let vCat of publicVehicleCategoriesList" [value]="vCat.id">
+              {{ vCat.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="d-flex align-items-center">
+          <select class="form-select form-control" style="min-width: 130px;" [(ngModel)]="selectedStatus"
+            (change)="page = 1; GetTagsFun()">
+            <option value="all">All Status</option>
+            <option [value]="true">Active</option>
+            <option [value]="false">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Search Bar -->
+        <form [formGroup]="searchbarform" (ngSubmit)="GetTagsFun()">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search tag..." formControlName="searchbar"
+              style="min-width: 180px;" />
+            <button class="btn btn-custom-primary" type="submit">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <button class="btn btn-outline-secondary" type="button" (click)="resetSearch()" title="Reset Filters">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="row g-4 mt-2" *ngIf="tagsList.length > 0; else noData">
+      <div class="col-12 col-md-6 col-lg-4 col-xl-3" *ngFor="
+          let tag of tagsList
+            | paginate: {
+                itemsPerPage: tableSize != 'all' ? tableSize : totalRecords,
+                currentPage: page,
+                totalItems: totalRecords
+              };
+          index as i
+        ">
+        <div
+          class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative hover-shadow transition-all bg-white">
+          <!-- Serial Number Left Top -->
+          <div class="position-absolute top-0 start-0 m-3">
+            <span class="badge bg-light text-secondary border fw-medium px-2 py-1" style="font-size: 13px;">
+              #{{ tableSize != 'all' ? (page - 1) * tableSize + i + 1 : i + 1 }}
+            </span>
+          </div>
+
+          <div class="card-body p-4 text-center d-flex flex-column justify-content-between">
+            <div>
+              <div
+                class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3"
+                style="width: 70px; height: 70px; font-size: 28px; font-weight: bold;">
+                {{ tag.name.charAt(0) | uppercase }}
+              </div>
+              <h5 class="card-title fw-bold text-dark mb-3 text-truncate" [title]="tag.name">
+                {{ tag.name }}
+              </h5>
+
+              <!-- Badges Section -->
+              <div class="mb-3 d-flex justify-content-center gap-2 flex-wrap">
+                <!-- Business Category Badge -->
+                <span
+                  class="badge rounded-pill bg-dark bg-opacity-10 text-dark px-3 py-2 fw-medium d-inline-flex align-items-center gap-1"
+                  *ngIf="tag.business_category" [title]="'Business Category: ' + tag.business_category.name">
+                  <i class="fa-solid fa-briefcase me-1"></i>
+                  {{ tag.business_category.name }}
+                </span>
+
+                <!-- Business Type Badge -->
+                <span class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1"
+                  [ngClass]="getBusinessTypeBadgeClass(tag.business_type)">
+                  {{ getBusinessTypeLabel(tag.business_type) }}
+                </span>
+
+                <!-- Vehicle Categories Badges -->
+                <ng-container *ngIf="tag.vehicle_category_id && tag.vehicle_category_id.length > 0; else allVehicles">
+                  <span
+                    class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 fw-medium d-inline-flex align-items-center gap-1"
+                    *ngFor="let vId of tag.vehicle_category_id">
+                    <i class="fa-solid fa-car me-1"></i>
+                    {{ getVehicleCategoryName(vId) }}
+                  </span>
+                </ng-container>
+                <ng-template #allVehicles>
+                  <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 py-2 fw-medium">
+                    N/A
+                  </span>
+                </ng-template>
+
+                <!-- Status Badge -->
+                <span class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1" [ngClass]="
+                    tag.is_active
+                      ? 'bg-success bg-opacity-10 text-success'
+                      : 'bg-danger bg-opacity-10 text-danger'
+                  ">
+                  <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+                  {{ tag.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Actions Bottom -->
+            <div class="border-top pt-3 mt-2 d-flex justify-content-center gap-3">
+              <button class="btn btn-sm btn-light text-primary rounded-circle shadow-sm"
+                style="width: 38px; height: 38px;" (click)="openUpdateModal(tag)" title="Edit Tag">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-light text-info rounded-circle shadow-sm" style="width: 38px; height: 38px;"
+                (click)="openViewModal(tag)" title="View Details">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-light rounded-circle shadow-sm" style="width: 38px; height: 38px;"
+                [ngClass]="tag.is_active ? 'text-danger' : 'text-success'" (click)="Status(tag.id, tag.is_active)"
+                [title]="tag.is_active ? 'Deactivate' : 'Activate'">
+                <i class="fa-solid" [ngClass]="tag.is_active ? 'fa-power-off' : 'fa-check'"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Data Template -->
+    <ng-template #noData>
+      <div class="text-center py-5 my-4">
+        <div class="mb-3">
+          <i class="fa-solid fa-tags text-muted" style="font-size: 48px; opacity: 0.5;"></i>
+        </div>
+        <h5 class="fw-bold text-dark">No Tags Found</h5>
+        <p class="text-muted small">
+          We couldn't find any tags matching your search or filters.
+        </p>
+      </div>
+    </ng-template>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-end align-items-center mt-4 pt-3 border-top"
+      *ngIf="tagsList.length > 0 && tableSize != 'all'">
+      <pagination-controls previousLabel="Prev" nextLabel="Next" (pageChange)="onTableDataChange($event)"
+        class="custom-pagination"></pagination-controls>
+    </div>
+  </div>
+
+  <!-- Add Tag Modal -->
+  <div class="modal-container position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+    style="background: rgba(0, 0, 0, 0.5); z-index: 1050;" *ngIf="createModalOpen" @fadeIn>
+    <div class="modal-contenttop bg-white rounded-4 shadow-lg p-4"
+      style="width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;">
+      <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+        <h5 class="fw-bold mb-0 text-dark">Add New Tag</h5>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+      </div>
+
+      <form [formGroup]="createForm" (ngSubmit)="createTag()">
+        <div class="mb-3">
+          <label class="form-label fw-medium small text-muted">
+            Tag Name <span class="text-danger">*</span>
+          </label>
+          <input type="text" class="form-control" formControlName="name"
+            placeholder="e.g. Bike Mechanic, Engine Parts" />
+          <div *ngIf="
+              createForm.get('name')?.invalid &&
+              createForm.get('name')?.touched
+            " class="text-danger small mt-1">
+            Valid tag name is required.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-medium small text-muted">
+            Business Category <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" formControlName="business_category_id">
+            <option value="">Select Business Category</option>
+            <option *ngFor="let bCat of publicBusinessCategoriesList" [value]="bCat.id">
+              {{ bCat.name }} ({{ getBusinessTypeLabel(bCat.business_type) }})
+            </option>
+          </select>
+          <div *ngIf="
+              createForm.get('business_category_id')?.invalid &&
+              createForm.get('business_category_id')?.touched
+            " class="text-danger small mt-1">
+            Please select a business category.
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-medium small text-muted d-block mb-2">
+            Vehicle Categories (Optional)
+          </label>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-sm rounded-pill d-flex align-items-center gap-1"
+              *ngFor="let vCat of publicVehicleCategoriesList" [ngClass]="
+                isCreateVehicleCategorySelected(vCat.id)
+                  ? 'btn-primary'
+                  : 'btn-outline-secondary'
+              " (click)="toggleCreateVehicleCategory(vCat.id)">
+              <i class="fa-solid" [ngClass]="
+                  isCreateVehicleCategorySelected(vCat.id)
+                    ? 'fa-check'
+                    : 'fa-plus'
+                "></i>
+              {{ vCat.name }}
+            </button>
+          </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <button type="button" class="btn btn-light px-4" (click)="closeModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-custom-primary px-4" [disabled]="createForm.invalid">
+            Save Tag
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Tag Modal -->
+  <div class="modal-container position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+    style="background: rgba(0, 0, 0, 0.5); z-index: 1050;" *ngIf="updateModalOpen" @fadeIn>
+    <div class="modal-contenttop bg-white rounded-4 shadow-lg p-4"
+      style="width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;">
+      <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+        <h5 class="fw-bold mb-0 text-dark">Update Tag</h5>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+      </div>
+
+      <form [formGroup]="updateForm" (ngSubmit)="updateTagFun()">
+        <div class="mb-3">
+          <label class="form-label fw-medium small text-muted">
+            Tag Name <span class="text-danger">*</span>
+          </label>
+          <input type="text" class="form-control" formControlName="name"
+            placeholder="e.g. Bike Mechanic, Engine Parts" />
+          <div *ngIf="
+              updateForm.get('name')?.invalid &&
+              updateForm.get('name')?.touched
+            " class="text-danger small mt-1">
+            Valid tag name is required.
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-medium small text-muted">
+            Business Category <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" formControlName="business_category_id">
+            <option value="">Select Business Category</option>
+            <option *ngFor="let bCat of publicBusinessCategoriesList" [value]="bCat.id">
+              {{ bCat.name }} ({{ getBusinessTypeLabel(bCat.business_type) }})
+            </option>
+          </select>
+          <div *ngIf="
+              updateForm.get('business_category_id')?.invalid &&
+              updateForm.get('business_category_id')?.touched
+            " class="text-danger small mt-1">
+            Please select a business category.
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-medium small text-muted d-block mb-2">
+            Vehicle Categories (Optional)
+          </label>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-sm rounded-pill d-flex align-items-center gap-1"
+              *ngFor="let vCat of publicVehicleCategoriesList" [ngClass]="
+                isUpdateVehicleCategorySelected(vCat.id)
+                  ? 'btn-primary'
+                  : 'btn-outline-secondary'
+              " (click)="toggleUpdateVehicleCategory(vCat.id)">
+              <i class="fa-solid" [ngClass]="
+                  isUpdateVehicleCategorySelected(vCat.id)
+                    ? 'fa-check'
+                    : 'fa-plus'
+                "></i>
+              {{ vCat.name }}
+            </button>
+          </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <button type="button" class="btn btn-light px-4" (click)="closeModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-custom-primary px-4" [disabled]="updateForm.invalid">
+            Update Tag
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- View Tag Modal -->
+  <div class="modal-container position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+    style="background: rgba(0, 0, 0, 0.5); z-index: 1050;" *ngIf="viewModalOpen" @fadeIn>
+    <div class="modal-contenttop bg-white rounded-4 shadow-lg p-4"
+      style="width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;">
+      <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+        <h5 class="fw-bold mb-0 text-dark">Tag Details</h5>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+      </div>
+
+      <form [formGroup]="viewForm">
+        <div class="mb-3">
+          <label class="form-label fw-medium small text-muted">Tag Name</label>
+          <input type="text" class="form-control bg-light" formControlName="name" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-medium small text-muted">Business Category</label>
+          <input type="text" class="form-control bg-light" formControlName="business_category_id" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-medium small text-muted">Business Type</label>
+          <input type="text" class="form-control bg-light" formControlName="business_type" />
+        </div>
+
+        <div class="mb-3" *ngIf="selectedTag">
+          <label class="form-label fw-medium small text-muted">Assigned Vehicle Categories</label>
+          <div class="d-flex flex-wrap gap-2 mt-1" *ngIf="
+              selectedTag.vehicle_category_id &&
+                selectedTag.vehicle_category_id.length > 0;
+              else noVehicles
+            ">
+            <span
+              class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 fw-medium"
+              *ngFor="let vId of selectedTag.vehicle_category_id">
+              <i class="fa-solid fa-car me-1"></i>
+              {{ getVehicleCategoryName(vId) }}
+            </span>
+          </div>
+          <ng-template #noVehicles>
+            <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 py-2 fw-medium">
+              N/A
+            </span>
+          </ng-template>
+        </div>
+
+        <div class="mb-3" *ngIf="selectedTag">
+          <label class="form-label fw-medium small text-muted">Status</label>
+          <div>
+            <span class="badge rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1" [ngClass]="
+                selectedTag.is_active
+                  ? 'bg-success bg-opacity-10 text-success'
+                  : 'bg-danger bg-opacity-10 text-danger'
+              ">
+              <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+              {{ selectedTag.is_active ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end pt-3 border-top">
+          <button type="button" class="btn btn-custom-primary px-4" (click)="closeModal()">
+            Close
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

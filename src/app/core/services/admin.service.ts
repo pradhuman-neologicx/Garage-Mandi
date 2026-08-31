@@ -222,6 +222,68 @@ export class AdminService {
     );
   }
 
+  getPublicBusinessCategories(businessType?: any): Observable<any> {
+    const headers = new HttpHeaders();
+    let url = 'business-categories';
+    if (businessType && businessType !== 'all' && businessType !== '') {
+      const val = Array.isArray(businessType)
+        ? businessType.join(',')
+        : businessType;
+      url += `?business_type=${val}`;
+    }
+    return this.apiservice.get(url, headers).pipe(
+      tap((error: any) => {
+        console.log('Response received:', error);
+        this.erromessagefunction(error);
+      }),
+    );
+  }
+
+  getPublicTags(
+    businessType?: any,
+    businessCategoryId?: any,
+    vehicleCategoryId?: any,
+  ): Observable<any> {
+    const headers = new HttpHeaders();
+    let url = 'tags?';
+    if (businessType && businessType !== 'all' && businessType !== '') {
+      const val = Array.isArray(businessType)
+        ? businessType.join(',')
+        : businessType;
+      url += `business_type=${val}&`;
+    }
+    if (
+      businessCategoryId &&
+      businessCategoryId !== 'all' &&
+      (Array.isArray(businessCategoryId)
+        ? businessCategoryId.length > 0
+        : businessCategoryId !== '')
+    ) {
+      const val = Array.isArray(businessCategoryId)
+        ? businessCategoryId.join(',')
+        : businessCategoryId;
+      url += `business_category_id=${val}&`;
+    }
+    if (
+      vehicleCategoryId &&
+      vehicleCategoryId !== 'all' &&
+      (Array.isArray(vehicleCategoryId)
+        ? vehicleCategoryId.length > 0
+        : vehicleCategoryId !== '')
+    ) {
+      const val = Array.isArray(vehicleCategoryId)
+        ? vehicleCategoryId.join(',')
+        : vehicleCategoryId;
+      url += `vehicle_category_id=${val}&`;
+    }
+    return this.apiservice.get(url, headers).pipe(
+      tap((error: any) => {
+        console.log('Response received:', error);
+        this.erromessagefunction(error);
+      }),
+    );
+  }
+
   getPublicSpareParts(): Observable<any> {
     const headers = new HttpHeaders();
     let url = 'vehicle-spare-parts';
@@ -884,6 +946,174 @@ export class AdminService {
     );
   }
   // Vehicle-Brand APIs end
+
+  // Business-Categories APIs start
+  getBusinessCategories(
+    tableSize: any,
+    page: any,
+    search: any,
+    businessType?: any,
+    isActive?: any,
+  ): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+
+    let url = '';
+    if (tableSize !== 'all') {
+      url = `system-admin/business-categories?limit=${tableSize}&page=${page}`;
+    } else {
+      url = `system-admin/business-categories?`;
+    }
+
+    if (search) {
+      url += `&search=${search}`;
+    }
+    if (businessType && businessType !== 'all') {
+      url += `&business_type=${businessType}`;
+    }
+    if (
+      isActive !== '' &&
+      isActive !== null &&
+      isActive !== undefined &&
+      isActive !== 'all'
+    ) {
+      url += `&is_active=${isActive}`;
+    }
+
+    return this.apiservice.get(url, headers).pipe(
+      tap((error: any) => {
+        console.log('Response received:', error);
+        this.erromessagefunction(error);
+      }),
+    );
+  }
+
+  addBusinessCategory(data: any): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    return this.apiservice.post(
+      `system-admin/business-categories`,
+      data,
+      headers,
+    );
+  }
+
+  updateBusinessCategory(id: any, data: any): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    return this.apiservice.post(
+      `system-admin/business-categories/${id}`,
+      data,
+      headers,
+    );
+  }
+
+  updateBusinessCategoryStatus(id: any): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    return this.apiservice.patchWithHeader(
+      `system-admin/business-categories/${id}/status`,
+      {},
+      headers,
+    );
+  }
+  // Business-Categories APIs end
+
+  // Tags-Master APIs start
+  getTags(
+    tableSize: any,
+    page: any,
+    search: any,
+    businessCategoryId?: any,
+    businessType?: any,
+    vehicleCategoryId?: any,
+    isActive?: any,
+  ): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+
+    let url = '';
+    if (tableSize !== 'all') {
+      url = `system-admin/tags?limit=${tableSize}&page=${page}`;
+    } else {
+      url = `system-admin/tags?`;
+    }
+
+    if (search) {
+      url += `&search=${search}`;
+    }
+    if (businessCategoryId && businessCategoryId !== 'all') {
+      url += `&business_category_id=${businessCategoryId}`;
+    }
+    if (businessType && businessType !== 'all') {
+      url += `&business_type=${businessType}`;
+    }
+    if (vehicleCategoryId && vehicleCategoryId !== 'all') {
+      url += `&vehicle_category_id=${vehicleCategoryId}`;
+    }
+    if (
+      isActive !== '' &&
+      isActive !== null &&
+      isActive !== undefined &&
+      isActive !== 'all'
+    ) {
+      url += `&is_active=${isActive}`;
+    }
+
+    return this.apiservice.get(url, headers).pipe(
+      tap((error: any) => {
+        console.log('Response received:', error);
+        this.erromessagefunction(error);
+      }),
+    );
+  }
+
+  addTag(data: any): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    return this.apiservice.post(`system-admin/tags`, data, headers);
+  }
+
+  updateTag(id: any, data: any): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    return this.apiservice.post(`system-admin/tags/${id}`, data, headers);
+  }
+
+  updateTagStatus(id: any): Observable<any> {
+    const token = this.jwtService.getToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    });
+    return this.apiservice.patchWithHeader(
+      `system-admin/tags/${id}/status`,
+      {},
+      headers,
+    );
+  }
+  // Tags-Master APIs end
 
   getDashboardStatistics(): Observable<any> {
     const token = this.jwtService.getToken();

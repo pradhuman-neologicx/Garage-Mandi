@@ -177,6 +177,7 @@ export class SubscriptionManagementComponent implements OnInit {
               phoneNumber: item.provider?.phone_number || 'N/A',
               name: providerName,
               plan: item.plan?.name || 'Standard Plan',
+              startDate: this.formatDate(item.subscription_starts_at),
               expiryDate: this.formatDate(item.current_period_end || item.trial_ends_at),
               daysLeft: daysLeft !== undefined ? daysLeft : 'N/A',
               rawData: item
@@ -294,18 +295,24 @@ export class SubscriptionManagementComponent implements OnInit {
             const data = res.data || {};
             this.selectedProvider.rawData = data;
 
-            // Map previous history if they exist in the response
-            if (data.previous && Array.isArray(data.previous)) {
-              this.selectedProvider.history = data.previous.map((p: any) => ({
-                planName: p.plan?.name || 'N/A',
-                amount: p.plan?.amount || p.amount_at_purchase || 0,
-                startDate: this.formatDate(p.subscription_starts_at || p.current_period_start),
-                endDate: this.formatDate(p.current_period_end),
-                status: p.status || 'N/A'
-              }));
-            } else {
-              this.selectedProvider.history = [];
-            }
+            const currentSubs = Array.isArray(data.current) ? data.current : [];
+            const previousSubs = Array.isArray(data.previous) ? data.previous : [];
+
+            this.selectedProvider.currentSubs = currentSubs.map((p: any) => ({
+              planName: p.plan?.name || 'N/A',
+              amount: p.plan?.amount || p.amount_at_purchase || 0,
+              startDate: this.formatDate(p.subscription_starts_at || p.current_period_start),
+              endDate: this.formatDate(p.current_period_end),
+              status: p.status || 'N/A'
+            }));
+
+            this.selectedProvider.history = previousSubs.map((p: any) => ({
+              planName: p.plan?.name || 'N/A',
+              amount: p.plan?.amount || p.amount_at_purchase || 0,
+              startDate: this.formatDate(p.subscription_starts_at || p.current_period_start),
+              endDate: this.formatDate(p.current_period_end),
+              status: p.status || 'N/A'
+            }));
           }
           this.selectedProvider.isLoading = false;
         },
