@@ -1,0 +1,141 @@
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 pt-32 pb-16 px-4 sm:px-6 lg:px-8"
+  style="font-family: 'Inter', sans-serif;">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Header -->
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+        What do you need <span class="text-[#db3333]">help</span> with?
+      </h1>
+      <p class="text-lg text-gray-500">
+        Choose from our primary services below. We will connect you with the best verified providers in your area.
+      </p>
+    </div>
+
+    <!-- Services Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+
+      <!-- Card 1: Service Request -->
+      <a routerLink="/request-service"
+        class="group block relative bg-white rounded-3xl p-8 shadow-md hover:shadow-2xl border border-gray-100 hover:border-blue-200 transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-blue-100 rounded-bl-full -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-150">
+        </div>
+        <div class="relative z-10">
+          <div
+            class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-wrench text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-700 transition-colors">Service Request
+          </h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Book a general service, repair, or maintenance for your vehicle. Get multiple quotes from top-rated garages.
+          </p>
+          <div
+            class="flex items-center text-blue-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
+            Get Started <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 2: Spare Part Request -->
+      <a routerLink="/request-spare-part"
+        class="group block relative bg-white rounded-3xl p-8 shadow-md hover:shadow-2xl border border-gray-100 hover:border-purple-200 transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-purple-100 rounded-bl-full -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-150">
+        </div>
+        <div class="relative z-10">
+          <div
+            class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-gear text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-700 transition-colors">Spare Part
+            Request</h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Looking for a specific new or used part? Let our network of sellers find exactly what you need at the best
+            price.
+          </p>
+          <div
+            class="flex items-center text-purple-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
+            Get Started <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 3: Search Vehicle -->
+      <a routerLink="/search-vehicle"
+        class="group block relative bg-white rounded-3xl p-8 shadow-md hover:shadow-2xl border border-gray-100 hover:border-green-200 transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-green-100 rounded-bl-full -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-150">
+        </div>
+        <div class="relative z-10">
+          <div
+            class="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-car text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-green-700 transition-colors">Search Vehicle
+          </h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Browse through our wide selection of certified used vehicles. Find the perfect ride that matches your
+            budget.
+          </p>
+          <div
+            class="flex items-center text-green-600 font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
+            Search Now <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 4: My Purchase Request -->
+      <a routerLink="/purchase-request"
+        class="group block relative bg-white rounded-3xl p-8 shadow-md hover:shadow-2xl border border-gray-100 hover:border-red-200 transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-50 to-red-100 rounded-bl-full -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-150">
+        </div>
+        <div class="relative z-10">
+          <div
+            class="w-16 h-16 bg-red-100 text-[#db3333] rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-file-invoice-dollar text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#db3333] transition-colors">My Purchase Request
+          </h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Track your part inquiries, review competitive seller quotations, confirm commercial terms, and approve orders.
+          </p>
+          <div
+            class="flex items-center text-[#db3333] font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
+            View Requests <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card 5: My Orders -->
+      <a routerLink="/my-orders"
+        class="group block relative bg-white rounded-3xl p-8 shadow-md hover:shadow-2xl border border-gray-100 hover:border-red-200 transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-rose-50 to-red-100 rounded-bl-full -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-150">
+        </div>
+        <div class="relative z-10">
+          <div
+            class="w-16 h-16 bg-rose-100 text-[#db3333] rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+            <i class="fa-solid fa-bag-shopping text-3xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#db3333] transition-colors">Goods Orders
+          </h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6">
+            Track your confirmed orders, live shipment & pickup progress, view payment snapshots, and delivery updates.
+          </p>
+          <div
+            class="flex items-center text-[#db3333] font-bold text-sm uppercase tracking-wider group-hover:translate-x-2 transition-transform duration-300">
+            View Orders <i class="fa-solid fa-arrow-right ml-2"></i>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

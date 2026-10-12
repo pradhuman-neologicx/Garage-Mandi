@@ -1,0 +1,57 @@
+<app-navbar></app-navbar>
+
+<main class="min-h-screen bg-gray-50 pt-[54px] pb-12">
+  <!-- Header Section -->
+  <div class="bg-[#131e3d] text-white py-16 relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute inset-0 opacity-10 pointer-events-none">
+      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-white blur-3xl"></div>
+      <div class="absolute -left-20 -bottom-20 w-64 h-64 rounded-full bg-[#db3333] blur-3xl"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center animate-fade-in-up">
+      <div class="inline-flex items-center justify-center p-3 bg-white/10 rounded-2xl mb-4 backdrop-blur-sm border border-white/20">
+        <i class="fa-solid fa-gears text-3xl text-[#db3333]"></i>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Workshop Operations</h1>
+      <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto font-light">
+        Manage your workshop services, requests, and quotations efficiently from a single dashboard.
+      </p>
+    </div>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <a *ngFor="let op of operations; let i = index" [routerLink]="op.link"
+         class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden flex flex-col animate-fade-in-up"
+         [ngStyle]="{'animation-delay': (i * 50) + 'ms'}">
+         
+         <div class="p-8 flex-1 flex flex-col items-center text-center">
+            <!-- Icon Container -->
+            <div [ngClass]="[op.bg, op.color]" class="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-inner">
+              <i [class]="op.icon + ' text-4xl'"></i>
+            </div>
+            
+            <!-- Content -->
+            <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-[#db3333] transition-colors">
+              {{ op.title }}
+            </h3>
+            <p class="text-gray-500 text-sm leading-relaxed flex-1">
+              {{ op.desc }}
+            </p>
+         </div>
+
+         <!-- Action Bar -->
+         <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center group-hover:bg-[#db3333] transition-colors duration-300">
+           <span class="text-sm font-semibold text-gray-600 group-hover:text-white">View Details</span>
+           <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:bg-white/20 transition-colors">
+             <i class="fa-solid fa-arrow-right text-gray-400 group-hover:text-white transform group-hover:translate-x-1 transition-all"></i>
+           </div>
+         </div>
+      </a>
+    </div>
+  </div>
+</main>
+
+<app-footer></app-footer>

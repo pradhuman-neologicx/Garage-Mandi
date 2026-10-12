@@ -1,0 +1,504 @@
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50 pt-32 pb-20 px-4 sm:px-6 lg:px-8 font-sans">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Top Breadcrumb / Back button -->
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <a routerLink="/request-quote"
+        class="text-sm font-semibold text-gray-500 hover:text-[#db3333] transition-colors inline-flex items-center group">
+        <i class="fa-solid fa-arrow-left mr-2 transform group-hover:-translate-x-1 transition-transform"></i> 
+        Back to Options
+      </a>
+
+      <div class="flex items-center gap-2 text-xs font-medium text-gray-400">
+        <a routerLink="/" class="hover:text-gray-600">Home</a>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <a routerLink="/request-quote" class="hover:text-gray-600">Services</a>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <span class="text-[#db3333] font-semibold">My Orders</span>
+      </div>
+    </div>
+
+    <!-- Main Header Banner -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <div class="absolute -top-16 -right-16 w-52 h-52 bg-red-50 rounded-full opacity-60 pointer-events-none"></div>
+      
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-[#db3333] border border-red-100 mb-3">
+          <i class="fa-solid fa-bag-shopping"></i> Purchase Orders & Delivery Tracking
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+          My <span class="text-[#db3333]">Orders</span>
+        </h1>
+        <p class="text-gray-500 mt-2 text-base max-w-2xl leading-relaxed">
+          Monitor your automotive spare parts orders, inspect payment escrow status, follow shipment timelines, and view commercial breakdowns.
+        </p>
+      </div>
+
+      <div class="relative z-10 flex flex-wrap items-center gap-3">
+        <a routerLink="/purchase-request"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold text-sm border border-gray-200 transition-all duration-200">
+          <i class="fa-solid fa-file-invoice-dollar mr-2 text-gray-500"></i> Purchase Requests
+        </a>
+        <a routerLink="/request-spare-part"
+          class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-[#db3333] hover:bg-[#c22b2b] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+          <i class="fa-solid fa-plus mr-2"></i> Request Spare Part
+        </a>
+      </div>
+    </div>
+
+    <!-- KPI Summary Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+      <!-- Total Orders (Matching screenshot 9) -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Total Orders</span>
+          <div class="w-10 h-10 rounded-xl bg-rose-50 text-[#db3333] border border-rose-100 flex items-center justify-center">
+            <i class="fa-solid fa-bag-shopping text-base"></i>
+          </div>
+        </div>
+        <div class="text-3xl font-extrabold text-gray-900">{{ totalOrdersCount }}</div>
+        <p class="text-xs text-gray-400 mt-1">All purchases placed</p>
+      </div>
+
+      <!-- Completed Orders (Matching screenshot 1) -->
+      <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-emerald-50/30">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Completed</span>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
+            <i class="fa-solid fa-circle-check text-base"></i>
+          </div>
+        </div>
+        <div class="text-3xl font-extrabold text-gray-900">{{ completedOrdersCount }}</div>
+        <p class="text-xs text-emerald-600 mt-1">Delivered & verified</p>
+      </div>
+
+      <!-- In Transit / Active -->
+      <div class="bg-white rounded-2xl p-5 border border-blue-100 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-blue-50/30">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">In Progress</span>
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
+            <i class="fa-solid fa-truck-fast text-base"></i>
+          </div>
+        </div>
+        <div class="text-3xl font-extrabold text-gray-900">{{ inProgressOrdersCount }}</div>
+        <p class="text-xs text-blue-600 mt-1">Confirmed / in transit</p>
+      </div>
+
+      <!-- Escrow Protected Guarantee -->
+      <div class="bg-white rounded-2xl p-5 border border-red-100 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-red-50/40">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#db3333]">Escrow Protected</span>
+          <div class="w-10 h-10 rounded-xl bg-red-100 text-[#db3333] flex items-center justify-center">
+            <i class="fa-solid fa-shield-halved text-base"></i>
+          </div>
+        </div>
+        <div class="text-2xl font-extrabold text-gray-900">100% Secure</div>
+        <p class="text-xs text-[#db3333] mt-1 font-medium">Funds held until open-box verification</p>
+      </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <!-- Filter Tabs -->
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <button (click)="setFilter('ALL')"
+          [ngClass]="activeFilter === 'ALL' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
+          All Orders ({{ orders.length }})
+        </button>
+
+        <button (click)="setFilter('CONFIRMED')"
+          [ngClass]="activeFilter === 'CONFIRMED' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
+          Confirmed
+        </button>
+
+        <button (click)="setFilter('READY_FOR_PICKUP')"
+          [ngClass]="activeFilter === 'READY_FOR_PICKUP' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
+          Ready for Pickup
+        </button>
+
+        <button (click)="setFilter('SHIPPED')"
+          [ngClass]="activeFilter === 'SHIPPED' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
+          Shipped
+        </button>
+
+        <button (click)="setFilter('DELIVERED')"
+          [ngClass]="activeFilter === 'DELIVERED' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
+          Delivered
+        </button>
+      </div>
+
+      <!-- Search Box -->
+      <div class="relative w-full md:w-80">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search order, product or seller..."
+          class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-[#db3333] focus:border-transparent transition-all">
+        <button *ngIf="searchQuery" (click)="searchQuery = ''"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Orders Grid (Web Responsive Layout) -->
+    <div *ngIf="filteredOrders.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+      <div *ngFor="let order of filteredOrders"
+        class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+        
+        <div>
+          <!-- Card Top Row: Bag icon, Order Number, Status Badge -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 text-[#db3333] flex items-center justify-center text-lg flex-shrink-0 group-hover:bg-[#db3333] group-hover:text-white transition-colors">
+                <i class="fa-solid fa-bag-shopping"></i>
+              </div>
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block">Order</span>
+                <span class="text-lg font-bold text-gray-900 group-hover:text-[#db3333] transition-colors">
+                  {{ order.orderNumber }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Status Badge -->
+            <span [ngClass]="getStatusBadgeClass(order.status)"
+              class="px-3.5 py-1.5 rounded-full text-xs font-bold capitalize">
+              {{ order.status }}
+            </span>
+          </div>
+
+          <!-- Product Details Box (Matching mobile screenshot styling adapted for web) -->
+          <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 mb-4">
+            <!-- Product Label & Title -->
+            <div class="flex items-start gap-2.5 mb-3.5">
+              <div class="w-8 h-8 rounded-lg bg-rose-50 text-[#db3333] flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
+                <i class="fa-solid fa-box"></i>
+              </div>
+              <div class="flex-1">
+                <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Product</span>
+                <h3 class="text-base font-bold text-gray-900 leading-snug">
+                  {{ order.product }}
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                  <i class="fa-solid fa-store text-gray-400 text-[11px]"></i>
+                  <span>{{ order.seller }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Two-column metric row: Quantity vs Final Amount -->
+            <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-200/80">
+              <!-- Quantity -->
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-gray-600 flex items-center justify-center text-xs flex-shrink-0">
+                  <i class="fa-solid fa-list-ol text-[#db3333]"></i>
+                </div>
+                <div>
+                  <span class="text-[11px] font-medium text-gray-400 block">Quantity</span>
+                  <span class="text-sm font-bold text-gray-900">{{ order.quantity }}</span>
+                </div>
+              </div>
+
+              <!-- Final Amount -->
+              <div class="flex items-center gap-2.5 pl-3 border-l border-slate-200">
+                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-[#db3333] flex items-center justify-center text-xs flex-shrink-0 font-bold">
+                  ₹
+                </div>
+                <div>
+                  <span class="text-[11px] font-medium text-gray-400 block">Final Amount</span>
+                  <span class="text-sm font-bold text-gray-900">
+                    {{ order.finalAmount | currency:'INR':'symbol':'1.2-2' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Bottom Row: Payment Status, Order Date, Action Button -->
+        <div class="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-full bg-rose-50 text-[#db3333] flex items-center justify-center text-xs flex-shrink-0">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <div class="text-[11px] font-medium text-gray-400">Payment</div>
+              <div class="text-xs font-bold text-[#db3333]">{{ order.paymentStatus }}</div>
+            </div>
+            <span class="text-gray-300 mx-1">|</span>
+            <div class="text-xs text-gray-500 font-medium">
+              {{ order.orderDate }}
+            </div>
+          </div>
+
+          <!-- View Order Button (Matching mobile screenshot outline pill with eye icon) -->
+          <button (click)="openOrderDetails(order)"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-rose-200 text-[#db3333] hover:bg-[#db3333] hover:text-white font-bold text-xs transition-all duration-200 shadow-xs cursor-pointer group/btn">
+            <i class="fa-regular fa-eye group-hover/btn:scale-110 transition-transform"></i>
+            <span>View Order</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredOrders.length === 0"
+      class="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm max-w-lg mx-auto">
+      <div class="w-20 h-20 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center text-3xl mx-auto mb-4">
+        <i class="fa-solid fa-bag-shopping"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">No Orders Found</h3>
+      <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+        We couldn't find any orders matching your selected filters or search keyword.
+      </p>
+      <button (click)="setFilter('ALL'); searchQuery = ''"
+        class="px-6 py-2.5 rounded-xl bg-[#db3333] text-white font-bold text-sm hover:bg-[#c22b2b] transition-all cursor-pointer">
+        Reset All Filters
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- ORDER DETAILS MODAL (Matching mobile screenshots 2, 3 & 4 with web beauty) -->
+<!-- ========================================================================= -->
+<div *ngIf="isDetailsModalOpen && selectedOrder"
+  class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+  
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+    (click)="closeOrderDetails()"></div>
+
+  <!-- Modal Container with Max Height Fix (max-h-[86vh], flex-col) -->
+  <div class="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[86vh] flex flex-col overflow-hidden animate-in border border-gray-100 z-10">
+    
+    <!-- STICKY MODAL HEADER -->
+    <div class="flex-shrink-0 px-6 py-4 sm:py-5 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-100 text-[#db3333] flex items-center justify-center text-lg flex-shrink-0">
+          <i class="fa-solid fa-bag-shopping"></i>
+        </div>
+        <div>
+          <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 leading-tight">
+            Order Details
+          </h2>
+          <span class="text-xs font-bold text-[#db3333] tracking-wide">
+            {{ selectedOrder.orderNumber }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Close (X) button -->
+      <button (click)="closeOrderDetails()"
+        class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+    </div>
+
+    <!-- SCROLLABLE MODAL BODY -->
+    <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar bg-white">
+      
+      <!-- 1. Order Status Card -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Order Status</h4>
+        <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-100 flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full bg-rose-100 text-[#db3333] flex items-center justify-center text-base flex-shrink-0 mt-0.5">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div>
+              <h5 class="text-sm font-bold text-gray-900">
+                Order {{ selectedOrder.status }}
+              </h5>
+              <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                {{ selectedOrder.statusMessage }}
+              </p>
+            </div>
+          </div>
+
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-[#db3333] border border-rose-200 flex-shrink-0">
+            {{ selectedOrder.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- 2. Product Details Card -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Product Details</h4>
+        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
+          <div class="flex items-center justify-between py-2 first:pt-0">
+            <span class="text-gray-500">Product</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.product }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span class="text-gray-500">Quantity</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.quantity }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span class="text-gray-500">Seller</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.seller }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2 last:pb-0">
+            <span class="text-gray-500">Order Date</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.orderDate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Final Commercial Snapshot Card -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Final Commercial Snapshot</h4>
+        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 text-xs sm:text-sm space-y-2">
+          <div class="flex items-center justify-between text-gray-600">
+            <span>Unit Price</span>
+            <span class="font-semibold text-gray-900">{{ selectedOrder.unitPrice | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-600">
+            <span>Quantity</span>
+            <span class="font-semibold text-gray-900">{{ selectedOrder.quantity }}</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-600">
+            <span>Product Amount</span>
+            <span class="font-semibold text-gray-900">{{ selectedOrder.productAmount | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-600">
+            <span>GST / Tax</span>
+            <span class="font-semibold text-gray-900">{{ selectedOrder.gstTax | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-600">
+            <span>Delivery Fee</span>
+            <span class="font-semibold text-gray-900">{{ selectedOrder.deliveryFee | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-600">
+            <span>Convenience / Platform Fee</span>
+            <span class="font-semibold text-gray-900">{{ selectedOrder.platformFee | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+
+          <div class="border-t border-slate-200 my-2 pt-2 flex items-center justify-between">
+            <span class="font-bold text-gray-900">Final Payable Amount</span>
+            <span class="font-extrabold text-base sm:text-lg text-[#db3333]">
+              {{ selectedOrder.finalAmount | currency:'INR':'symbol':'1.2-2' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Quotation Details Card -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Quotation Details</h4>
+        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
+          <div class="flex items-center justify-between py-2 first:pt-0">
+            <span class="text-gray-500">Request ID</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.requestId }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span class="text-gray-500">Quotation ID</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.quotationId }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span class="text-gray-500">Quotation Version</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.quotationVersion }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2 last:pb-0">
+            <span class="text-gray-500">Acceptance Timestamp</span>
+            <span class="font-bold text-gray-900">{{ selectedOrder.acceptanceTimestamp }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Payment Details Card -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Payment Details</h4>
+        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
+          <div class="flex items-center justify-between py-2 first:pt-0">
+            <span class="text-gray-500">Payment Status</span>
+            <span class="font-bold text-[#db3333]">{{ selectedOrder.paymentStatus }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <span class="text-gray-500">Funds Status</span>
+            <span class="font-bold text-[#db3333]">{{ selectedOrder.fundsStatus }}</span>
+          </div>
+          <div class="flex items-center justify-between py-2 last:pb-0">
+            <span class="text-gray-500">Settlement Status</span>
+            <span class="font-bold text-[#db3333]">{{ selectedOrder.settlementStatus }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Order Progress Stepper (5 Milestones) -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Order Progress</h4>
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs">
+          <div class="space-y-0">
+            <div *ngFor="let step of orderSteps; let i = index; let isLast = last" class="relative flex items-start gap-3.5 pb-6 last:pb-0">
+              
+              <!-- Vertical connecting line -->
+              <div *ngIf="!isLast"
+                [ngClass]="step.id < selectedOrder.currentStep ? 'bg-[#db3333]' : 'bg-slate-200'"
+                class="absolute left-5 top-10 bottom-0 w-0.5 -ml-[1px]"></div>
+
+              <!-- Step Icon Circle -->
+              <div class="relative z-10 flex-shrink-0">
+                <!-- Completed Step -->
+                <div *ngIf="isStepCompleted(step.id, selectedOrder.currentStep)"
+                  class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+
+                <!-- Current Step -->
+                <div *ngIf="isStepCurrent(step.id, selectedOrder.currentStep)"
+                  class="w-10 h-10 rounded-full bg-[#db3333] text-white flex items-center justify-center text-sm shadow-md ring-4 ring-red-100 animate-pulse">
+                  <i class="fa-solid" [ngClass]="step.icon"></i>
+                </div>
+
+                <!-- Upcoming Step -->
+                <div *ngIf="step.id > selectedOrder.currentStep"
+                  class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 border border-slate-200 flex items-center justify-center text-sm">
+                  <i class="fa-solid" [ngClass]="step.icon"></i>
+                </div>
+              </div>
+
+              <!-- Step Description -->
+              <div class="flex-1 pt-1">
+                <div class="flex items-center gap-2">
+                  <h5 [ngClass]="step.id <= selectedOrder.currentStep ? 'text-gray-900 font-bold' : 'text-gray-400 font-medium'"
+                    class="text-sm">
+                    {{ step.title }}
+                  </h5>
+                  <span *ngIf="isStepCurrent(step.id, selectedOrder.currentStep)"
+                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-[#db3333] border border-rose-200">
+                    Current
+                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  {{ step.description }}
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STICKY MODAL FOOTER -->
+    <div class="flex-shrink-0 px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between sm:justify-end gap-3 z-10">
+      <button (click)="closeOrderDetails()"
+        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-sm transition-colors cursor-pointer">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<app-footer></app-footer>

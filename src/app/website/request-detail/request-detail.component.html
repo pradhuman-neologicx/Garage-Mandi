@@ -1,0 +1,595 @@
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 pt-28 pb-16 px-4 sm:px-6 lg:px-8" style="font-family: 'Inter', sans-serif;">
+  <div class="max-w-5xl mx-auto">
+    
+    <!-- Back Navigation -->
+    <div class="mb-6">
+      <a routerLink="/my-requests" class="group inline-flex items-center text-sm font-semibold text-gray-500 hover:text-[#db3333] transition-all duration-200">
+        <i class="fa-solid fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform duration-200"></i> Back to My Requests
+      </a>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-24 bg-white rounded-2xl shadow-lg border border-gray-100">
+      <div class="relative inline-block">
+        <div class="w-16 h-16 border-4 border-gray-200 border-t-[#db3333] rounded-full animate-spin"></div>
+      </div>
+      <p class="mt-6 text-gray-400 font-medium text-lg">Loading request details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!isLoading && errorMsg" class="bg-white rounded-2xl shadow-lg border border-red-100 p-10 text-center">
+      <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fa-solid fa-triangle-exclamation text-3xl text-red-400"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">Something went wrong</h3>
+      <p class="text-gray-500">{{ errorMsg }}</p>
+      <a routerLink="/my-requests" class="mt-6 inline-flex items-center px-5 py-2.5 bg-[#db3333] text-white rounded-lg text-sm font-semibold hover:bg-[#c22b2b] transition-colors shadow-md">
+        <i class="fa-solid fa-arrow-left mr-2"></i> Go Back
+      </a>
+    </div>
+
+    <!-- Content State -->
+    <div *ngIf="!isLoading && !errorMsg && requestDetail">
+
+      <!-- Hero Card -->
+      <div class="relative bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-8">
+        <!-- Colored Top Bar -->
+        <div class="h-2" [ngClass]="type === 'service' ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gradient-to-r from-purple-500 to-purple-600'"></div>
+        
+        <div class="p-6 md:p-10">
+          <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+            <!-- Left: Title & Meta -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-lg"
+                      [ngClass]="type === 'service' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-purple-50 text-purple-700 border border-purple-200'">
+                  <i [ngClass]="type === 'service' ? 'fa-solid fa-wrench' : 'fa-solid fa-gear'" class="mr-1.5"></i>
+                  {{ type === 'service' ? 'Service Request' : 'Spare Part Request' }}
+                </span>
+                <span class="text-xs text-gray-400 font-mono">REQ-{{ requestDetail.id }}</span>
+              </div>
+              
+              <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-3 capitalize">
+                {{ requestDetail.title || requestDetail.requirement_title || requestDetail.service_name || requestDetail.part_name || 'Request Details' }}
+              </h1>
+              
+              <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
+                <span class="flex items-center">
+                  <i class="fa-regular fa-calendar-days mr-1.5 text-gray-400"></i>
+                  {{ requestDetail.created_at | date:'mediumDate' }}
+                </span>
+                <span class="flex items-center">
+                  <i class="fa-regular fa-clock mr-1.5 text-gray-400"></i>
+                  {{ requestDetail.created_at | date:'shortTime' }}
+                </span>
+                <span *ngIf="requestDetail.creator_type" class="flex items-center capitalize">
+                  <i class="fa-regular fa-user mr-1.5 text-gray-400"></i>
+                  {{ requestDetail.creator_type }}
+                </span>
+              </div>
+            </div>
+            
+            <!-- Right: Status Badge -->
+            <div class="flex flex-col items-start lg:items-end gap-3 shrink-0">
+              <span [class]="getStatusClass(requestDetail.status)" 
+                    class="px-5 py-2 text-sm font-extrabold rounded-xl uppercase tracking-wider shadow-sm">
+                {{ requestDetail.status || 'Pending' }}
+              </span>
+              <span *ngIf="requestDetail.fulfilled" class="inline-flex items-center text-xs text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-lg border border-green-200">
+                <i class="fa-solid fa-circle-check mr-1.5"></i> Fulfilled
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        
+        <!-- Left Column: Main Info -->
+        <div class="lg:col-span-2 space-y-8">
+          
+          <!-- Description Card -->
+          <div *ngIf="requestDetail.description || requestDetail.requirement_description" class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+              <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                <i class="fa-solid fa-align-left mr-2 text-gray-400"></i> Description
+              </h3>
+            </div>
+            <div class="p-6">
+              <p class="text-gray-700 leading-relaxed whitespace-pre-line text-[15px]">{{ requestDetail.description || requestDetail.requirement_description }}</p>
+            </div>
+          </div>
+
+          <!-- Media / Attachments Card -->
+          <div *ngIf="requestDetail.media && requestDetail.media.length > 0" class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+              <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                <i class="fa-solid fa-images mr-2 text-gray-400"></i> Attachments
+                <span class="ml-2 bg-gray-200 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">{{ requestDetail.media_count || requestDetail.media.length }}</span>
+              </h3>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div *ngFor="let file of requestDetail.media" (click)="openMediaPreview(file)"
+                     class="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-gray-200 hover:border-[#db3333] transition-all duration-300 cursor-pointer shadow-sm hover:shadow-lg">
+                  <img *ngIf="file.file_type === 'image'" [src]="file.file_url" alt="Attachment" 
+                       class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
+                  <video *ngIf="file.file_type === 'video'" [src]="file.file_url" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" muted preload="metadata"></video>
+                  
+                  <!-- Video Icon Overlay -->
+                  <div *ngIf="file.file_type === 'video'" class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm">
+                      <i class="fa-solid fa-play text-white ml-1"></i>
+                    </div>
+                  </div>
+
+                  <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <i class="fa-solid fa-expand text-white text-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-lg"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quotations Card -->
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+              <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                <i class="fa-solid fa-file-invoice-dollar mr-2 text-green-500"></i> Quotations
+                <span *ngIf="requestDetail.quotations && requestDetail.quotations.length > 0" class="ml-2 bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">{{ requestDetail.quotations_count || requestDetail.quotations.length }}</span>
+              </h3>
+            </div>
+            
+            <!-- Empty State -->
+            <div *ngIf="!requestDetail.quotations || requestDetail.quotations.length === 0" class="p-10 text-center flex flex-col items-center justify-center bg-gray-50/30">
+              <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mb-4">
+                <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
+              </div>
+              <h4 class="text-gray-900 font-bold text-lg mb-1">No Quotations Yet</h4>
+              <p class="text-gray-500 text-sm max-w-sm mx-auto">Service providers haven't submitted any quotations for this request yet. Please check back later.</p>
+            </div>
+
+            <div *ngIf="requestDetail.quotations && requestDetail.quotations.length > 0" class="p-6 space-y-5">
+              <div *ngFor="let quote of requestDetail.quotations" 
+                   class="rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50/50">
+                
+                <!-- Provider Header -->
+                <div class="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border border-gray-200 overflow-hidden shrink-0 shadow-sm">
+                      <img *ngIf="quote.provider?.service_provider_profile?.image_url; else noProvImg" 
+                           [src]="quote.provider.service_provider_profile.image_url" class="w-full h-full object-cover"/>
+                      <ng-template #noProvImg>
+                        <i class="fa-solid fa-store text-2xl text-gray-400"></i>
+                      </ng-template>
+                    </div>
+                    <div>
+                      <h4 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                        {{ quote.provider?.name || 'Service Provider' }}
+                        <span *ngIf="quote.provider?.service_provider_profile?.is_verified" class="inline-flex items-center px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-bold rounded-md border border-green-200">
+                          <i class="fa-solid fa-circle-check mr-1"></i> Verified
+                        </span>
+                        <span *ngIf="!quote.provider?.service_provider_profile?.is_verified" class="inline-flex items-center px-2 py-0.5 bg-red-50 text-red-500 text-[10px] font-bold rounded-md border border-red-200">
+                          <i class="fa-solid fa-circle-xmark mr-1"></i> Unverified
+                        </span>
+                      </h4>
+                      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mt-1">
+                        <span *ngIf="quote.provider?.rating" class="flex items-center">
+                          <span class="flex items-center gap-0.5 mr-1">
+                            <i *ngFor="let s of [1,2,3,4,5]" class="fa-star text-[10px]"
+                               [ngClass]="s <= quote.provider.rating ? 'fa-solid text-yellow-400' : 'fa-regular text-gray-300'"></i>
+                          </span>
+                          <span class="font-bold text-gray-700">{{ quote.provider.rating }}</span>
+                        </span>
+                        <span class="flex items-center" *ngIf="quote.provider?.service_provider_profile?.district">
+                          <i class="fa-solid fa-location-dot mr-1 text-[#db3333]"></i> 
+                          {{ quote.provider.service_provider_profile.district }}, {{ quote.provider.service_provider_profile.state }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Price -->
+                  <div class="flex flex-col items-end shrink-0 bg-white rounded-xl px-5 py-3 border border-gray-200 shadow-sm">
+                    <span class="text-xs text-gray-400 font-medium uppercase tracking-wider">Quote Price</span>
+                    <span class="text-2xl font-extrabold text-[#db3333] leading-tight">₹{{ quote.price }}</span>
+                  </div>
+                </div>
+                
+                <!-- Provider Message -->
+                <div *ngIf="quote.description" class="mx-5 mb-5 bg-blue-50/60 rounded-lg p-4 border border-blue-100">
+                  <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1.5">
+                    <i class="fa-regular fa-message mr-1"></i> Provider's Note
+                  </p>
+                  <p class="text-sm text-gray-700 whitespace-pre-line">{{ quote.description }}</p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="px-5 py-4 bg-gray-50/80 border-t border-gray-100 flex justify-end gap-3">
+                  <button *ngIf="!quote.feedback_given" (click)="openFeedbackModal(quote.provider_id, quote.id)" class="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg text-sm font-semibold hover:bg-blue-600 hover:text-white transition-all duration-200">
+                    <i class="fa-regular fa-star mr-1.5"></i> Give Feedback
+                  </button>
+                  <button (click)="openQuotationModal(quote.id)" class="px-4 py-2 border border-[#db3333] text-[#db3333] rounded-lg text-sm font-semibold hover:bg-[#db3333] hover:text-white transition-all duration-200">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sidebar -->
+        <div class="space-y-6 lg:sticky lg:top-28 lg:self-start">
+          
+          <!-- Details Card -->
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+              <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                <i class="fa-solid fa-circle-info mr-2 text-gray-400"></i> Details
+              </h3>
+            </div>
+            <div class="p-5 space-y-5">
+              
+              <!-- Vehicle Category -->
+              <div *ngIf="requestDetail.vehicle_category" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-motorcycle text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Category</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">{{ requestDetail.vehicle_category.name }}</p>
+                </div>
+              </div>
+
+              <!-- Service Type -->
+              <div *ngIf="requestDetail.service_type" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-screwdriver-wrench text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Service Type</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">{{ requestDetail.service_type.name }}</p>
+                </div>
+              </div>
+
+              <!-- Vehicle Brand -->
+              <div *ngIf="requestDetail.vehicle_brand" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-car text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Brand</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">{{ requestDetail.vehicle_brand }}</p>
+                </div>
+              </div>
+
+              <!-- Vehicle Model -->
+              <div *ngIf="requestDetail.vehicle_model" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-tag text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Model</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">{{ requestDetail.vehicle_model }}</p>
+                </div>
+              </div>
+
+              <!-- Spare Part Item (Spare only) -->
+              <div *ngIf="type === 'spare' && requestDetail.spare_part?.name" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-box-open text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Spare Part</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">{{ requestDetail.spare_part.name }}</p>
+                </div>
+              </div>
+
+              <!-- Part Name (Spare only) -->
+              <div *ngIf="type === 'spare' && requestDetail.part_name" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-cog text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Requested Part Name</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">{{ requestDetail.part_name }}</p>
+                </div>
+              </div>
+
+              <!-- Part Condition (Spare only) -->
+              <div *ngIf="type === 'spare' && requestDetail.part_condition" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-star-half-stroke text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Condition</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">
+                    {{ requestDetail.part_condition == 1 ? 'New' : 'Used/Old' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Location -->
+              <div *ngIf="requestDetail.location" class="flex items-start gap-3">
+                <div class="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-location-dot text-gray-500 text-sm"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Location</p>
+                  <p class="text-sm font-bold text-gray-900 mt-0.5">{{ requestDetail.location }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feedback Card -->
+          <div *ngIf="requestDetail.feedback_given" class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-yellow-50/60">
+              <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                <i class="fa-solid fa-star text-yellow-500 mr-2"></i> Your Review
+              </h3>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center gap-1 mb-3">
+                <i *ngFor="let star of [1,2,3,4,5]" 
+                   class="fa-star text-xl" 
+                   [ngClass]="star <= requestDetail.rating ? 'fa-solid text-yellow-400' : 'fa-regular text-gray-300'">
+                </i>
+                <span class="ml-2 text-lg font-extrabold text-gray-800">{{ requestDetail.rating }}/5</span>
+              </div>
+              <p *ngIf="requestDetail.feedback_text" class="text-gray-600 text-sm italic bg-gray-50 rounded-lg p-3 border border-gray-100">
+                "{{ requestDetail.feedback_text }}"
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Media Preview Modal -->
+<div *ngIf="previewMedia" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm transition-all duration-300">
+  <div class="absolute inset-0" (click)="closeMediaPreview()"></div>
+  
+  <div class="relative z-10 w-full max-w-5xl px-4 flex flex-col items-center justify-center">
+    <!-- Close Button -->
+    <button (click)="closeMediaPreview()" class="absolute top-4 right-4 sm:top-6 sm:right-8 w-12 h-12 bg-white/10 hover:bg-white/25 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all duration-200 shadow-lg">
+      <i class="fa-solid fa-xmark text-2xl"></i>
+    </button>
+
+    <!-- Media Content -->
+    <div class="w-full max-h-[85vh] flex items-center justify-center overflow-hidden rounded-xl shadow-2xl">
+      <img *ngIf="previewMedia.file_type === 'image'" [src]="previewMedia.file_url" class="max-w-full max-h-[85vh] object-contain rounded-xl" />
+      <video *ngIf="previewMedia.file_type === 'video'" [src]="previewMedia.file_url" controls autoplay class="max-w-full max-h-[85vh] object-contain rounded-xl outline-none bg-black"></video>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>
+<!-- Quotation Detail Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4" style="font-family: 'Inter', sans-serif;">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeModal()"></div>
+  
+  <!-- Modal Content -->
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto z-10">
+    
+    <!-- Close Button -->
+    <button (click)="closeModal()" class="absolute top-4 right-4 z-20 w-9 h-9 bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-500 rounded-full flex items-center justify-center transition-all duration-200">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+
+    <!-- Loading -->
+    <div *ngIf="modalLoading" class="py-24 text-center">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-[#db3333] rounded-full animate-spin mx-auto"></div>
+      <p class="mt-4 text-gray-400 font-medium">Loading quotation details...</p>
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="!modalLoading && quotationDetail">
+      
+      <!-- Header -->
+      <div class="p-6 md:p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border border-gray-200 overflow-hidden shrink-0 shadow-sm">
+              <img *ngIf="quotationDetail.provider?.service_provider_profile?.image_url; else noModalImg" 
+                   [src]="quotationDetail.provider.service_provider_profile.image_url" class="w-full h-full object-cover"/>
+              <ng-template #noModalImg>
+                <i class="fa-solid fa-store text-2xl text-gray-400"></i>
+              </ng-template>
+            </div>
+            <div>
+              <h3 class="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+                {{ quotationDetail.provider?.name || 'Service Provider' }}
+                <span *ngIf="quotationDetail.provider?.service_provider_profile?.is_verified" class="inline-flex items-center px-2 py-0.5 bg-green-50 text-green-600 text-[10px] font-bold rounded-md border border-green-200">
+                  <i class="fa-solid fa-circle-check mr-1"></i> Verified
+                </span>
+              </h3>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mt-1">
+                <span *ngIf="quotationDetail.provider?.rating" class="flex items-center">
+                  <i *ngFor="let s of [1,2,3,4,5]" class="fa-star text-[10px]"
+                     [ngClass]="s <= quotationDetail.provider.rating ? 'fa-solid text-yellow-400' : 'fa-regular text-gray-300'"></i>
+                  <span class="ml-1 font-bold text-gray-700">{{ quotationDetail.provider.rating }}</span>
+                </span>
+                <span *ngIf="quotationDetail.provider?.service_provider_profile?.district" class="flex items-center">
+                  <i class="fa-solid fa-location-dot mr-1 text-[#db3333]"></i>
+                  {{ quotationDetail.provider.service_provider_profile.district }}, {{ quotationDetail.provider.service_provider_profile.state }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-red-50 rounded-xl px-5 py-3 border border-red-100 text-center shrink-0">
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Price</p>
+            <p class="text-2xl font-extrabold text-[#db3333]">₹{{ quotationDetail.price }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Provider Info Grid -->
+      <div class="p-6 md:p-8 border-b border-gray-100">
+        <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4 flex items-center">
+          <i class="fa-solid fa-building mr-2 text-gray-400"></i> Provider Information
+        </h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div *ngIf="quotationDetail.provider?.service_provider_profile?.business_name">
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Business</p>
+            <p class="text-sm font-bold text-gray-900 mt-0.5">{{ quotationDetail.provider.service_provider_profile.business_name }}</p>
+          </div>
+          <div *ngIf="quotationDetail.provider?.phone_number">
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Phone</p>
+            <p class="text-sm font-bold text-gray-900 mt-0.5">{{ quotationDetail.provider.phone_number }}</p>
+          </div>
+          <div *ngIf="quotationDetail.provider?.email">
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Email</p>
+            <p class="text-sm font-bold text-gray-900 mt-0.5 truncate">{{ quotationDetail.provider.email }}</p>
+          </div>
+          <div *ngIf="quotationDetail.provider?.service_provider_profile?.business_address">
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Address</p>
+            <p class="text-sm font-bold text-gray-900 mt-0.5">{{ quotationDetail.provider.service_provider_profile.business_address }}</p>
+          </div>
+          <div *ngIf="quotationDetail.status">
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Quote Status</p>
+            <span [class]="getStatusClass(quotationDetail.status)" class="inline-block mt-1 px-2.5 py-0.5 text-xs font-bold rounded-full uppercase">
+              {{ quotationDetail.status }}
+            </span>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider">Quoted On</p>
+            <p class="text-sm font-bold text-gray-900 mt-0.5">{{ quotationDetail.created_at | date:'mediumDate' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Provider Message -->
+      <div *ngIf="quotationDetail.description" class="p-6 md:p-8 border-b border-gray-100">
+        <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center">
+          <i class="fa-regular fa-message mr-2 text-gray-400"></i> Provider's Message
+        </h4>
+        <div class="bg-blue-50/60 rounded-xl p-4 border border-blue-100 text-sm text-gray-700 whitespace-pre-line">
+          {{ quotationDetail.description }}
+        </div>
+      </div>
+
+      <!-- Provider Gallery -->
+      <div *ngIf="quotationDetail.provider?.service_provider_profile?.gallery && quotationDetail.provider.service_provider_profile.gallery.length > 0" class="p-6 md:p-8 border-b border-gray-100">
+        <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center">
+          <i class="fa-solid fa-images mr-2 text-gray-400"></i> Provider Gallery
+        </h4>
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          <div *ngFor="let img of quotationDetail.provider.service_provider_profile.gallery" 
+               class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+            <img [src]="img.image_url" alt="Gallery" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quotation Media -->
+      <div *ngIf="quotationDetail.media && quotationDetail.media.length > 0" class="p-6 md:p-8 border-b border-gray-100">
+        <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center">
+          <i class="fa-solid fa-paperclip mr-2 text-gray-400"></i> Quotation Attachments
+        </h4>
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+          <div *ngFor="let file of quotationDetail.media" 
+               class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+            <img [src]="file.file_url || file" alt="Attachment" class="w-full h-full object-cover"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Tags -->
+      <div class="p-6 md:p-8 bg-gray-50/50 flex flex-wrap gap-3">
+        <span *ngIf="quotationDetail.provider?.service_provider_profile?.is_service_provider" class="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">
+          <i class="fa-solid fa-wrench mr-1 text-gray-400"></i> Service Provider
+        </span>
+        <span *ngIf="quotationDetail.provider?.service_provider_profile?.is_spare_part_seller" class="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">
+          <i class="fa-solid fa-gear mr-1 text-gray-400"></i> Spare Parts Seller
+        </span>
+        <span *ngIf="quotationDetail.provider?.service_provider_profile?.is_vehicle_reseller" class="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">
+          <i class="fa-solid fa-car mr-1 text-gray-400"></i> Vehicle Reseller
+        </span>
+        <span *ngIf="quotationDetail.provider?.service_provider_profile?.spare_parts_new" class="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">
+          New Parts
+        </span>
+        <span *ngIf="quotationDetail.provider?.service_provider_profile?.spare_parts_old" class="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">
+          Used Parts
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Modal / Drawer -->
+<div *ngIf="isFeedbackModalOpen" class="fixed inset-0 z-[100] flex" style="font-family: 'Inter', sans-serif;">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" (click)="closeFeedbackModal()"></div>
+  
+  <!-- Drawer Content -->
+  <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-slide-in-left">
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
+      <h2 class="text-xl font-extrabold text-[#1a2b4b]">Submit Feedback</h2>
+      <button (click)="closeFeedbackModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    
+    <!-- Body -->
+    <div class="p-6 md:p-8 space-y-8 flex-1 overflow-y-auto">
+      
+      <!-- Fulfilled Question -->
+      <div>
+        <label class="block text-[#1a2b4b] font-bold mb-4">Was your request fulfilled?</label>
+        <div class="flex gap-4">
+          <button (click)="feedbackForm.fulfilled = true" [ngClass]="feedbackForm.fulfilled === true ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'" class="flex-1 py-3.5 border-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm">
+            <i [ngClass]="feedbackForm.fulfilled === true ? 'fa-solid text-green-500' : 'fa-regular'" class="fa-circle-dot"></i> Yes
+          </button>
+          <button (click)="feedbackForm.fulfilled = false" [ngClass]="feedbackForm.fulfilled === false ? 'border-gray-800 bg-gray-50 text-gray-800' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'" class="flex-1 py-3.5 border-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm">
+            <i [ngClass]="feedbackForm.fulfilled === false ? 'fa-solid text-gray-800' : 'fa-regular'" class="fa-circle-dot"></i> No
+          </button>
+        </div>
+      </div>
+
+      <!-- Give Feedback Now Question -->
+      <div>
+        <label class="block text-[#1a2b4b] font-bold mb-4">Do you want to give feedback now?</label>
+        <div class="flex gap-4">
+          <button (click)="feedbackForm.give_feedback = true" [ngClass]="feedbackForm.give_feedback === true ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'" class="flex-1 py-3.5 border-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm">
+            <i [ngClass]="feedbackForm.give_feedback === true ? 'fa-solid text-green-500' : 'fa-regular'" class="fa-circle-dot"></i> Yes
+          </button>
+          <button (click)="feedbackForm.give_feedback = false" [ngClass]="feedbackForm.give_feedback === false ? 'border-gray-800 bg-gray-50 text-gray-800' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'" class="flex-1 py-3.5 border-2 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-sm">
+            <i [ngClass]="feedbackForm.give_feedback === false ? 'fa-solid text-gray-800' : 'fa-regular'" class="fa-circle-dot"></i> No
+          </button>
+        </div>
+      </div>
+
+      <!-- Rating & Text -->
+      <div *ngIf="feedbackForm.give_feedback === true" class="space-y-6 animate-fade-in-up">
+        <div>
+          <label class="block text-[#1a2b4b] font-bold mb-3">Rate Provider</label>
+          <div class="flex items-center gap-3">
+            <button *ngFor="let star of [1,2,3,4,5]" (click)="setRating(star)" class="text-4xl focus:outline-none transition-transform hover:scale-110" [ngClass]="star <= feedbackForm.rating ? 'text-yellow-400' : 'text-gray-300'">
+              <i [ngClass]="star <= feedbackForm.rating ? 'fa-solid' : 'fa-regular'" class="fa-star"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <textarea [(ngModel)]="feedbackForm.feedback_text" rows="4" placeholder="Write your feedback" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-gray-200 focus:border-gray-300 resize-none text-gray-700 font-medium transition-all"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="p-6 md:p-8 shrink-0 bg-white border-t border-gray-50">
+      <button (click)="submitFeedback()" [disabled]="submittingFeedback || feedbackForm.fulfilled === null || feedbackForm.give_feedback === null || (feedbackForm.give_feedback === true && feedbackForm.rating === 0)" class="w-full py-4 bg-[#e84c4c] text-white rounded-2xl font-extrabold text-lg hover:bg-[#d63f3f] transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed">
+        <i *ngIf="submittingFeedback" class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+        {{ submittingFeedback ? 'Submitting...' : 'Submit Feedback' }}
+      </button>
+    </div>
+  </div>
+</div>

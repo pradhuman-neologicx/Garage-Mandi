@@ -1,0 +1,376 @@
+<app-navbar></app-navbar>
+
+<main class="min-h-screen bg-gray-50 pt-28 pb-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-8 flex items-end justify-between">
+      <div>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">My Profile</h1>
+        <p class="text-gray-500 mt-1 text-sm">Manage your account details and view your activity summary.</p>
+      </div>
+      <a routerLink="/recent-activity" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-[#131e3d] hover:text-[#db3333] transition-colors duration-200">
+        Recent Activity
+        <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+
+    <ng-container *ngIf="!isLoading; else loadingTemplate">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- ======= LEFT COLUMN: Info Panel ======= -->
+        <div class="lg:col-span-4 space-y-6">
+
+          <!-- Avatar Card -->
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 text-center">
+            <div class="relative w-28 h-28 mx-auto mb-5 group cursor-pointer" (click)="fileInput.click()">
+              <div class="w-28 h-28 rounded-full overflow-hidden ring-4 ring-gray-100">
+                <!-- Actual image -->
+                <img *ngIf="profileImageUrl" [src]="profileImageUrl" alt="Profile" class="w-full h-full object-cover">
+                <!-- Placeholder with initials -->
+                <div *ngIf="!profileImageUrl" class="w-full h-full bg-gradient-to-br from-[#131e3d] to-[#2a3f7e] flex items-center justify-center">
+                  <span class="text-white text-3xl font-bold uppercase select-none">{{ (fullName | slice:0:1) || 'U' }}</span>
+                </div>
+                <div class="absolute inset-0 rounded-full bg-[#131e3d]/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <i class="fa-solid fa-camera text-white text-lg mb-1"></i>
+                  <span class="text-white text-[10px] font-bold uppercase tracking-widest">Change</span>
+                </div>
+              </div>
+              <!-- Always-visible camera badge -->
+              <div class="absolute bottom-0 right-0 w-9 h-9 bg-[#db3333] rounded-full flex items-center justify-center shadow-lg border-2 border-white group-hover:scale-110 transition-transform duration-200">
+                <i class="fa-solid fa-camera text-white text-xs"></i>
+              </div>
+              <input type="file" #fileInput (change)="onFileChange($event)" accept="image/*" class="hidden">
+            </div>
+            <h2 class="text-xl font-bold text-gray-900">{{ fullName || 'User' }}</h2>
+            <p class="text-gray-400 text-sm mt-0.5">&#64;{{ username || '—' }}</p>
+            <p class="text-gray-500 text-sm mt-1">{{ email }}</p>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active Account
+              </span>
+            </div>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-gray-200 transition-all group">
+              <div class="text-2xl font-extrabold text-[#131e3d] group-hover:scale-110 transition-transform">{{ summary.total_vehicles }}</div>
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Vehicles</div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-gray-200 transition-all group">
+              <div class="text-2xl font-extrabold text-[#db3333] group-hover:scale-110 transition-transform">{{ summary.total_requests }}</div>
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Requests</div>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md hover:border-gray-200 transition-all group">
+              <div class="text-2xl font-extrabold text-emerald-600 group-hover:scale-110 transition-transform">{{ summary.total_quotes }}</div>
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Quotes</div>
+            </div>
+          </div>
+
+          <!-- Quick Info Card -->
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact Info</h4>
+            <div class="flex items-center gap-3" *ngIf="phone_number">
+              <div class="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-phone text-gray-400 text-sm"></i></div>
+              <span class="text-sm text-gray-700 font-medium">{{ phone_number }}</span>
+            </div>
+            <div class="flex items-center gap-3" *ngIf="email">
+              <div class="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-envelope text-gray-400 text-sm"></i></div>
+              <span class="text-sm text-gray-700 font-medium break-all">{{ email }}</span>
+            </div>
+            <div class="flex items-center gap-3" *ngIf="address">
+              <div class="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-location-dot text-gray-400 text-sm"></i></div>
+              <span class="text-sm text-gray-700 font-medium">{{ address }}</span>
+            </div>
+          </div>
+
+          <!-- Change Password Button (Under Contact Info Section) -->
+          <button type="button" (click)="openPasswordModal()"
+            class="w-full py-3.5 px-5 rounded-3xl bg-white hover:bg-red-50/40 text-gray-800 hover:text-[#db3333] border border-gray-100 hover:border-red-200 font-bold text-sm transition-all duration-200 shadow-sm flex items-center justify-between group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-rose-50 text-[#db3333] border border-rose-100 flex items-center justify-center text-sm group-hover:bg-[#db3333] group-hover:text-white transition-colors">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <div class="text-left">
+                <div class="text-sm font-bold text-gray-900 group-hover:text-[#db3333] transition-colors">Change Password</div>
+                <div class="text-xs font-normal text-gray-400">Update account credentials</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:text-[#db3333] group-hover:translate-x-1 transition-all"></i>
+          </button>
+
+        </div>
+
+        <!-- ======= RIGHT COLUMN: Edit Form ======= -->
+        <div class="lg:col-span-8">
+          <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100">
+            
+            <div class="flex items-center gap-3 mb-8 pb-5 border-b border-gray-100">
+              <div class="w-10 h-10 bg-[#131e3d]/5 rounded-xl flex items-center justify-center text-[#131e3d]">
+                <i class="fa-solid fa-user-pen"></i>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">Edit Profile</h3>
+                <p class="text-gray-400 text-xs">Update your personal information and address.</p>
+              </div>
+            </div>
+            
+            <form #profileForm="ngForm" (ngSubmit)="onSubmit(profileForm)" novalidate class="space-y-5">
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+                  <input type="text" name="fullName" [(ngModel)]="fullName" #fullNameCtrl="ngModel" required placeholder="John Doe"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none text-sm"
+                    [ngClass]="{'!border-red-400 !bg-red-50': fullNameCtrl.invalid && (fullNameCtrl.touched || profileForm.submitted)}">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">Username</label>
+                  <input type="text" name="username" [(ngModel)]="username" #usernameCtrl="ngModel" required placeholder="johndoe123"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none text-sm"
+                    [ngClass]="{'!border-red-400 !bg-red-50': usernameCtrl.invalid && (usernameCtrl.touched || profileForm.submitted)}">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">Mobile Number</label>
+                  <input type="tel" name="phone_number" [(ngModel)]="phone_number" #phoneCtrl="ngModel" required pattern="^[0-9]{10}$" maxlength="10" placeholder="10-digit number"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none text-sm"
+                    [ngClass]="{'!border-red-400 !bg-red-50': phoneCtrl.invalid && (phoneCtrl.touched || profileForm.submitted)}">
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                  <input type="email" name="email" [(ngModel)]="email" #emailCtrl="ngModel" required placeholder="john@example.com"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none text-sm"
+                    [ngClass]="{'!border-red-400 !bg-red-50': emailCtrl.invalid && (emailCtrl.touched || profileForm.submitted)}">
+                </div>
+              </div>
+
+              <!-- Divider -->
+              <div class="flex items-center gap-3 pt-2">
+                <div class="flex-1 border-t border-gray-100"></div>
+                <span class="text-xs font-bold text-gray-300 uppercase tracking-widest">Address</span>
+                <div class="flex-1 border-t border-gray-100"></div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">State</label>
+                  <select name="state" [(ngModel)]="selectedState" (change)="onStateChange()" required
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none appearance-none cursor-pointer text-sm">
+                    <option value="">Select State</option>
+                    <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">District</label>
+                  <select name="district" [(ngModel)]="selectedDistrict" (change)="onDistrictChange()" required [disabled]="!districts.length"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none appearance-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm">
+                    <option value="">Select District</option>
+                    <option *ngFor="let district of districts" [value]="district.id">{{ district.name }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">City</label>
+                  <select name="city" [(ngModel)]="selectedCity" required [disabled]="!cities.length"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none appearance-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-sm">
+                    <option value="">Select City</option>
+                    <option *ngFor="let city of cities" [value]="city.id">{{ city.name }}</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pincode</label>
+                  <input type="text" name="pincode" [(ngModel)]="pincode" #pincodeCtrl="ngModel" required pattern="^[0-9]{6}$" maxlength="6" placeholder="e.g. 334001"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none text-sm"
+                    [ngClass]="{'!border-red-400 !bg-red-50': pincodeCtrl.invalid && (pincodeCtrl.touched || profileForm.submitted)}">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full Address</label>
+                <textarea name="address" [(ngModel)]="address" #addressCtrl="ngModel" required rows="3" placeholder="Enter your full street address"
+                  class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#131e3d] focus:ring-4 focus:ring-[#131e3d]/10 transition-all outline-none resize-y text-sm"
+                  [ngClass]="{'!border-red-400 !bg-red-50': addressCtrl.invalid && (addressCtrl.touched || profileForm.submitted)}"></textarea>
+              </div>
+
+              <div class="pt-4 mt-2 border-t border-gray-100 flex justify-end">
+                <button type="submit" [disabled]="isSaving"
+                  class="bg-[#db3333] hover:bg-[#c22b2b] text-white font-bold py-3 px-8 rounded-xl shadow-[0_4px_12px_rgba(219,51,51,0.25)] hover:shadow-[0_6px_16px_rgba(219,51,51,0.35)] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed transform hover:-translate-y-0.5 active:translate-y-0 text-sm">
+                  <i class="fa-solid fa-spinner fa-spin mr-2" *ngIf="isSaving"></i>
+                  {{ isSaving ? 'Saving...' : 'Save Changes' }}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+
+    <!-- Skeleton Loader -->
+    <ng-template #loadingTemplate>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left skeleton -->
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col items-center">
+            <div class="skeleton skeleton-avatar"></div>
+            <div class="skeleton skeleton-title" style="width:50%;"></div>
+            <div class="skeleton skeleton-text mt-2" style="width:70%;"></div>
+          </div>
+          <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div class="skeleton h-4 w-1/3"></div>
+            <div class="skeleton h-10 w-full rounded-lg"></div>
+            <div class="skeleton h-10 w-full rounded-lg"></div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 h-20"><div class="skeleton h-full w-full rounded-lg"></div></div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 h-20"><div class="skeleton h-full w-full rounded-lg"></div></div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 h-20"><div class="skeleton h-full w-full rounded-lg"></div></div>
+          </div>
+        </div>
+        <!-- Right skeleton -->
+        <div class="lg:col-span-8">
+          <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 space-y-6">
+            <div class="skeleton h-7 w-1/4 mb-6"></div>
+            <div class="grid grid-cols-2 gap-5"><div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-input"></div></div><div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-input"></div></div></div>
+            <div class="grid grid-cols-2 gap-5"><div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-input"></div></div><div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-input"></div></div></div>
+            <div class="grid grid-cols-2 gap-5"><div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-input"></div></div><div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-input"></div></div></div>
+            <div><div class="skeleton skeleton-label"></div><div class="skeleton skeleton-input" style="height:90px;"></div></div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+  </div>
+</main>
+
+<!-- ========================================== -->
+<!-- CHANGE PASSWORD MODAL                      -->
+<!-- ========================================== -->
+<div *ngIf="showPasswordModal"
+  class="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden">
+  
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+    (click)="closePasswordModal()"></div>
+
+  <!-- Modal Dialog -->
+  <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in border border-gray-100 z-10">
+    
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-100 text-[#db3333] flex items-center justify-center text-base flex-shrink-0">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-gray-900 leading-tight">Change Password</h3>
+          <p class="text-xs text-gray-400">Enter your current password and choose a new one.</p>
+        </div>
+      </div>
+      <button type="button" (click)="closePasswordModal()"
+        class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <form (ngSubmit)="submitPasswordChange()" class="p-6 space-y-4">
+      
+      <!-- Current Password -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">
+          Current Password <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <input [type]="showCurrentPassword ? 'text' : 'password'"
+            name="currentPassword"
+            [(ngModel)]="currentPassword"
+            required
+            placeholder="Enter current password"
+            class="w-full pl-4 pr-11 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#db3333] focus:ring-4 focus:ring-red-50 text-sm transition-all outline-none">
+          <button type="button" (click)="showCurrentPassword = !showCurrentPassword"
+            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+            <i class="fa-regular" [ngClass]="showCurrentPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- New Password -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">
+            New Password <span class="text-red-500">*</span>
+          </label>
+          <span class="text-[11px] text-gray-400">Min 6 characters</span>
+        </div>
+        <div class="relative">
+          <input [type]="showNewPassword ? 'text' : 'password'"
+            name="newPassword"
+            [(ngModel)]="newPassword"
+            required
+            minlength="6"
+            placeholder="Enter new password"
+            class="w-full pl-4 pr-11 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#db3333] focus:ring-4 focus:ring-red-50 text-sm transition-all outline-none">
+          <button type="button" (click)="showNewPassword = !showNewPassword"
+            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+            <i class="fa-regular" [ngClass]="showNewPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirm New Password -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5">
+          Confirm New Password <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <input [type]="showConfirmPassword ? 'text' : 'password'"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            required
+            placeholder="Confirm new password"
+            class="w-full pl-4 pr-11 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-[#db3333] focus:ring-4 focus:ring-red-50 text-sm transition-all outline-none"
+            [ngClass]="{'border-red-400 bg-red-50/30': confirmPassword && newPassword && confirmPassword !== newPassword, 'border-emerald-400 bg-emerald-50/30': confirmPassword && newPassword && confirmPassword === newPassword}">
+          <button type="button" (click)="showConfirmPassword = !showConfirmPassword"
+            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+            <i class="fa-regular" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+          </button>
+        </div>
+        <!-- Password mismatch error or match hint -->
+        <p *ngIf="confirmPassword && newPassword && confirmPassword !== newPassword"
+          class="text-xs text-red-500 mt-1 flex items-center gap-1">
+          <i class="fa-solid fa-circle-exclamation text-[10px]"></i> Passwords do not match
+        </p>
+        <p *ngIf="confirmPassword && newPassword && confirmPassword === newPassword"
+          class="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+          <i class="fa-solid fa-circle-check text-[10px]"></i> Passwords match
+        </p>
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
+        <button type="button" (click)="closePasswordModal()"
+          class="px-5 py-2.5 rounded-xl text-gray-600 hover:bg-gray-100 font-bold text-xs sm:text-sm transition-colors cursor-pointer">
+          Cancel
+        </button>
+        <button type="submit" [disabled]="isChangingPassword"
+          class="px-6 py-2.5 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+          <i *ngIf="isChangingPassword" class="fa-solid fa-spinner fa-spin text-xs"></i>
+          <span>{{ isChangingPassword ? 'Updating...' : 'Update Password' }}</span>
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<app-footer></app-footer>

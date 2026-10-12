@@ -11,27 +11,45 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
     <div *ngFor="let plan of platformPlans"
       class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col relative transition-transform hover:-translate-y-1 hover:shadow-md">
-      <div class="bg-custom-primary p-6 text-white flex justify-between items-stretch flex-grow">
-        <div class="flex flex-col justify-between w-full h-full pr-2">
-          <h3 class="font-bold text-lg mb-4 leading-tight">{{ plan.name }}</h3>
-          <div class="text-3xl font-bold mt-auto">₹{{ plan.price }} <span class="text-sm font-normal opacity-80">+ GST /
-              month</span></div>
+      <!-- Header -->
+      <div class="bg-custom-primary p-6 text-white">
+        <div class="flex justify-between items-start gap-4">
+          <h3 class="font-bold text-lg leading-tight">{{ plan.name }}</h3>
+          <button (click)="openEditPlanModal(plan)"
+            class="text-sm bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors cursor-pointer shrink-0"
+            title="Edit Plan">
+            <i class="fa-solid fa-pen"></i>
+          </button>
         </div>
-        <button (click)="openEditPlanModal(plan)"
-          class="text-sm bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors cursor-pointer shrink-0 self-start"
-          title="Edit Plan">
-          <i class="fa-solid fa-pen"></i>
-        </button>
+        <p class="text-justify text-sm opacity-90 mt-3">{{ plan.description || 'No description available.' }}</p>
       </div>
-      <!-- <div class="p-6 flex-grow flex flex-col">
+
+      <!-- Features Listing -->
+      <div class="p-6 border-b border-gray-100 flex-grow">
         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Features included</h4>
-        <ul class="space-y-3 flex-grow">
+        <ul class="space-y-3">
           <li *ngFor="let feature of plan.features" class="flex items-start">
             <i class="fa-solid fa-check text-green-500 mt-1.5 mr-3 text-xs"></i>
             <span class="text-sm text-gray-700 leading-snug">{{ feature }}</span>
           </li>
         </ul>
-      </div> -->
+      </div>
+
+      <!-- Pricing Info -->
+      <div class="p-6 bg-gray-50 flex flex-col gap-2">
+        <div class="flex justify-between text-sm text-gray-600">
+          <span>Subtotal</span>
+          <span class="font-semibold">₹{{ plan.price }}</span>
+        </div>
+        <div class="flex justify-between text-sm text-gray-600">
+          <span>GST ({{ plan.gst_percent }}%)</span>
+          <span class="font-semibold">₹{{ plan.gst }}</span>
+        </div>
+        <div class="flex justify-between text-lg font-bold text-gray-800 pt-2 border-t border-gray-200 mt-1">
+          <span>Total</span>
+          <span>₹{{ plan.final_amount }} <span class="text-xs font-normal text-gray-500">/ month</span></span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -101,9 +119,12 @@
         <thead>
           <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
             <th class="p-3 w-16 text-center">S.No.</th>
-            <th class="p-3">Provider Name & Number</th>
-            <th class="p-3">Start Date</th>
-            <th class="p-3">End Date</th>
+            <th class="p-3">User Name</th>
+            <th class="p-3">Email</th>
+            <th class="p-3">Number</th>
+            <th class="p-3">Plan Name</th>
+            <th class="p-3">Purchase Date</th>
+            <th class="p-3">Renew Date</th>
             <th class="p-3 text-center">Status</th>
             <th class="p-3 text-right">Actions</th>
           </tr>
@@ -117,7 +138,15 @@
             </td>
             <td class="p-3">
               <div class="font-bold text-gray-800 text-sm">{{ sub.name }}</div>
-              <div class="text-xs text-gray-500 mt-1"><i class="fa-solid fa-phone mr-1"></i> {{ sub.phoneNumber }}</div>
+            </td>
+            <td class="p-3 text-sm text-gray-600">
+              {{ sub.email }}
+            </td>
+            <td class="p-3 text-sm text-gray-600">
+              {{ sub.phoneNumber }}
+            </td>
+            <td class="p-3 text-sm font-semibold text-gray-800">
+              {{ sub.plan }}
             </td>
             <td class="p-3 text-sm text-gray-600">{{ sub.startDate }}</td>
             <td class="p-3 text-sm text-gray-600">{{ sub.endDate }}</td>
@@ -130,7 +159,7 @@
               <button (click)="openPaymentModal(sub)"
                 class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition-colors"
                 title="View Payment History">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
+               <i class="fa-solid fa-clipboard-list"></i>
               </button>
             </td>
           </tr>
@@ -197,17 +226,42 @@
       <div
         class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all max-h-[90vh] flex flex-col">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-          <h3 class="text-lg font-bold text-gray-800">Edit {{ editPlanData?.name || 'Plan' }}</h3>
+          <h3 class="text-lg font-bold text-gray-800">Edit Plan</h3>
           <button (click)="closeEditPlanModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
             <i class="fa-solid fa-xmark text-xl"></i>
           </button>
         </div>
         <div class="p-6 space-y-5 overflow-y-auto grow">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Base Price (₹ / month)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input type="text" [(ngModel)]="editPlanData.name"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea [(ngModel)]="editPlanData.description" rows="2"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Base Price / Subtotal (₹ per month)</label>
             <input type="number" [(ngModel)]="editPlanData.price"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-custom-primary text-sm">
           </div>
+          
+          <!-- <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 mt-2">
+             <div class="flex justify-between text-sm text-gray-600">
+               <span>Subtotal</span>
+               <span>₹{{ editPlanData.price || 0 }}</span>
+             </div>
+             <div class="flex justify-between text-sm text-gray-600">
+               <span>GST ({{ editPlanData.gst_percent || 18 }}%)</span>
+               <span>₹{{ ((editPlanData.price || 0) * ((editPlanData.gst_percent || 18) / 100)).toFixed(2) }}</span>
+             </div>
+             <div class="flex justify-between font-bold text-gray-800 pt-2 border-t border-gray-200 mt-1">
+               <span>Total Price</span>
+               <span>₹{{ ((editPlanData.price || 0) * (1 + (editPlanData.gst_percent || 18) / 100)).toFixed(2) }}</span>
+             </div>
+          </div> -->
         </div>
         <div class="px-6 py-4 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50 shrink-0">
           <button (click)="closeEditPlanModal()"
@@ -251,7 +305,7 @@
           </div>
 
           <!-- Details Section -->
-          <div *ngIf="selectedProvider?.rawData" class="bg-white border border-gray-100 rounded-xl p-5 shadow-sm mb-6">
+          <div *ngIf="selectedProvider?.rawData" class="bg-white border border-gray-100 rounded-xl p-3 shadow-sm mb-6">
             <!-- Provider Details -->
             <div>
               <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Provider Details</h4>
@@ -279,71 +333,141 @@
             </div>
           </div>
 
-          <!-- Current Plans Table -->
+          <!-- Current Plans Section -->
           <div *ngIf="selectedProvider?.currentSubs && selectedProvider.currentSubs.length > 0">
-            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">Current Plans</h4>
-            <div class="overflow-x-auto border border-gray-100 rounded-lg shadow-sm mb-6">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr
-                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-                    <th class="p-4 w-[250px]">Plan Name</th>
-                    <th class="p-4">Amount</th>
-                    <th class="p-4">Start Date</th>
-                    <th class="p-4">End Date</th>
-                    <th class="p-4 text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                  <tr *ngFor="let item of selectedProvider.currentSubs" class="hover:bg-gray-50/50 transition-colors">
-                    <td class="p-4 text-sm text-gray-900 font-medium">{{ item.planName }}</td>
-                    <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ item.amount }}</td>
-                    <td class="p-4 text-sm text-gray-600">{{ item.startDate }}</td>
-                    <td class="p-4 text-sm text-gray-600">{{ item.endDate }}</td>
-                    <td class="p-4 text-center">
-                      <span
-                        [ngClass]="{'bg-green-100 text-green-700': item.status === 'active', 'bg-red-100 text-red-700': item.status === 'expired', 'bg-gray-100 text-gray-700': item.status !== 'active' && item.status !== 'expired'}"
-                        class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize">
-                        {{ item.status }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 mt-2 flex items-center">
+              <i class="fa-solid fa-bolt text-yellow-500 mr-2"></i> Current Plans
+            </h4>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              <div *ngFor="let item of selectedProvider.currentSubs" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-all relative">
+                <!-- Header -->
+                <div class="flex justify-between items-start mb-4 gap-3 border-b border-gray-50 pb-3">
+                  <h5 class="font-bold text-gray-800 text-base leading-snug">{{ item.planName }}</h5>
+                  <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-100 text-red-700 border-red-200': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
+                        class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
+                    {{ item.status }}
+                  </span>
+                </div>
+
+                <!-- Dates Grid -->
+                <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mb-4">
+                  <div>
+                    <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Start Date</p>
+                    <p class="font-medium text-gray-800"><i class="fa-regular fa-calendar text-custom-primary mr-1.5 opacity-70"></i>{{ item.startDate }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-1">Renew Date</p>
+                    <p class="font-medium text-gray-800"><i class="fa-regular fa-calendar-check text-custom-primary mr-1.5 opacity-70"></i>{{ item.endDate }}</p>
+                  </div>
+
+                  <!-- Financials -->
+                  <div class="col-span-2 bg-gray-50/80 p-3 rounded-lg flex justify-between items-center border border-gray-100">
+                    <div class="text-center flex-1">
+                      <p class="text-[11px] text-gray-500 font-medium mb-0.5">Base Amount</p>
+                      <p class="font-semibold text-gray-700">₹{{ item.amount }}</p>
+                    </div>
+                    <div class="text-gray-300 text-lg font-light">+</div>
+                    <div class="text-center flex-1">
+                      <p class="text-[11px] text-gray-500 font-medium mb-0.5">GST</p>
+                      <p class="font-semibold text-gray-700">₹{{ item.gstAmount }}</p>
+                    </div>
+                    <div class="text-gray-300 text-lg font-light">=</div>
+                    <div class="text-center flex-1">
+                      <p class="text-[11px] text-custom-primary font-bold uppercase tracking-wider mb-0.5">Total Paid</p>
+                      <p class="font-bold text-gray-900 text-base">₹{{ item.totalAmount }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Info Footer -->
+                <div class="flex flex-wrap items-center justify-between border-t border-gray-100 pt-3 text-xs gap-2">
+                  <div class="flex items-center">
+                    <span class="text-gray-500 mr-2 font-medium">Payment:</span>
+                    <span class="capitalize px-2 py-0.5 rounded font-bold"
+                          [ngClass]="{'text-green-600 bg-green-50': item.paymentStatus === 'paid', 'text-red-600 bg-red-50': item.paymentStatus === 'failed', 'text-gray-600 bg-gray-100': item.paymentStatus !== 'paid' && item.paymentStatus !== 'failed'}">
+                      {{ item.paymentStatus }}
+                    </span>
+                  </div>
+                  
+                  <div class="flex items-center gap-3">
+                    <span *ngIf="item.paymentDate !== 'N/A'" class="text-gray-500 font-medium flex items-center" title="Payment Date">
+                      <i class="fa-solid fa-clock-rotate-left mr-1.5 opacity-60"></i>{{ item.paymentDate }}
+                    </span>
+                    <span *ngIf="item.activity !== 'N/A'" class="capitalize bg-indigo-50 text-indigo-600 font-semibold px-2 py-0.5 rounded flex items-center">
+                      <i class="fa-solid fa-tag mr-1 text-[10px]"></i>{{ item.activity }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- History Table -->
+          <!-- History Section -->
           <div *ngIf="selectedProvider?.history && selectedProvider.history.length > 0">
-            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 mt-4">History</h4>
-            <div class="overflow-x-auto border border-gray-100 rounded-lg shadow-sm">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr
-                    class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-bold">
-                    <th class="p-4 w-[250px]">Plan Name</th>
-                    <th class="p-4">Amount</th>
-                    <th class="p-4">Start Date</th>
-                    <th class="p-4">End Date</th>
-                    <th class="p-4 text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                  <tr *ngFor="let item of selectedProvider.history" class="hover:bg-gray-50/50 transition-colors">
-                    <td class="p-4 text-sm text-gray-900 font-medium">{{ item.planName }}</td>
-                    <td class="p-4 font-semibold text-gray-900 text-sm">₹{{ item.amount }}</td>
-                    <td class="p-4 text-sm text-gray-600">{{ item.startDate }}</td>
-                    <td class="p-4 text-sm text-gray-600">{{ item.endDate }}</td>
-                    <td class="p-4 text-center">
-                      <span
-                        [ngClass]="{'bg-green-100 text-green-700': item.status === 'active', 'bg-red-100 text-red-700': item.status === 'expired', 'bg-gray-100 text-gray-700': item.status !== 'active' && item.status !== 'expired'}"
-                        class="text-xs px-2.5 py-1 rounded-full font-semibold capitalize">
-                        {{ item.status }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 mt-2 flex items-center">
+              <i class="fa-solid fa-clock-rotate-left text-gray-400 mr-2"></i> Subscription History
+            </h4>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-2">
+              <div *ngFor="let item of selectedProvider.history" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-all relative grayscale-[0.2] opacity-90">
+                <!-- Header -->
+                <div class="flex justify-between items-start mb-4 gap-3 border-b border-gray-50 pb-3">
+                  <h5 class="font-bold text-gray-700 text-base leading-snug">{{ item.planName }}</h5>
+                  <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-50 text-red-600 border-red-100': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
+                        class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
+                    {{ item.status }}
+                  </span>
+                </div>
+
+                <!-- Dates Grid -->
+                <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-sm mb-4">
+                  <div>
+                    <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-1">Start Date</p>
+                    <p class="font-medium text-gray-600"><i class="fa-regular fa-calendar mr-1.5 opacity-50"></i>{{ item.startDate }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[11px] text-gray-400 font-bold uppercase tracking-wider mb-1">Renew Date</p>
+                    <p class="font-medium text-gray-600"><i class="fa-regular fa-calendar-check mr-1.5 opacity-50"></i>{{ item.endDate }}</p>
+                  </div>
+
+                  <!-- Financials -->
+                  <div class="col-span-2 bg-gray-50/50 p-3 rounded-lg flex justify-between items-center border border-gray-100">
+                    <div class="text-center flex-1">
+                      <p class="text-[11px] text-gray-400 font-medium mb-0.5">Base Amount</p>
+                      <p class="font-semibold text-gray-600">₹{{ item.amount }}</p>
+                    </div>
+                    <div class="text-gray-300 text-lg font-light">+</div>
+                    <div class="text-center flex-1">
+                      <p class="text-[11px] text-gray-400 font-medium mb-0.5">GST</p>
+                      <p class="font-semibold text-gray-600">₹{{ item.gstAmount }}</p>
+                    </div>
+                    <div class="text-gray-300 text-lg font-light">=</div>
+                    <div class="text-center flex-1">
+                      <p class="text-[11px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Total Paid</p>
+                      <p class="font-bold text-gray-700 text-base">₹{{ item.totalAmount }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Info Footer -->
+                <div class="flex flex-wrap items-center justify-between border-t border-gray-100 pt-3 text-xs gap-2">
+                  <div class="flex items-center">
+                    <span class="text-gray-400 mr-2 font-medium">Payment:</span>
+                    <span class="capitalize px-2 py-0.5 rounded font-bold"
+                          [ngClass]="{'text-green-600 bg-green-50': item.paymentStatus === 'paid', 'text-red-600 bg-red-50': item.paymentStatus === 'failed', 'text-gray-500 bg-gray-100': item.paymentStatus !== 'paid' && item.paymentStatus !== 'failed'}">
+                      {{ item.paymentStatus }}
+                    </span>
+                  </div>
+                  
+                  <div class="flex items-center gap-3">
+                    <span *ngIf="item.paymentDate !== 'N/A'" class="text-gray-400 font-medium flex items-center" title="Payment Date">
+                      <i class="fa-solid fa-clock-rotate-left mr-1.5 opacity-50"></i>{{ item.paymentDate }}
+                    </span>
+                    <span *ngIf="item.activity !== 'N/A'" class="capitalize bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded flex items-center">
+                      <i class="fa-solid fa-tag mr-1 text-[10px]"></i>{{ item.activity }}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

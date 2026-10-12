@@ -1,0 +1,649 @@
+<app-navbar></app-navbar>
+
+<main class="min-h-screen bg-gray-50 pt-[54px] pb-12">
+  <div *ngIf="isLoading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#db3333]"></div>
+  </div>
+
+  <ng-container *ngIf="!isLoading && profileData">
+    <!-- Header Section (Glassmorphism + Gradients) -->
+    <div class="bg-[#131e3d] text-white py-12 relative overflow-hidden">
+      <!-- Decorator blobs -->
+      <div class="absolute top-0 right-0 w-96 h-96 bg-[#db3333]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+      
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          <!-- Profile Image -->
+          <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/20 shadow-2xl shrink-0 bg-gray-800">
+            <img *ngIf="profileData.service_provider_profile?.image_url" 
+                 [src]="profileData.service_provider_profile.image_url" 
+                 alt="Profile" 
+                 class="w-full h-full object-cover">
+            <div *ngIf="!profileData.service_provider_profile?.image_url" class="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-400">
+              {{ profileData.name?.charAt(0) || 'P' }}
+            </div>
+          </div>
+          
+          <!-- Basic Info -->
+          <div class="text-center md:text-left flex-1">
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
+              <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{{ profileData.service_provider_profile?.business_name || profileData.name }}</h1>
+              
+              <span *ngIf="profileData.is_verified || profileData.service_provider_profile?.is_verified" class="bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full font-semibold border border-emerald-500/30 flex items-center gap-1">
+                <i class="fa-solid fa-circle-check"></i> Verified
+              </span>
+              <span *ngIf="!profileData.is_verified && !profileData.service_provider_profile?.is_verified" class="bg-amber-500/20 text-amber-400 text-xs px-3 py-1 rounded-full font-semibold border border-amber-500/30 flex items-center gap-1">
+                <i class="fa-solid fa-clock"></i> Pending Verification
+              </span>
+            </div>
+            
+            <p class="text-gray-300 mb-4 flex items-center justify-center md:justify-start gap-2 text-lg">
+              <i class="fa-solid fa-location-dot text-[#db3333]"></i>
+              {{ profileData.service_provider_profile?.city || 'City' }}, {{ profileData.service_provider_profile?.state || 'State' }}
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
+              <!-- Summary Stats -->
+              <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+                <i class="fa-solid fa-star text-yellow-400"></i>
+                <span class="font-bold">{{ profileData.summary?.rating || '0.0' }}</span>
+                <span class="text-sm text-gray-400">({{ profileData.summary?.total_reviews || 0 }} Reviews)</span>
+              </div>
+              <div class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+                <i class="fa-solid fa-wrench text-blue-400"></i>
+                <span class="font-bold">{{ profileData.summary?.total_jobs_done || 0 }}</span>
+                <span class="text-sm text-gray-400">Jobs Done</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Edit Button -->
+          <div>
+            <button (click)="openEditModal()" class="bg-[#db3333] hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2">
+              <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Details & Contact -->
+        <div class="lg:col-span-1 space-y-6">
+          
+          <!-- Contact Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-address-book text-[#db3333]"></i> Contact Information
+            </h3>
+            <ul class="space-y-4">
+              <li class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#131e3d] shrink-0 mt-0.5">
+                  <i class="fa-solid fa-phone"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 uppercase font-semibold">Phone Number</p>
+                  <p class="text-gray-900 font-medium">{{ profileData.service_provider_profile?.business_phone || profileData.phone_number }}</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#131e3d] shrink-0 mt-0.5">
+                  <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 uppercase font-semibold">Email</p>
+                  <p class="text-gray-900 font-medium">{{ profileData.email }}</p>
+                </div>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#131e3d] shrink-0 mt-0.5">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-gray-500 uppercase font-semibold">Address</p>
+                  <p class="text-gray-900 font-medium text-sm">{{ profileData.service_provider_profile?.business_address }}</p>
+                  <p class="text-gray-500 text-sm">{{ profileData.service_provider_profile?.district }}, {{ profileData.service_provider_profile?.pincode }}</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Capabilities Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-handshake text-[#db3333]"></i> Business Types
+            </h3>
+            <div class="space-y-3">
+              <div *ngIf="profileData.service_provider_profile?.is_service_provider" class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <i class="fa-solid fa-screwdriver-wrench text-[#131e3d] text-lg"></i>
+                <span class="font-medium text-gray-800">Service Provider</span>
+              </div>
+              <div *ngIf="profileData.service_provider_profile?.is_spare_part_seller" class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <i class="fa-solid fa-gears text-[#131e3d] text-lg"></i>
+                <span class="font-medium text-gray-800">Spare Parts Seller</span>
+                <div class="ml-auto flex gap-1">
+                  <span *ngIf="profileData.service_provider_profile?.spare_parts_new" class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase">New</span>
+                  <span *ngIf="profileData.service_provider_profile?.spare_parts_old" class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold uppercase">Old</span>
+                </div>
+              </div>
+              <div *ngIf="profileData.service_provider_profile?.is_vehicle_reseller" class="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <i class="fa-solid fa-car-side text-[#131e3d] text-lg"></i>
+                <span class="font-medium text-gray-800">Vehicle Reseller</span>
+              </div>
+            </div>
+          </div>
+          <!-- Account Settings Card -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-gear text-[#db3333]"></i> Account Settings
+            </h3>
+            <div class="space-y-3">
+              <button (click)="changePassword()" class="w-full text-left flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-gray-100 hover:border-gray-200 transition-colors">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#131e3d]">
+                    <i class="fa-solid fa-lock"></i>
+                  </div>
+                  <span class="font-medium text-gray-800">Change Password</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-gray-400 text-sm"></i>
+              </button>
+              
+              <button (click)="deleteAccount()" class="w-full text-left flex items-center justify-between p-3 rounded-xl border border-red-50 bg-red-50/50 hover:bg-red-50 hover:border-red-100 transition-colors group">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 group-hover:bg-red-200 transition-colors">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </div>
+                  <span class="font-medium text-red-600">Delete Account</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-red-300 text-sm"></i>
+              </button>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Right Column: Services & Gallery -->
+        <div class="lg:col-span-2 space-y-6">
+          
+          <!-- Categories & Tags -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4">Service Details</h3>
+            
+            <div class="mb-6">
+              <h4 class="text-sm uppercase font-bold text-gray-400 mb-3 tracking-wider">Business Categories</h4>
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let cat of profileData.service_provider_profile?.business_category" 
+                      class="bg-blue-50 text-[#131e3d] px-3 py-1.5 rounded-lg text-sm font-medium border border-blue-100">
+                  {{ cat.name }}
+                </span>
+                <span *ngIf="!profileData.service_provider_profile?.business_category?.length" class="text-gray-400 text-sm italic">None added</span>
+              </div>
+            </div>
+            
+            <div class="mb-6">
+              <h4 class="text-sm uppercase font-bold text-gray-400 mb-3 tracking-wider">Vehicle Categories Supported</h4>
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let veh of profileData.service_provider_profile?.vehicle_category" 
+                      class="bg-gray-100 text-gray-800 px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-200 flex items-center gap-2">
+                  <i class="fa-solid fa-car text-gray-500"></i> {{ veh.name }}
+                </span>
+                <span *ngIf="!profileData.service_provider_profile?.vehicle_category?.length" class="text-gray-400 text-sm italic">None added</span>
+              </div>
+            </div>
+            
+            <div>
+              <h4 class="text-sm uppercase font-bold text-gray-400 mb-3 tracking-wider">Specialized Tags</h4>
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let tag of profileData.service_provider_profile?.tags" 
+                      class="bg-red-50 text-[#db3333] px-3 py-1.5 rounded-lg text-sm font-medium border border-red-100">
+                  #{{ tag.name }}
+                </span>
+                <span *ngIf="!profileData.service_provider_profile?.tags?.length" class="text-gray-400 text-sm italic">None added</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Gallery -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+              <h3 class="text-xl font-bold text-gray-900">Workshop Gallery</h3>
+              <span class="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                {{ profileData.service_provider_profile?.gallery?.length || 0 }} / 3 Photos
+              </span>
+            </div>
+            
+            <div *ngIf="profileData.service_provider_profile?.gallery?.length > 0; else noGallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div *ngFor="let img of profileData.service_provider_profile.gallery" 
+                   class="aspect-w-16 aspect-h-12 rounded-xl overflow-hidden shadow-sm border border-gray-200 group relative cursor-pointer"
+                   (click)="openImage(img.image_url)">
+                <img [src]="img.image_url" alt="Gallery Image" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                   <button class="text-white hover:text-white bg-black/50 p-2 rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-sm"
+                           (click)="$event.stopPropagation(); openImage(img.image_url)">
+                     <i class="fa-solid fa-expand"></i>
+                   </button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noGallery>
+              <div class="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400 text-2xl">
+                  <i class="fa-solid fa-images"></i>
+                </div>
+                <h4 class="text-gray-700 font-medium">No photos yet</h4>
+                <p class="text-sm text-gray-500 mt-1">Add some photos to show off your workshop</p>
+              </div>
+            </ng-template>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</main>
+
+<!-- Image Popup Modal -->
+<div *ngIf="selectedImage" 
+     class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+     (click)="closeImage()">
+  
+  <button class="absolute top-6 right-6 text-white hover:text-[#db3333] transition-colors bg-black/50 rounded-full w-12 h-12 flex items-center justify-center text-xl z-10"
+          (click)="closeImage()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+  
+  <img [src]="selectedImage" 
+       alt="Full size gallery image" 
+       class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+       (click)="$event.stopPropagation()">
+</div>
+
+<!-- Password Change Modal -->
+<div *ngIf="showPasswordModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
+    <div class="bg-gray-50 border-b border-gray-100 p-4 flex justify-between items-center">
+      <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+        <i class="fa-solid fa-lock text-[#db3333]"></i> Change Password
+      </h3>
+      <button (click)="closePasswordModal()" class="text-gray-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+        <div class="relative">
+          <input type="password" [(ngModel)]="currentPassword" class="w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#db3333] focus:border-transparent transition-all outline-none" placeholder="Enter current password">
+          <i class="fa-solid fa-key absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+        <div class="relative">
+          <input type="password" [(ngModel)]="newPassword" class="w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#db3333] focus:border-transparent transition-all outline-none" placeholder="Enter new password">
+          <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+        <div class="relative">
+          <input type="password" [(ngModel)]="confirmPassword" class="w-full pl-4 pr-10 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#db3333] focus:border-transparent transition-all outline-none" placeholder="Confirm new password">
+          <i class="fa-solid fa-check absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
+    </div>
+    <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-end gap-3">
+      <button (click)="closePasswordModal()" class="px-5 py-2 rounded-lg text-gray-600 hover:bg-gray-200 font-medium transition-colors">Cancel</button>
+      <button (click)="submitPasswordChange()" class="px-5 py-2 rounded-lg bg-[#db3333] hover:bg-red-700 text-white font-bold transition-colors shadow-md">Update</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Edit Profile Modal -->
+<div *ngIf="showEditModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto" style="padding-top: 6rem; padding-bottom: 3rem;">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-fade-in-up flex flex-col" style="max-height: 85vh;">
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+      <h3 class="text-xl font-bold text-[#131e3d]">Edit Profile</h3>
+      <button (click)="closeEditModal()" class="text-gray-400 hover:text-red-500 transition-colors">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+    
+    <div class="p-6 overflow-y-auto grow" style="background: #fff;">
+      <form class="auth-form" #editForm="ngForm" >
+      <!-- API Error Message Display -->
+      <div *ngIf="apiError" class="bg-red-50 border-l-4 border-[#db3333] text-red-700 p-3 rounded text-sm mb-4">
+        {{ apiError }}
+      </div>
+      <!-- Personal Information -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" [(ngModel)]="fullName" #fullNameCtrl="ngModel" placeholder="John Doe" required
+                 [class.border-red-500]="fullNameCtrl.invalid && (fullNameCtrl.touched || editForm.submitted)">
+          <div *ngIf="fullNameCtrl.invalid && (fullNameCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            Full name is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" [(ngModel)]="username" #usernameCtrl="ngModel" placeholder="johndoe123" required
+                 [class.border-red-500]="usernameCtrl.invalid && (usernameCtrl.touched || editForm.submitted)">
+          <div *ngIf="usernameCtrl.invalid && (usernameCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            Username is required.
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="number">Mobile Number</label>
+          <input type="tel" id="number" name="number" [(ngModel)]="phone_number" #phoneCtrl="ngModel" placeholder="Enter mobile number" required pattern="^[0-9]{10}$" maxlength="10"
+                 [class.border-red-500]="phoneCtrl.invalid && (phoneCtrl.touched || editForm.submitted)">
+          <div *ngIf="phoneCtrl.invalid && (phoneCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="phoneCtrl.errors?.['required']">Mobile number is required.</span>
+            <span *ngIf="phoneCtrl.errors?.['pattern']">Mobile number must be exactly 10 digits.</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="email">Email</label>
+          <div class="relative flex items-center email-wrapper">
+            <input type="email" id="email" name="email" [(ngModel)]="email" #emailCtrl="ngModel" placeholder="john@example.com" required
+                   [class.border-red-500]="emailCtrl.invalid && (emailCtrl.touched || editForm.submitted)"
+                   
+                   style="width: 100%; padding-right: 80px;">
+            
+            
+          </div>
+          <div *ngIf="emailCtrl.invalid && (emailCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="emailCtrl.errors?.['required']">Email is required.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="state">State</label>
+          <select id="state" name="state" [(ngModel)]="selectedState" (change)="onStateChange()" required #stateCtrl="ngModel"
+                  [class.border-red-500]="stateCtrl.invalid && (stateCtrl.touched || editForm.submitted)">
+            <option value="">Select State</option>
+            <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+          </select>
+          <div *ngIf="stateCtrl.invalid && (stateCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            State is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="district">District</label>
+          <select id="district" name="district" [(ngModel)]="selectedDistrict" (change)="onDistrictChange()" [disabled]="!districts.length" required #districtCtrl="ngModel"
+                  [class.border-red-500]="districtCtrl.invalid && (districtCtrl.touched || editForm.submitted)">
+            <option value="">Select District</option>
+            <option *ngFor="let district of districts" [value]="district.id">{{ district.name }}</option>
+          </select>
+          <div *ngIf="districtCtrl.invalid && (districtCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            District is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="city">City</label>
+          <select id="city" name="city" [(ngModel)]="selectedCity" [disabled]="!cities.length" required #cityCtrl="ngModel"
+                  [class.border-red-500]="cityCtrl.invalid && (cityCtrl.touched || editForm.submitted)">
+            <option value="">Select City</option>
+            <option *ngFor="let city of cities" [value]="city.id">{{ city.name }}</option>
+          </select>
+          <div *ngIf="cityCtrl.invalid && (cityCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            City is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="pincode">Pincode</label>
+          <input type="text" id="pincode" name="pincode" [(ngModel)]="pincode" #pincodeCtrl="ngModel" placeholder="e.g. 110001" required pattern="^[0-9]{6}$" maxlength="6"
+                 [class.border-red-500]="pincodeCtrl.invalid && (pincodeCtrl.touched || editForm.submitted)">
+          <div *ngIf="pincodeCtrl.invalid && (pincodeCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="pincodeCtrl.errors?.['required']">Pincode is required.</span>
+            <span *ngIf="pincodeCtrl.errors?.['pattern']">Pincode must be exactly 6 digits.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workshop Information -->
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.2rem; color: #131e3d; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">Workshop Information</h3>
+      
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="workshopName">Workshop Name</label>
+          <input type="text" id="workshopName" name="workshopName" [(ngModel)]="workshopName" #workshopNameCtrl="ngModel" placeholder="Garage Name" required
+                 [class.border-red-500]="workshopNameCtrl.invalid && (workshopNameCtrl.touched || editForm.submitted)">
+          <div *ngIf="workshopNameCtrl.invalid && (workshopNameCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            Workshop name is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="workshopAddress">Workshop Address</label>
+          <input type="text" id="workshopAddress" name="workshopAddress" [(ngModel)]="workshopAddress" #workshopAddressCtrl="ngModel" placeholder="Full Address" required
+                 [class.border-red-500]="workshopAddressCtrl.invalid && (workshopAddressCtrl.touched || editForm.submitted)">
+          <div *ngIf="workshopAddressCtrl.invalid && (workshopAddressCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            Workshop address is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="latitude">Latitude</label>
+          <input type="text" id="latitude" name="latitude" [(ngModel)]="latitude" #latCtrl="ngModel" placeholder="e.g. 28.6139" required pattern="^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}$"
+                 [class.border-red-500]="latCtrl.invalid && (latCtrl.touched || editForm.submitted)">
+          <div *ngIf="latCtrl.invalid && (latCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="latCtrl.errors?.['required']">Latitude is required.</span>
+            <span *ngIf="latCtrl.errors?.['pattern']">Please enter a valid latitude (e.g. 28.6139).</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="longitude">Longitude</label>
+          <input type="text" id="longitude" name="longitude" [(ngModel)]="longitude" #lngCtrl="ngModel" placeholder="e.g. 77.2090" required pattern="^-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])\.{1}\d{1,6}$"
+                 [class.border-red-500]="lngCtrl.invalid && (lngCtrl.touched || editForm.submitted)">
+          <div *ngIf="lngCtrl.invalid && (lngCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="lngCtrl.errors?.['required']">Longitude is required.</span>
+            <span *ngIf="lngCtrl.errors?.['pattern']">Please enter a valid longitude (e.g. 77.2090).</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+          <label for="serviceOffered">Service Offered (Vehicle Category)</label>
+          <ng-select id="serviceOffered" name="serviceOffered" [(ngModel)]="selectedVehicleCategory" (change)="onVehicleCategoryChange()" required #serviceOfferedCtrl="ngModel"
+                  [class.border-red-500]="serviceOfferedCtrl.invalid && (serviceOfferedCtrl.touched || editForm.submitted)"
+                  placeholder="Select Vehicle Category" [items]="vehicleCategories" bindLabel="name" bindValue="id">
+          </ng-select>
+          <div *ngIf="serviceOfferedCtrl.invalid && (serviceOfferedCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            Service offered is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="businessType">Business Type</label>
+          <ng-select id="businessType" name="businessType" [(ngModel)]="selectedBusinessType" required #businessTypeCtrl="ngModel"
+                  [class.border-red-500]="businessTypeCtrl.invalid && (businessTypeCtrl.touched || editForm.submitted)"
+                  placeholder="Select Business Type" [items]="businessTypes" bindLabel="label" bindValue="value"
+                  [multiple]="true" [closeOnSelect]="false" #businessTypeSelect>
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-bt-{{index}}" type="checkbox" [ngModel]="item$.selected" [ngModelOptions]="{standalone: true}"/> {{item.label}}
+            </ng-template>
+            <ng-template ng-footer-tmp>
+              <div class="ng-select-footer">
+                <button type="button" class="btn-clear" (click)="clearBusinessType(businessTypeSelect); $event.stopPropagation()">Clear</button>
+                <button type="button" class="btn-apply" (click)="applyBusinessType(businessTypeSelect); $event.stopPropagation()">Apply</button>
+              </div>
+            </ng-template>
+          </ng-select>
+          <div *ngIf="businessTypeCtrl.invalid && (businessTypeCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            Business type is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="businessCategory">Business Category</label>
+          <ng-select id="businessCategory" name="businessCategory" [(ngModel)]="selectedBusinessCategories" [disabled]="!businessCategories.length" required #businessCategoryCtrl="ngModel"
+                  [class.border-red-500]="businessCategoryCtrl.invalid && (businessCategoryCtrl.touched || editForm.submitted)"
+                  placeholder="Select Category" [items]="businessCategories" bindLabel="name" bindValue="id"
+                  [multiple]="true" [closeOnSelect]="false" groupBy="business_type_label" #businessCategorySelect>
+            <ng-template ng-optgroup-tmp let-item="item">
+              <div style="font-weight: bold; color: #131e3d; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">
+                {{item.business_type_label}}
+              </div>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-bc-{{index}}" type="checkbox" [ngModel]="item$.selected" [ngModelOptions]="{standalone: true}"/> 
+              <span style="margin-left: 8px;">{{item.name}}</span>
+            </ng-template>
+            <ng-template ng-footer-tmp>
+              <div class="ng-select-footer">
+                <button type="button" class="btn-clear" (click)="clearBusinessCategory(businessCategorySelect); $event.stopPropagation()">Clear</button>
+                <button type="button" class="btn-apply" (click)="applyBusinessCategory(businessCategorySelect); $event.stopPropagation()">Apply</button>
+              </div>
+            </ng-template>
+          </ng-select>
+          <div *ngIf="businessCategoryCtrl.invalid && (businessCategoryCtrl.touched || editForm.submitted)" class="text-red-500 text-xs mt-1">
+            Business category is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full-width" style="flex: 1;">
+          <label for="tags">Tags</label>
+          <ng-select id="tags" name="tags" [(ngModel)]="selectedTags" [disabled]="!tags.length" #tagsCtrl="ngModel"
+                  [class.border-red-500]="tagsCtrl.invalid && (tagsCtrl.touched || editForm.submitted)"
+                  placeholder="Select Tags" [items]="tags" bindLabel="name" bindValue="id"
+                  [multiple]="true" [closeOnSelect]="false" groupBy="business_type_label">
+            <ng-template ng-optgroup-tmp let-item="item">
+              <div style="font-weight: bold; color: #131e3d; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">
+                {{item.business_type_label}}
+              </div>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-tag-{{index}}" type="checkbox" [ngModel]="item$.selected" [ngModelOptions]="{standalone: true}"/> 
+              <span style="margin-left: 8px;">{{item.name}}</span>
+            </ng-template>
+          </ng-select>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.2rem; color: #131e3d; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">Images & Gallery</h3>
+      <div class="form-row">
+        <!-- Profile Image -->
+        <div class="form-group half-width">
+          <label>Profile Image</label>
+          <div class="file-upload-container" style="border: 2px dashed #ccc; padding: 1rem; text-align: center; border-radius: 8px; background: #fafafa; transition: all 0.3s;">
+            <input type="file" id="profileImage" (change)="onFileSelected($event)" accept="image/*" style="display: none;" #profileInput>
+            
+            <div *ngIf="!profileImagePreview" (click)="profileInput.click()" style="cursor: pointer; color: #131e3d;">
+              <p style="margin: 0; font-weight: 500;">Click to upload Profile Image</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.8em; color: #777;">(JPG, PNG)</p>
+            </div>
+            
+            <div *ngIf="profileImagePreview" class="image-preview" style="position: relative; display: inline-block;">
+              <img [src]="profileImagePreview" alt="Profile Preview" style="max-width: 100px; max-height: 100px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;">
+              <button type="button" (click)="removeProfileImage()" style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">&times;</button>
+              <p style="margin: 0.5rem 0 0; font-size: 0.8em; color: #555; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ selectedFile?.name }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gallery Images -->
+        <div class="form-group half-width">
+          <label>Gallery Images (Max 3)</label>
+          <div class="file-upload-container" style="border: 2px dashed #ccc; padding: 1rem; text-align: center; border-radius: 8px; background: #fafafa; transition: all 0.3s; min-height: 80px; display: flex; align-items: center; justify-content: center;">
+            <input type="file" id="galleryImages" (change)="onFilesSelected($event)" accept="image/*" multiple style="display: none;" #galleryInput>
+            
+            <div *ngIf="galleryPreviews.length === 0" (click)="galleryInput.click()" style="cursor: pointer; color: #131e3d; width: 100%;">
+              <p style="margin: 0; font-weight: 500;">Click to upload Gallery (Max 3)</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.8em; color: #777;">(JPG, PNG)</p>
+            </div>
+
+            <div *ngIf="galleryPreviews.length > 0" class="gallery-preview-container" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%;">
+              <div *ngFor="let preview of galleryPreviews; let i = index" class="image-preview" style="position: relative;">
+                <img [src]="preview" alt="Gallery Preview" style="width: 65px; height: 65px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+                <button type="button" (click)="removeGalleryImage(i)" style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">&times;</button>
+              </div>
+              
+              <!-- Add more button if less than 3 -->
+              <div *ngIf="galleryPreviews.length < 3" (click)="galleryInput.click()" style="width: 65px; height: 65px; border: 2px dashed #aaa; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #777; font-size: 1.5rem; background: #fff;">
+                +
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row toggle-row">
+        <div class="toggle-group">
+          <label class="switch">
+            <input type="checkbox" id="acceptServiceRequest" name="acceptServiceRequest" [(ngModel)]="acceptServiceRequest">
+            <span class="slider"></span>
+          </label>
+          <label for="acceptServiceRequest" class="toggle-label">Accept Service Request</label>
+        </div>
+
+        <div class="toggle-group">
+          <label class="switch">
+            <input type="checkbox" id="oldSpareParts" name="oldSpareParts" [(ngModel)]="oldSpareParts">
+            <span class="slider"></span>
+          </label>
+          <label for="oldSpareParts" class="toggle-label">Old Spare Parts</label>
+        </div>
+
+        <div class="toggle-group">
+          <label class="switch">
+            <input type="checkbox" id="newSpareParts" name="newSpareParts" [(ngModel)]="newSpareParts">
+            <span class="slider"></span>
+          </label>
+          <label for="newSpareParts" class="toggle-label">New Spare Parts</label>
+        </div>
+      </div>
+
+      
+      
+    </form>
+    </div>
+
+    <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 shrink-0">
+      <button type="button" (click)="closeEditModal()" class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold hover:bg-gray-100 transition-colors">Cancel</button>
+      <button type="button" (click)="submitEditProfile(editForm)" [disabled]="isSaving" class="px-5 py-2.5 rounded-xl bg-[#db3333] hover:bg-red-700 text-white font-bold transition-colors shadow-md flex items-center gap-2">
+        <i *ngIf="isSaving" class="fa-solid fa-spinner fa-spin"></i>
+        {{ isSaving ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete Account Modal -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
+    <div class="p-6 text-center">
+      <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-sm">
+        <i class="fa-solid fa-triangle-exclamation text-4xl text-red-600"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">Delete Account?</h3>
+      <p class="text-gray-500 mb-6">Are you sure you want to delete your account? This action is permanent and cannot be undone. All your profile data and listings will be removed.</p>
+      
+      <div class="flex gap-3">
+        <button (click)="closeDeleteModal()" class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-bold hover:bg-gray-50 transition-colors">Keep Account</button>
+        <button (click)="confirmDeleteAccount()" class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-md shadow-red-200 transition-colors">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer>

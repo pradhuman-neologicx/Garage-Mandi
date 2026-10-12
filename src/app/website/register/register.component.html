@@ -1,0 +1,44 @@
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Join Garage Mandi
+        </h2>
+        <p class="mt-2 text-center text-sm text-gray-600">
+            Select your account type to get started
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Customer Card -->
+                <a routerLink="/customer-register"
+                    class="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-[#db3333] hover:bg-red-50/50 transition-all cursor-pointer group text-center no-underline">
+                    <div
+                        class="h-16 w-16 bg-red-100 text-[#db3333] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-user text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Customer</h3>
+                    <p class="text-sm text-gray-500">Register as a customer to request services, manage vehicles, and
+                        buy spare parts.</p>
+                </a>
+
+                <!-- Service Provider Card -->
+                <a routerLink="/provider-register"
+                    class="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-[#db3333] hover:bg-red-50/50 transition-all cursor-pointer group text-center no-underline">
+                    <div
+                        class="h-16 w-16 bg-red-100 text-[#db3333] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-store text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Service Provider</h3>
+                    <p class="text-sm text-gray-500">Register as a garage, mechanic, or shop owner to offer your
+                        services to customers.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>

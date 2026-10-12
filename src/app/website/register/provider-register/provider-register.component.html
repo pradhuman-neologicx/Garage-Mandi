@@ -1,0 +1,378 @@
+<app-navbar></app-navbar>
+<div class="auth-container">
+  <div class="auth-card register-card">
+    <div class="auth-header relative">
+      <a routerLink="/register" class="absolute left-0 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#db3333] transition-colors no-underline">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <h2>Service Provider Registration</h2>
+      <p>Join Garage Mandi as a Service Provider</p>
+    </div>
+    
+    <form class="auth-form" #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)">
+      <!-- API Error Message Display -->
+      <div *ngIf="apiError" class="bg-red-50 border-l-4 border-[#db3333] text-red-700 p-3 rounded text-sm mb-4">
+        {{ apiError }}
+      </div>
+      <!-- Personal Information -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" [(ngModel)]="fullName" #fullNameCtrl="ngModel" placeholder="John Doe" required
+                 [class.border-red-500]="fullNameCtrl.invalid && (fullNameCtrl.touched || registerForm.submitted)">
+          <div *ngIf="fullNameCtrl.invalid && (fullNameCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            Full name is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" [(ngModel)]="username" #usernameCtrl="ngModel" placeholder="johndoe123" required
+                 [class.border-red-500]="usernameCtrl.invalid && (usernameCtrl.touched || registerForm.submitted)">
+          <div *ngIf="usernameCtrl.invalid && (usernameCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            Username is required.
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="number">Mobile Number</label>
+          <input type="tel" id="number" name="number" [(ngModel)]="phone_number" #phoneCtrl="ngModel" placeholder="Enter mobile number" required pattern="^[0-9]{10}$" maxlength="10"
+                 [class.border-red-500]="phoneCtrl.invalid && (phoneCtrl.touched || registerForm.submitted)">
+          <div *ngIf="phoneCtrl.invalid && (phoneCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="phoneCtrl.errors?.['required']">Mobile number is required.</span>
+            <span *ngIf="phoneCtrl.errors?.['pattern']">Mobile number must be exactly 10 digits.</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="email">Email</label>
+          <div class="relative flex items-center email-wrapper">
+            <input type="email" id="email" name="email" [(ngModel)]="email" #emailCtrl="ngModel" placeholder="john@example.com" required
+                   [class.border-red-500]="emailCtrl.invalid && (emailCtrl.touched || registerForm.submitted)"
+                   [disabled]="isEmailVerified"
+                   style="width: 100%; padding-right: 80px;">
+            <button type="button" *ngIf="!isEmailVerified" (click)="sendOtp()" [disabled]="otpLoading || !email"
+                    style="position: absolute; right: 8px; padding: 4px 12px; background: #131e3d; color: white; border: none; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
+              {{ otpLoading ? 'Sending...' : 'Verify' }}
+            </button>
+            <span *ngIf="isEmailVerified" style="position: absolute; right: 12px; color: #10b981; font-weight: bold; font-size: 1.2rem;">
+              ✓
+            </span>
+          </div>
+          <div *ngIf="emailCtrl.invalid && (emailCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="emailCtrl.errors?.['required']">Email is required.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="password">Password</label>
+          <div style="position: relative;">
+            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="password" #passwordCtrl="ngModel" placeholder="Create a password" required minlength="6"
+                   [class.border-red-500]="passwordCtrl.invalid && (passwordCtrl.touched || registerForm.submitted)"
+                   style="width: 100%; padding-right: 42px;">
+            <button type="button" (click)="showPassword = !showPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: #999;">
+              <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+            </button>
+          </div>
+          <div *ngIf="passwordCtrl.invalid && (passwordCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="passwordCtrl.errors?.['required']">Password is required.</span>
+            <span *ngIf="passwordCtrl.errors?.['minlength']">Password must be at least 6 characters.</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="confirmPassword">Confirm Password</label>
+          <div style="position: relative;">
+            <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" name="confirmPassword" [(ngModel)]="confirmPassword" #confirmCtrl="ngModel" placeholder="Confirm your password" required
+                   [class.border-red-500]="(confirmCtrl.invalid || password !== confirmPassword) && (confirmCtrl.touched || registerForm.submitted)"
+                   style="width: 100%; padding-right: 42px;">
+            <button type="button" (click)="showConfirmPassword = !showConfirmPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: #999;">
+              <i [class]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+            </button>
+          </div>
+          <div *ngIf="(confirmCtrl.invalid || password !== confirmPassword) && (confirmCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="confirmCtrl.errors?.['required']">Confirm Password is required.</span>
+            <span *ngIf="!confirmCtrl.errors?.['required'] && password !== confirmPassword">Passwords do not match.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="state">State</label>
+          <select id="state" name="state" [(ngModel)]="selectedState" (change)="onStateChange()" required #stateCtrl="ngModel"
+                  [class.border-red-500]="stateCtrl.invalid && (stateCtrl.touched || registerForm.submitted)">
+            <option value="">Select State</option>
+            <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+          </select>
+          <div *ngIf="stateCtrl.invalid && (stateCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            State is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="district">District</label>
+          <select id="district" name="district" [(ngModel)]="selectedDistrict" (change)="onDistrictChange()" [disabled]="!districts.length" required #districtCtrl="ngModel"
+                  [class.border-red-500]="districtCtrl.invalid && (districtCtrl.touched || registerForm.submitted)">
+            <option value="">Select District</option>
+            <option *ngFor="let district of districts" [value]="district.id">{{ district.name }}</option>
+          </select>
+          <div *ngIf="districtCtrl.invalid && (districtCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            District is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="city">City</label>
+          <select id="city" name="city" [(ngModel)]="selectedCity" [disabled]="!cities.length" required #cityCtrl="ngModel"
+                  [class.border-red-500]="cityCtrl.invalid && (cityCtrl.touched || registerForm.submitted)">
+            <option value="">Select City</option>
+            <option *ngFor="let city of cities" [value]="city.id">{{ city.name }}</option>
+          </select>
+          <div *ngIf="cityCtrl.invalid && (cityCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            City is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="pincode">Pincode</label>
+          <input type="text" id="pincode" name="pincode" [(ngModel)]="pincode" #pincodeCtrl="ngModel" placeholder="e.g. 110001" required pattern="^[0-9]{6}$" maxlength="6"
+                 [class.border-red-500]="pincodeCtrl.invalid && (pincodeCtrl.touched || registerForm.submitted)">
+          <div *ngIf="pincodeCtrl.invalid && (pincodeCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="pincodeCtrl.errors?.['required']">Pincode is required.</span>
+            <span *ngIf="pincodeCtrl.errors?.['pattern']">Pincode must be exactly 6 digits.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workshop Information -->
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.2rem; color: #131e3d; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">Workshop Information</h3>
+      
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="workshopName">Workshop Name</label>
+          <input type="text" id="workshopName" name="workshopName" [(ngModel)]="workshopName" #workshopNameCtrl="ngModel" placeholder="Garage Name" required
+                 [class.border-red-500]="workshopNameCtrl.invalid && (workshopNameCtrl.touched || registerForm.submitted)">
+          <div *ngIf="workshopNameCtrl.invalid && (workshopNameCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            Workshop name is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="workshopAddress">Workshop Address</label>
+          <input type="text" id="workshopAddress" name="workshopAddress" [(ngModel)]="workshopAddress" #workshopAddressCtrl="ngModel" placeholder="Full Address" required
+                 [class.border-red-500]="workshopAddressCtrl.invalid && (workshopAddressCtrl.touched || registerForm.submitted)">
+          <div *ngIf="workshopAddressCtrl.invalid && (workshopAddressCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            Workshop address is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="latitude">Latitude</label>
+          <input type="text" id="latitude" name="latitude" [(ngModel)]="latitude" #latCtrl="ngModel" placeholder="e.g. 28.6139" required pattern="^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}$"
+                 [class.border-red-500]="latCtrl.invalid && (latCtrl.touched || registerForm.submitted)">
+          <div *ngIf="latCtrl.invalid && (latCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="latCtrl.errors?.['required']">Latitude is required.</span>
+            <span *ngIf="latCtrl.errors?.['pattern']">Please enter a valid latitude (e.g. 28.6139).</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="longitude">Longitude</label>
+          <input type="text" id="longitude" name="longitude" [(ngModel)]="longitude" #lngCtrl="ngModel" placeholder="e.g. 77.2090" required pattern="^-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])\.{1}\d{1,6}$"
+                 [class.border-red-500]="lngCtrl.invalid && (lngCtrl.touched || registerForm.submitted)">
+          <div *ngIf="lngCtrl.invalid && (lngCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            <span *ngIf="lngCtrl.errors?.['required']">Longitude is required.</span>
+            <span *ngIf="lngCtrl.errors?.['pattern']">Please enter a valid longitude (e.g. 77.2090).</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group" style="flex: 1;">
+          <label for="serviceOffered">Service Offered (Vehicle Category)</label>
+          <ng-select id="serviceOffered" name="serviceOffered" [(ngModel)]="selectedVehicleCategory" (change)="onVehicleCategoryChange()" required #serviceOfferedCtrl="ngModel"
+                  [class.border-red-500]="serviceOfferedCtrl.invalid && (serviceOfferedCtrl.touched || registerForm.submitted)"
+                  placeholder="Select Vehicle Category" [items]="vehicleCategories" bindLabel="name" bindValue="id">
+          </ng-select>
+          <div *ngIf="serviceOfferedCtrl.invalid && (serviceOfferedCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            Service offered is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="businessType">Business Type</label>
+          <ng-select id="businessType" name="businessType" [(ngModel)]="selectedBusinessType" required #businessTypeCtrl="ngModel"
+                  [class.border-red-500]="businessTypeCtrl.invalid && (businessTypeCtrl.touched || registerForm.submitted)"
+                  placeholder="Select Business Type" [items]="businessTypes" bindLabel="label" bindValue="value"
+                  [multiple]="true" [closeOnSelect]="false" #businessTypeSelect>
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-bt-{{index}}" type="checkbox" [ngModel]="item$.selected" [ngModelOptions]="{standalone: true}"/> {{item.label}}
+            </ng-template>
+            <ng-template ng-footer-tmp>
+              <div class="ng-select-footer">
+                <button type="button" class="btn-clear" (click)="clearBusinessType(businessTypeSelect); $event.stopPropagation()">Clear</button>
+                <button type="button" class="btn-apply" (click)="applyBusinessType(businessTypeSelect); $event.stopPropagation()">Apply</button>
+              </div>
+            </ng-template>
+          </ng-select>
+          <div *ngIf="businessTypeCtrl.invalid && (businessTypeCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            Business type is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="businessCategory">Business Category</label>
+          <ng-select id="businessCategory" name="businessCategory" [(ngModel)]="selectedBusinessCategories" [disabled]="!businessCategories.length" required #businessCategoryCtrl="ngModel"
+                  [class.border-red-500]="businessCategoryCtrl.invalid && (businessCategoryCtrl.touched || registerForm.submitted)"
+                  placeholder="Select Category" [items]="businessCategories" bindLabel="name" bindValue="id"
+                  [multiple]="true" [closeOnSelect]="false" groupBy="business_type_label" #businessCategorySelect>
+            <ng-template ng-optgroup-tmp let-item="item">
+              <div style="font-weight: bold; color: #131e3d; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">
+                {{item.business_type_label}}
+              </div>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-bc-{{index}}" type="checkbox" [ngModel]="item$.selected" [ngModelOptions]="{standalone: true}"/> 
+              <span style="margin-left: 8px;">{{item.name}}</span>
+            </ng-template>
+            <ng-template ng-footer-tmp>
+              <div class="ng-select-footer">
+                <button type="button" class="btn-clear" (click)="clearBusinessCategory(businessCategorySelect); $event.stopPropagation()">Clear</button>
+                <button type="button" class="btn-apply" (click)="applyBusinessCategory(businessCategorySelect); $event.stopPropagation()">Apply</button>
+              </div>
+            </ng-template>
+          </ng-select>
+          <div *ngIf="businessCategoryCtrl.invalid && (businessCategoryCtrl.touched || registerForm.submitted)" class="text-red-500 text-xs mt-1">
+            Business category is required.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full-width" style="flex: 1;">
+          <label for="tags">Tags</label>
+          <ng-select id="tags" name="tags" [(ngModel)]="selectedTags" [disabled]="!tags.length" #tagsCtrl="ngModel"
+                  [class.border-red-500]="tagsCtrl.invalid && (tagsCtrl.touched || registerForm.submitted)"
+                  placeholder="Select Tags" [items]="tags" bindLabel="name" bindValue="id"
+                  [multiple]="true" [closeOnSelect]="false" groupBy="business_type_label">
+            <ng-template ng-optgroup-tmp let-item="item">
+              <div style="font-weight: bold; color: #131e3d; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">
+                {{item.business_type_label}}
+              </div>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="item-tag-{{index}}" type="checkbox" [ngModel]="item$.selected" [ngModelOptions]="{standalone: true}"/> 
+              <span style="margin-left: 8px;">{{item.name}}</span>
+            </ng-template>
+          </ng-select>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.2rem; color: #131e3d; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">Images & Gallery</h3>
+      <div class="form-row">
+        <!-- Profile Image -->
+        <div class="form-group half-width">
+          <label>Profile Image</label>
+          <div class="file-upload-container" style="border: 2px dashed #ccc; padding: 1rem; text-align: center; border-radius: 8px; background: #fafafa; transition: all 0.3s;">
+            <input type="file" id="profileImage" (change)="onFileSelected($event)" accept="image/*" style="display: none;" #profileInput>
+            
+            <div *ngIf="!profileImagePreview" (click)="profileInput.click()" style="cursor: pointer; color: #131e3d;">
+              <p style="margin: 0; font-weight: 500;">Click to upload Profile Image</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.8em; color: #777;">(JPG, PNG)</p>
+            </div>
+            
+            <div *ngIf="profileImagePreview" class="image-preview" style="position: relative; display: inline-block;">
+              <img [src]="profileImagePreview" alt="Profile Preview" style="max-width: 100px; max-height: 100px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;">
+              <button type="button" (click)="removeProfileImage()" style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">&times;</button>
+              <p style="margin: 0.5rem 0 0; font-size: 0.8em; color: #555; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ selectedFile?.name }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gallery Images -->
+        <div class="form-group half-width">
+          <label>Gallery Images (Max 3)</label>
+          <div class="file-upload-container" style="border: 2px dashed #ccc; padding: 1rem; text-align: center; border-radius: 8px; background: #fafafa; transition: all 0.3s; min-height: 80px; display: flex; align-items: center; justify-content: center;">
+            <input type="file" id="galleryImages" (change)="onFilesSelected($event)" accept="image/*" multiple style="display: none;" #galleryInput>
+            
+            <div *ngIf="galleryPreviews.length === 0" (click)="galleryInput.click()" style="cursor: pointer; color: #131e3d; width: 100%;">
+              <p style="margin: 0; font-weight: 500;">Click to upload Gallery (Max 3)</p>
+              <p style="margin: 0.2rem 0 0; font-size: 0.8em; color: #777;">(JPG, PNG)</p>
+            </div>
+
+            <div *ngIf="galleryPreviews.length > 0" class="gallery-preview-container" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%;">
+              <div *ngFor="let preview of galleryPreviews; let i = index" class="image-preview" style="position: relative;">
+                <img [src]="preview" alt="Gallery Preview" style="width: 65px; height: 65px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+                <button type="button" (click)="removeGalleryImage(i)" style="position: absolute; top: -8px; right: -8px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">&times;</button>
+              </div>
+              
+              <!-- Add more button if less than 3 -->
+              <div *ngIf="galleryPreviews.length < 3" (click)="galleryInput.click()" style="width: 65px; height: 65px; border: 2px dashed #aaa; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #777; font-size: 1.5rem; background: #fff;">
+                +
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row toggle-row">
+        <div class="toggle-group">
+          <label class="switch">
+            <input type="checkbox" id="acceptServiceRequest" name="acceptServiceRequest" [(ngModel)]="acceptServiceRequest">
+            <span class="slider"></span>
+          </label>
+          <label for="acceptServiceRequest" class="toggle-label">Accept Service Request</label>
+        </div>
+
+        <div class="toggle-group">
+          <label class="switch">
+            <input type="checkbox" id="oldSpareParts" name="oldSpareParts" [(ngModel)]="oldSpareParts">
+            <span class="slider"></span>
+          </label>
+          <label for="oldSpareParts" class="toggle-label">Old Spare Parts</label>
+        </div>
+
+        <div class="toggle-group">
+          <label class="switch">
+            <input type="checkbox" id="newSpareParts" name="newSpareParts" [(ngModel)]="newSpareParts">
+            <span class="slider"></span>
+          </label>
+          <label for="newSpareParts" class="toggle-label">New Spare Parts</label>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top: 1.5rem;">
+        <button type="submit" class="auth-btn" [disabled]="isLoading">
+          {{ isLoading ? 'Registering...' : 'Register' }}
+        </button>
+      </div>
+      
+    </form>
+  </div>
+</div>
+<app-footer></app-footer>
+
+<!-- OTP Verification Modal -->
+<div *ngIf="showOtpModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+  <div style="background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,0.2);">
+    <h3 style="margin-top: 0; color: #131e3d; font-size: 1.3rem;">Verify Email</h3>
+    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">Enter the OTP sent to {{email}}</p>
+    
+    <div class="form-group" style="margin-bottom: 1.5rem;">
+      <input type="text" [(ngModel)]="otpValue" placeholder="Enter OTP" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 1rem; text-align: center; letter-spacing: 2px;">
+    </div>
+    
+    <div style="display: flex; gap: 1rem;">
+      <button type="button" (click)="closeOtpModal()" style="flex: 1; padding: 0.75rem; background: #f3f4f6; color: #4b5563; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+        Cancel
+      </button>
+      <button type="button" (click)="verifyOtp()" [disabled]="otpLoading || !otpValue" style="flex: 1; padding: 0.75rem; background: #db3333; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+        {{ otpLoading ? 'Verifying...' : 'Verify OTP' }}
+      </button>
+    </div>
+  </div>
+</div>

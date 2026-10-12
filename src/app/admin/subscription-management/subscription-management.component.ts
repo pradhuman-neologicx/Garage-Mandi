@@ -124,15 +124,22 @@ export class SubscriptionManagementComponent implements OnInit {
 
           this.providerSubscriptions = apiData.map((item: any) => {
             const providerName = item.provider?.name || 'Unknown';
+            // Capitalize status to match HTML expectations ('Active', 'Expired')
+            const status = item.status ? (item.status.charAt(0).toUpperCase() + item.status.slice(1)) : 'Active';
+
             return {
               providerId: item.provider?.id || item.provider_id || 'N/A',
               phoneNumber: item.provider?.phone_number || 'N/A',
+              email: item.provider?.email || 'N/A',
               name: providerName,
               plan: item.plan?.name || 'Standard Plan',
-              startDate: this.formatDate(item.current_period_start || item.subscription_starts_at),
-              endDate: this.formatDate(item.current_period_end || item.trial_ends_at),
+              startDate: item.plan?.purchase_date || this.formatDate(item.current_period_start || item.subscription_starts_at),
+              endDate: item.plan?.renew_date || this.formatDate(item.current_period_end || item.trial_ends_at),
               trialEndsAt: item.trial_ends_at ? this.formatDate(item.trial_ends_at) : null,
-              status: item.status || 'Active',
+              status: status,
+              amount: item.amount,
+              gst: item.gst,
+              totalAmount: item.total_amount,
               payments: [],
               rawData: item
             };
@@ -203,14 +210,23 @@ export class SubscriptionManagementComponent implements OnInit {
 
           this.platformPlans = data.map((plan: any) => {
             let featuresList: string[] = [];
-            if (plan.features) {
+            if (plan.included_info && plan.included_info.features) {
+              featuresList = plan.included_info.features;
+            } else if (plan.features) {
               featuresList = typeof plan.features === 'string' ? plan.features.split(',').map((f: string) => f.trim()) : plan.features;
             }
+            
+            // Features are expected to come directly from the API now.
+
 
             return {
               id: plan.id,
-              name: plan.name || 'Plan',
+              name: plan.title || plan.name,
+              description: plan.description,
               price: plan.amount !== undefined ? Number(plan.amount) : 0,
+              gst_percent: plan.gst_percent !== undefined ? Number(plan.gst_percent) : 18,
+              gst: plan.gst !== undefined ? Number(plan.gst) : 0,
+              final_amount: plan.final_amount !== undefined ? Number(plan.final_amount) : 0,
               features: featuresList,
               vehicle_category: plan.vehicle_category,
               type: plan.type,
@@ -257,8 +273,9 @@ export class SubscriptionManagementComponent implements OnInit {
     }
 
     const payload = {
+      name: this.editPlanData.name,
+      description: this.editPlanData.description,
       amount: this.editPlanData.price
-      // Future: add features/name if backend supports updating them for multiple plans
     };
 
     // Send to API. Since API currently handles single plan, it will update it.
@@ -300,16 +317,32 @@ export class SubscriptionManagementComponent implements OnInit {
 
             this.selectedProvider.currentSubs = currentSubs.map((p: any) => ({
               planName: p.plan?.name || 'N/A',
-              amount: p.plan?.amount || p.amount_at_purchase || 0,
-              startDate: this.formatDate(p.subscription_starts_at || p.current_period_start),
+              amount: p.subscription_amount || p.plan?.amount || 0,
+              gstAmount: p.gst_amount || 0,
+              totalAmount: p.total_amount || 0,
+              paymentStatus: p.payment_status || 'N/A',
+              paymentMethod: p.payment_method || 'N/A',
+              paymentDate: p.payment_date ? this.formatDate(p.payment_date) : 'N/A',
+              activity: p.activity || 'N/A',
+              transactionId: p.transaction_id || 'N/A',
+              autoRenewal: p.auto_renewal ? 'Yes' : 'No',
+              startDate: this.formatDate(p.current_period_start || p.subscription_starts_at),
               endDate: this.formatDate(p.current_period_end),
               status: p.status || 'N/A'
             }));
 
             this.selectedProvider.history = previousSubs.map((p: any) => ({
               planName: p.plan?.name || 'N/A',
-              amount: p.plan?.amount || p.amount_at_purchase || 0,
-              startDate: this.formatDate(p.subscription_starts_at || p.current_period_start),
+              amount: p.subscription_amount || p.plan?.amount || 0,
+              gstAmount: p.gst_amount || 0,
+              totalAmount: p.total_amount || 0,
+              paymentStatus: p.payment_status || 'N/A',
+              paymentMethod: p.payment_method || 'N/A',
+              paymentDate: p.payment_date ? this.formatDate(p.payment_date) : 'N/A',
+              activity: p.activity || 'N/A',
+              transactionId: p.transaction_id || 'N/A',
+              autoRenewal: p.auto_renewal ? 'Yes' : 'No',
+              startDate: this.formatDate(p.current_period_start || p.subscription_starts_at),
               endDate: this.formatDate(p.current_period_end),
               status: p.status || 'N/A'
             }));

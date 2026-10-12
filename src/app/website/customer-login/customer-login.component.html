@@ -1,1 +1,52 @@
-<p>customer-login works!</p>
+<app-navbar></app-navbar>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Welcome Back</h2>
+      <p>Login to your Garage Mandi account</p>
+    </div>
+    
+    <form class="auth-form" #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)">
+      
+      <!-- API Error Message Display -->
+      <div *ngIf="apiError" class="bg-red-50 border-l-4 border-[#db3333] text-red-700 p-3 rounded text-sm mb-4">
+        {{ apiError }}
+      </div>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" [(ngModel)]="username" #usernameCtrl="ngModel" placeholder="Enter your username" required
+               [class.border-red-500]="usernameCtrl.invalid && (usernameCtrl.touched || loginForm.submitted)">
+        <div *ngIf="usernameCtrl.invalid && (usernameCtrl.touched || loginForm.submitted)">
+          <small class="text-[#db3333]">Username is required.</small>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div style="position: relative;">
+          <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="password" #passwordCtrl="ngModel" placeholder="Enter your password" required
+                 [class.border-red-500]="passwordCtrl.invalid && (passwordCtrl.touched || loginForm.submitted)"
+                 style="width: 100%; padding-right: 42px;">
+          <button type="button" (click)="showPassword = !showPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: #999;">
+            <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+          </button>
+        </div>
+        <div *ngIf="passwordCtrl.invalid && (passwordCtrl.touched || loginForm.submitted)">
+          <small class="text-[#db3333]">Password is required.</small>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="auth-btn" [disabled]="isLoading">
+          {{ isLoading ? 'Logging in...' : 'Login' }}
+        </button>
+      </div>
+      
+      <div class="auth-footer">
+        <p style="margin-bottom: 0.75rem;"><a routerLink="/forgot_password" style="font-size: 0.85rem;">Forgot Password?</a></p>
+        <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+<app-footer></app-footer>

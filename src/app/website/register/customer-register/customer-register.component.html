@@ -1,0 +1,152 @@
+<app-navbar></app-navbar>
+<div class="auth-container">
+  <div class="auth-card register-card">
+    <div class="auth-header relative">
+      <a routerLink="/register" class="absolute left-0 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#db3333] transition-colors no-underline">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <h2>Create an Account</h2>
+      <p>Join Garage Mandi today</p>
+    </div>
+    
+    <form class="auth-form" #registerForm="ngForm" (ngSubmit)="onSubmit(registerForm)">
+      <!-- API Error Message Display -->
+      <div *ngIf="apiError" class="bg-red-50 border-l-4 border-[#db3333] text-red-700 p-3 rounded text-sm mb-4">
+        {{ apiError }}
+      </div>
+      <!-- Personal Information -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" name="fullName" [(ngModel)]="fullName" #fullNameCtrl="ngModel" placeholder="John Doe" required
+                 [class.border-red-500]="fullNameCtrl.invalid && (fullNameCtrl.touched || registerForm.submitted)">
+        </div>
+        <div class="form-group half-width">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" [(ngModel)]="username" #usernameCtrl="ngModel" placeholder="johndoe123" required
+                 [class.border-red-500]="usernameCtrl.invalid && (usernameCtrl.touched || registerForm.submitted)">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="number">Mobile Number</label>
+          <input type="tel" id="number" name="number" [(ngModel)]="phone_number" #phoneCtrl="ngModel" placeholder="Enter mobile number" required pattern="^[0-9]{10}$" maxlength="10"
+                 [class.border-red-500]="phoneCtrl.invalid && (phoneCtrl.touched || registerForm.submitted)">
+        </div>
+        <div class="form-group half-width">
+          <label for="email">Email</label>
+          <div class="relative flex items-center email-wrapper">
+            <input type="email" id="email" name="email" [(ngModel)]="email" #emailCtrl="ngModel" placeholder="john@example.com" required
+                   [class.border-red-500]="emailCtrl.invalid && (emailCtrl.touched || registerForm.submitted)"
+                   [disabled]="isEmailVerified"
+                   style="width: 100%; padding-right: 80px;">
+            <button type="button" *ngIf="!isEmailVerified" (click)="sendOtp()" [disabled]="otpLoading || !email"
+                    style="position: absolute; right: 8px; padding: 4px 12px; background: #131e3d; color: white; border: none; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
+              {{ otpLoading ? 'Sending...' : 'Verify' }}
+            </button>
+            <span *ngIf="isEmailVerified" style="position: absolute; right: 12px; color: #10b981; font-weight: bold; font-size: 1.2rem;">
+              ✓
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="password">Password</label>
+          <div style="position: relative;">
+            <input [type]="showPassword ? 'text' : 'password'" id="password" name="password" [(ngModel)]="password" #passwordCtrl="ngModel" placeholder="Create a password" required minlength="6"
+                   [class.border-red-500]="passwordCtrl.invalid && (passwordCtrl.touched || registerForm.submitted)"
+                   style="width: 100%; padding-right: 42px;">
+            <button type="button" (click)="showPassword = !showPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: #999;">
+              <i [class]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <label for="confirmPassword">Confirm Password</label>
+          <div style="position: relative;">
+            <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" name="confirmPassword" [(ngModel)]="confirmPassword" #confirmCtrl="ngModel" placeholder="Confirm your password" required
+                   [class.border-red-500]="(confirmCtrl.invalid || password !== confirmPassword) && (confirmCtrl.touched || registerForm.submitted)"
+                   style="width: 100%; padding-right: 42px;">
+            <button type="button" (click)="showConfirmPassword = !showConfirmPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: #999;">
+              <i [class]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Information -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="state">State</label>
+          <select id="state" name="state" [(ngModel)]="selectedState" (change)="onStateChange()" required>
+            <option value="">Select State</option>
+            <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+          </select>
+        </div>
+        <div class="form-group half-width">
+          <label for="district">District</label>
+          <select id="district" name="district" [(ngModel)]="selectedDistrict" (change)="onDistrictChange()" [disabled]="!districts.length" required>
+            <option value="">Select District</option>
+            <option *ngFor="let district of districts" [value]="district.id">{{ district.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label for="city">City</label>
+          <select id="city" name="city" [(ngModel)]="selectedCity" [disabled]="!cities.length" required>
+            <option value="">Select City</option>
+            <option *ngFor="let city of cities" [value]="city.id">{{ city.name }}</option>
+          </select>
+        </div>
+        <div class="form-group half-width">
+          <label for="pincode">Pincode</label>
+          <input type="text" id="pincode" name="pincode" [(ngModel)]="pincode" #pincodeCtrl="ngModel" placeholder="e.g. 110001" required pattern="^[0-9]{6}$" maxlength="6"
+                 [class.border-red-500]="pincodeCtrl.invalid && (pincodeCtrl.touched || registerForm.submitted)">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="address">Full Address</label>
+        <textarea id="address" name="address" [(ngModel)]="address" #addressCtrl="ngModel" rows="3" placeholder="Enter your full address" required
+                  [class.border-red-500]="addressCtrl.invalid && (addressCtrl.touched || registerForm.submitted)"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="auth-btn" [disabled]="isLoading">
+          {{ isLoading ? 'Registering...' : 'Register' }}
+        </button>
+      </div>
+      
+      <div class="auth-footer">
+        <p>Already have an account? <a routerLink="/customer-login">Login here</a></p>
+      </div>
+    </form>
+  </div>
+</div>
+<app-footer></app-footer>
+
+<!-- OTP Verification Modal -->
+<div *ngIf="showOtpModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+  <div style="background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,0.2);">
+    <h3 style="margin-top: 0; color: #131e3d; font-size: 1.3rem;">Verify Email</h3>
+    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">Enter the OTP sent to {{email}}</p>
+    
+    <div class="form-group" style="margin-bottom: 1.5rem;">
+      <input type="text" [(ngModel)]="otpValue" placeholder="Enter OTP" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; outline: none; font-size: 1rem; text-align: center; letter-spacing: 2px;">
+    </div>
+    
+    <div style="display: flex; gap: 1rem;">
+      <button type="button" (click)="closeOtpModal()" style="flex: 1; padding: 0.75rem; background: #f3f4f6; color: #4b5563; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+        Cancel
+      </button>
+      <button type="button" (click)="verifyOtp()" [disabled]="otpLoading || !otpValue" style="flex: 1; padding: 0.75rem; background: #db3333; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+        {{ otpLoading ? 'Verifying...' : 'Verify OTP' }}
+      </button>
+    </div>
+  </div>
+</div>

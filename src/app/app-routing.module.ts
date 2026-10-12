@@ -50,6 +50,82 @@ const routes: Routes = [
     component: TermsComponent,
   },
   {
+    path: 'request-quote',
+    loadComponent: () => import('./website/book-now/book-now.component').then(m => m.BookNowComponent),
+  },
+  {
+    path: 'request-service',
+    loadComponent: () => import('./website/request-service/request-service.component').then(m => m.RequestServiceComponent),
+  },
+  {
+    path: 'request-spare-part',
+    loadComponent: () => import('./website/request-spare-part/request-spare-part.component').then(m => m.RequestSparePartComponent),
+  },
+  {
+    path: 'search-vehicle',
+    loadComponent: () => import('./website/search-vehicle/search-vehicle.component').then(m => m.SearchVehicleComponent),
+  },
+  {
+    path: 'purchase-request',
+    loadComponent: () => import('./website/purchase-request/purchase-request.component').then(m => m.PurchaseRequestComponent),
+  },
+  {
+    path: 'my-orders',
+    loadComponent: () => import('./website/my-orders/my-orders.component').then(m => m.MyOrdersComponent),
+  },
+  {
+    path: 'vehicle-detail/:id',
+    loadComponent: () => import('./website/vehicle-detail/vehicle-detail.component').then(m => m.VehicleDetailComponent),
+  },
+  {
+    path: 'customer-login',
+    loadComponent: () => import('./website/customer-login/customer-login.component').then(m => m.CustomerLoginComponent),
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./website/register/register.component').then(m => m.RegisterComponent),
+  },
+  {
+    path: 'customer-register',
+    loadComponent: () => import('./website/register/customer-register/customer-register.component').then(m => m.CustomerRegisterComponent),
+  },
+  {
+    path: 'provider-register',
+    loadComponent: () => import('./website/register/provider-register/provider-register.component').then(m => m.ProviderRegisterComponent),
+  },
+  {
+    path: 'customer-profile',
+    loadComponent: () => import('./website/customer-profile/customer-profile.component').then(m => m.CustomerProfileComponent),
+  },
+  {
+    path: 'provider-profile',
+    loadComponent: () => import('./website/provider-profile/provider-profile.component').then(m => m.ProviderProfileComponent),
+  },
+  {
+    path: 'recent-activity',
+    loadComponent: () => import('./website/recent-activity/recent-activity.component').then(m => m.RecentActivityComponent),
+  },
+  {
+    path: 'forgot_password',
+    loadComponent: () => import('./website/customer-forgot-password/customer-forgot-password.component').then(m => m.CustomerForgotPasswordComponent),
+  },
+  {
+    path: 'my-requests',
+    loadComponent: () => import('./website/my-requests/my-requests.component').then(m => m.MyRequestsComponent),
+  },
+  {
+    path: 'request-detail/:type/:id',
+    loadComponent: () => import('./website/request-detail/request-detail.component').then(m => m.RequestDetailComponent),
+  },
+  {
+    path: 'subscription',
+    loadComponent: () => import('./website/provider-subscription/provider-subscription.component').then(m => m.ProviderSubscriptionComponent),
+  },
+  {
+    path: 'workshop-operations',
+    loadComponent: () => import('./website/workshop-operations/workshop-operations.component').then(m => m.WorkshopOperationsComponent),
+  },
+  {
     path: '',
     component: LoginpagesComponent,
     children: [

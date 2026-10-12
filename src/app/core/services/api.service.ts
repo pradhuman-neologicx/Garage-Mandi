@@ -14,7 +14,7 @@ export class ApiService {
     private jwtService: JwtService,
     private router: Router,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   private formatErrors(error: any) {
     let errorMessage = '';
@@ -118,6 +118,16 @@ export class ApiService {
         catchError(this.handleError)
       );
   }
+
+  patchNew(path: string, body: any, headers: any): Observable<any> {
+    return this.http
+      .patch(`${environment.api_url}${path}`, body, { headers })
+      .pipe(
+        catchError(this.formatErrors),
+        retry(1),
+        catchError(this.handleError)
+      );
+  }
   postwithoutbody(path: string, headers: HttpHeaders): Observable<any> {
     return this.http
       .post(`${environment.api_url}${path}`, {}, { headers }) // Correct placement of headers
@@ -179,7 +189,7 @@ export class ApiService {
   }
   handleError = (error: any) => {
     console.error('API Error intercepted by handleError:', error);
-    
+
     // Extract body if error is an HttpErrorResponse
     const errBody = error?.error || error;
 
@@ -196,7 +206,7 @@ export class ApiService {
           }
         }
       }
-      
+
       // If validation messages are found, show them and ignore the top-level message
       if (errorMessages.length > 0) {
         const finalMessage = errorMessages.join(' | ');
@@ -215,7 +225,7 @@ export class ApiService {
       // server-side error
       errorMessage = errBody?.message || error?.message || 'An unknown server error occurred';
     }
-    
+
     this.notificationService.show(errorMessage, 'error');
     return throwError(() => new Error(errorMessage));
   };

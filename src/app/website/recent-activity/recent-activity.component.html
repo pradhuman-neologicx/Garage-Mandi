@@ -1,0 +1,112 @@
+<app-navbar></app-navbar>
+
+<main class="min-h-screen bg-gray-50 pt-28 pb-16">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="mb-8 flex items-end justify-between">
+      <div>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Recent Activity</h1>
+        <p class="text-gray-500 mt-1 text-sm">Track all your recent actions and updates in one place.</p>
+      </div>
+      <a routerLink="/customer-profile"
+        class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-[#131e3d] hover:text-[#db3333] transition-colors duration-200">
+        <i class="fa-solid fa-arrow-left text-xs"></i>
+        Back to Profile
+      </a>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3 mb-6 flex flex-wrap items-center gap-3">
+      <div class="flex items-center gap-2 text-gray-500">
+        <i class="fa-solid fa-calendar-days text-sm"></i>
+        <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Filter</span>
+      </div>
+      <div class="flex items-center gap-2 flex-1 flex-wrap">
+        <input type="date" [(ngModel)]="filterFromDate"
+          class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700 outline-none focus:border-[#131e3d] focus:ring-2 focus:ring-[#131e3d]/10 transition-all cursor-pointer">
+        <span class="text-xs text-gray-400 font-medium">to</span>
+        <input type="date" [(ngModel)]="filterToDate"
+          class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700 outline-none focus:border-[#131e3d] focus:ring-2 focus:ring-[#131e3d]/10 transition-all cursor-pointer">
+        <button (click)="applyFilter()"
+          class="px-4 py-2 bg-[#131e3d] hover:bg-[#1c2c5a] text-white text-xs font-bold rounded-lg transition-all duration-200">
+          Apply
+        </button>
+        <button (click)="clearFilter()" *ngIf="filterFromDate || filterToDate"
+          class="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-[#db3333] transition-colors">
+          <i class="fa-solid fa-xmark mr-1"></i>Clear
+        </button>
+      </div>
+    </div>
+
+    <ng-container *ngIf="!isLoading; else loadingTemplate">
+
+      <!-- Activities List -->
+      <div *ngIf="activities.length > 0; else emptyState">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="divide-y divide-gray-50">
+            <div *ngFor="let activity of activities; let i = index"
+              class="flex items-start gap-4 px-6 py-3 hover:bg-gray-50/50 transition-colors duration-200 group animate-fadeIn"
+              [style.animation-delay]="(i * 40) + 'ms'">
+
+
+              <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm"
+                [ngClass]="getActivityColor(activity.type)">
+                <i [class]="getActivityIcon(activity)"></i>
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">{{ activity.title }}</p>
+                <p class="text-xs text-gray-400 mt-0.5" *ngIf="activity.subtitle">{{ activity.subtitle }}</p>
+              </div>
+
+              <!-- Timestamp -->
+              <div class="flex-shrink-0 text-right">
+                <span
+                  class="text-xs font-medium text-gray-400 group-hover:text-gray-500 transition-colors whitespace-nowrap">
+                  {{ activity.relative_time }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <ng-template #emptyState>
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 px-8 py-16 text-center">
+          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fa-solid fa-clock-rotate-left text-3xl text-gray-300"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">No Recent Activity</h3>
+          <p class="text-gray-400 text-sm max-w-md mx-auto mb-6">You haven't performed any actions yet. Start by
+            updating your profile or raising a service request.</p>
+          <a routerLink="/customer-profile"
+            class="inline-flex items-center gap-2 bg-[#db3333] hover:bg-[#c22b2b] text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg">
+            <i class="fa-solid fa-user text-xs"></i>
+            Go to Profile
+          </a>
+        </div>
+      </ng-template>
+
+    </ng-container>
+
+    <!-- Skeleton Loader -->
+    <ng-template #loadingTemplate>
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div *ngFor="let item of [1,2,3,4,5,6,7,8]"
+          class="flex items-center gap-4 px-6 py-5 border-b border-gray-50 last:border-b-0">
+          <div class="skeleton w-10 h-10 rounded-xl flex-shrink-0"></div>
+          <div class="flex-1 space-y-2">
+            <div class="skeleton h-4 w-3/5 rounded"></div>
+            <div class="skeleton h-3 w-2/5 rounded"></div>
+          </div>
+          <div class="skeleton h-3 w-20 rounded flex-shrink-0"></div>
+        </div>
+      </div>
+    </ng-template>
+
+  </div>
+</main>
+<app-footer></app-footer>

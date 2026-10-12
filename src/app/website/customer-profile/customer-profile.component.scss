@@ -1,0 +1,79 @@
+/* Only skeleton styles and minor custom tweaks needed as the rest is handled by Tailwind */
+
+:host {
+  display: block;
+}
+
+/* Skeleton Loader Styles */
+.skeleton {
+  background: #eee;
+  background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+  border-radius: 5px;
+  background-size: 200% 100%;
+  animation: 1.5s shine linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+.skeleton-avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  margin: 0 auto 1rem auto;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 60%;
+  margin: 0 auto 0.5rem auto;
+  border-radius: 4px;
+}
+
+.skeleton-text {
+  height: 16px;
+  width: 40%;
+  margin: 0 auto;
+  border-radius: 4px;
+}
+
+.skeleton-label {
+  height: 16px;
+  width: 30%;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.skeleton-input {
+  height: 52px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+/* Custom select arrow styling for Tailwind */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 1rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* Modal entry animation */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-in {
+  animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

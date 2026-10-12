@@ -1,0 +1,251 @@
+<app-navbar></app-navbar>
+
+<div class="min-h-screen bg-gray-50 pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+
+        <!-- Header -->
+        <div class="mb-8">
+            <a routerLink="/request-quote"
+                class="text-sm font-semibold text-gray-500 hover:text-[#db3333] transition-colors inline-flex items-center mb-4">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Options
+            </a>
+            <h1 class="text-3xl font-extrabold text-gray-900">Request Spare Part</h1>
+            <p class="text-gray-500 mt-2">Fill out the details below to receive quotes for spare parts from top-rated
+                providers.</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div *ngIf="successMessage" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start">
+            <i class="fa-solid fa-circle-check text-green-500 mt-0.5 mr-3"></i>
+            <p class="text-green-800 font-medium">{{ successMessage }}</p>
+        </div>
+        <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start">
+            <i class="fa-solid fa-triangle-exclamation text-red-500 mt-0.5 mr-3"></i>
+            <p class="text-red-800 font-medium">{{ errorMessage }}</p>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="h-2 bg-gradient-to-r from-[#db3333] to-[#c22b2b]"></div>
+
+            <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="p-8 space-y-8">
+
+                <!-- Category Selection -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Vehicle Category <span
+                            class="text-[#db3333]">*</span></label>
+                    <div *ngIf="isLoadingCategories" class="flex items-center text-sm text-gray-500">
+                        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading categories...
+                    </div>
+                    <div *ngIf="!isLoadingCategories" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <label *ngFor="let cat of vehicleCategories" class="cursor-pointer relative">
+                            <input type="radio" formControlName="vehicle_category_id" [value]="cat.id"
+                                class="peer sr-only">
+                            <div
+                                class="rounded-xl border-2 border-gray-100 px-4 py-4 hover:bg-gray-50 peer-checked:border-[#db3333] peer-checked:bg-red-50 transition-all text-center">
+                                <i [ngClass]="cat.name.toLowerCase().includes('two') ? 'fa-motorcycle' : 'fa-car'"
+                                    class="fa-solid text-2xl text-gray-400 peer-checked:text-[#db3333] mb-2"></i>
+                                <div class="text-sm font-bold text-gray-700 peer-checked:text-[#db3333]">{{ cat.name }}
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <div *ngIf="requestForm.get('vehicle_category_id')?.touched && requestForm.get('vehicle_category_id')?.invalid"
+                        class="text-[#db3333] text-xs mt-2 font-medium">
+                        Please select a vehicle category.
+                    </div>
+                </div>
+
+                <!-- Part Details Row 1 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    *ngIf="requestForm.get('vehicle_category_id')?.value">
+
+                    <!-- Spare Part Custom Dropdown -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Spare Part Category <span class="text-[#db3333]">*</span></label>
+                        
+                        <div class="relative">
+                            <!-- Selected State / Button -->
+                            <div (click)="toggleSparePartDropdown($event)"
+                                class="w-full rounded-xl border border-gray-200 shadow-sm sm:text-sm px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer flex justify-between items-center" 
+                                [ngClass]="{'border-[#db3333] ring-1 ring-[#db3333] bg-white': isSparePartDropdownOpen, 'text-gray-400': !requestForm.get('spare_part_id')?.value, 'text-gray-900 font-semibold': requestForm.get('spare_part_id')?.value}">
+                                <span>{{ selectedSparePartName }}</span>
+                                <i class="fa-solid fa-chevron-down text-gray-400 text-sm transition-transform duration-200" [ngClass]="{'rotate-180': isSparePartDropdownOpen}"></i>
+                            </div>
+
+                            <!-- Dropdown List Options -->
+                            <div *ngIf="isSparePartDropdownOpen" 
+                                 class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                                 style="animation: fadeIn 0.2s ease-out;">
+                                <ul class="py-1">
+                                    <li *ngIf="spareParts.length === 0" class="px-4 py-3 text-sm text-gray-500 italic flex items-center justify-center">
+                                        <i class="fa-solid fa-circle-info mr-2"></i> No parts available
+                                    </li>
+                                    <li *ngFor="let part of spareParts" 
+                                        (click)="selectSparePart(part)"
+                                        class="px-4 py-3 text-sm cursor-pointer hover:bg-red-50 hover:text-[#db3333] transition-colors flex items-center justify-between"
+                                        [ngClass]="{'bg-red-50 text-[#db3333] font-bold': requestForm.get('spare_part_id')?.value === part.id, 'text-gray-700': requestForm.get('spare_part_id')?.value !== part.id}">
+                                        <span>{{ part.name }}</span>
+                                        <i *ngIf="requestForm.get('spare_part_id')?.value === part.id" class="fa-solid fa-check text-[#db3333]"></i>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div *ngIf="isLoadingSpareParts" class="text-xs text-gray-500 mt-1 flex items-center">
+                            <i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading spare parts...
+                        </div>
+                        <div *ngIf="requestForm.get('spare_part_id')?.touched && requestForm.get('spare_part_id')?.invalid"
+                            class="text-[#db3333] text-xs mt-2 font-medium">
+                            Please select a spare part type.
+                        </div>
+                    </div>
+
+                    <!-- Part Condition -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Part Condition <span
+                                class="text-[#db3333]">*</span></label>
+                        <div class="grid grid-cols-2 gap-3 h-[46px]">
+                            <label class="cursor-pointer relative h-full">
+                                <input type="radio" formControlName="part_condition" value="1" class="peer sr-only">
+                                <div
+                                    class="h-full rounded-xl border-2 border-gray-100 px-4 flex items-center justify-center hover:bg-gray-50 peer-checked:border-[#db3333] peer-checked:bg-red-50 transition-all text-center">
+                                    <div class="text-sm font-bold text-gray-700 peer-checked:text-[#db3333]">New Part
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer relative h-full">
+                                <input type="radio" formControlName="part_condition" value="0" class="peer sr-only">
+                                <div
+                                    class="h-full rounded-xl border-2 border-gray-100 px-4 flex items-center justify-center hover:bg-gray-50 peer-checked:border-[#db3333] peer-checked:bg-red-50 transition-all text-center">
+                                    <div class="text-sm font-bold text-gray-700 peer-checked:text-[#db3333]">Second-hand
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div *ngIf="requestForm.get('part_condition')?.touched && requestForm.get('part_condition')?.invalid"
+                            class="text-[#db3333] text-xs mt-2 font-medium">
+                            Please select the required condition.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part Details Row 2 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Part Name -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Specific Part Name <span
+                                class="text-[#db3333]">*</span></label>
+                        <input type="text" formControlName="part_name" placeholder="e.g. Brake Pads, Front Bumper"
+                            class="w-full rounded-xl border-gray-200 shadow-sm focus:border-[#db3333] focus:ring-[#db3333] sm:text-sm px-4 py-3 bg-gray-50 focus:bg-white transition-colors">
+                        <div *ngIf="requestForm.get('part_name')?.touched && requestForm.get('part_name')?.invalid"
+                            class="text-[#db3333] text-xs mt-2 font-medium">
+                            Part name is required.
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Model -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Vehicle Model & Year <span
+                                class="text-[#db3333]">*</span></label>
+                        <input type="text" formControlName="vehicle_model" placeholder="e.g. Honda City 2019"
+                            class="w-full rounded-xl border-gray-200 shadow-sm focus:border-[#db3333] focus:ring-[#db3333] sm:text-sm px-4 py-3 bg-gray-50 focus:bg-white transition-colors">
+                        <div *ngIf="requestForm.get('vehicle_model')?.touched && requestForm.get('vehicle_model')?.invalid"
+                            class="text-[#db3333] text-xs mt-2 font-medium">
+                            Vehicle model is required.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Your Location (City/Area) <span
+                            class="text-[#db3333]">*</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-location-dot text-gray-400"></i>
+                        </div>
+                        <input type="text" formControlName="location" placeholder="e.g. Gurugram, Sector 14"
+                            class="w-full pl-10 rounded-xl border-gray-200 shadow-sm focus:border-[#db3333] focus:ring-[#db3333] sm:text-sm px-4 py-3 bg-gray-50 focus:bg-white transition-colors">
+                    </div>
+                    <div *ngIf="requestForm.get('location')?.touched && requestForm.get('location')?.invalid"
+                        class="text-[#db3333] text-xs mt-2 font-medium">
+                        Location is required.
+                    </div>
+                </div>
+
+                <!-- Requirement Title -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Requirement Title <span
+                            class="text-[#db3333]">*</span></label>
+                    <input type="text" formControlName="requirement_title"
+                        placeholder="e.g. Urgent need for Honda City Brake Pads"
+                        class="w-full rounded-xl border-gray-200 shadow-sm focus:border-[#db3333] focus:ring-[#db3333] sm:text-sm px-4 py-3 bg-gray-50 focus:bg-white transition-colors">
+                    <div *ngIf="requestForm.get('requirement_title')?.touched && requestForm.get('requirement_title')?.invalid"
+                        class="text-[#db3333] text-xs mt-2 font-medium">
+                        Title is required (max 100 characters).
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Detailed Description <span
+                            class="text-[#db3333]">*</span></label>
+                    <textarea formControlName="requirement_description" rows="4"
+                        placeholder="Describe the part condition, any specific brand preference, or other details..."
+                        class="w-full rounded-xl border-gray-200 shadow-sm focus:border-[#db3333] focus:ring-[#db3333] sm:text-sm px-4 py-3 bg-gray-50 focus:bg-white transition-colors"></textarea>
+                    <div *ngIf="requestForm.get('requirement_description')?.touched && requestForm.get('requirement_description')?.invalid"
+                        class="text-[#db3333] text-xs mt-2 font-medium">
+                        Description is required (max 500 characters).
+                    </div>
+                </div>
+
+                <!-- Media Upload -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Upload Images/Videos of the Part
+                        (Optional)</label>
+
+                    <label
+                        class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-red-400 hover:bg-red-50/50 transition-colors cursor-pointer relative">
+                        <input type="file" multiple (change)="onFileChange($event)" accept="image/*,video/*"
+                            class="sr-only">
+                        <div class="space-y-2 text-center pointer-events-none">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400"></i>
+                            <div class="text-sm text-gray-600">
+                                <span class="font-bold text-[#db3333]">Upload a file</span> or drag and drop
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, MP4 up to 10MB</p>
+                        </div>
+                    </label>
+
+                    <!-- Selected Files Preview -->
+                    <ul *ngIf="selectedFiles.length > 0" class="mt-4 space-y-2">
+                        <li *ngFor="let file of selectedFiles; let i = index"
+                            class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                            <div class="flex items-center truncate">
+                                <i [ngClass]="file.type.startsWith('video') ? 'fa-file-video text-purple-500' : 'fa-file-image text-[#db3333]'"
+                                    class="fa-solid text-lg mr-3 shrink-0"></i>
+                                <span class="text-sm text-gray-700 truncate font-medium">{{ file.name }}</span>
+                            </div>
+                            <button type="button" (click)="removeFile(i)"
+                                class="ml-4 shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-6 border-t border-gray-100">
+                    <button type="submit" [disabled]="isSubmitting"
+                        class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-md text-sm font-extrabold text-white bg-[#db3333] hover:bg-[#c22b2b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#db3333] transition-all disabled:opacity-70 disabled:cursor-not-allowed">
+                        <i *ngIf="isSubmitting" class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                        {{ isSubmitting ? 'Submitting Request...' : 'Submit Spare Part Request' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>
