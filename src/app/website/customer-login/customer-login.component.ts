@@ -70,6 +70,10 @@ export class CustomerLoginComponent {
               this.jwtService.saveCustomerRole(data.user.role);
             }
           }
+
+          if (data.service_provider) {
+            this.jwtService.saveServiceProvider(data.service_provider);
+          }
         }
 
         if (res && res.message) {

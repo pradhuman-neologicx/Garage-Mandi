@@ -308,7 +308,23 @@
           <div *ngIf="selectedProvider?.rawData" class="bg-white border border-gray-100 rounded-xl p-3 shadow-sm mb-6">
             <!-- Provider Details -->
             <div>
-              <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Provider Details</h4>
+              <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Provider Details</h4>
+                <div *ngIf="selectedProvider.rawData.auto_renewal !== undefined && selectedProvider.rawData.auto_renewal !== null">
+                  <span *ngIf="isAutoRenewActive(selectedProvider.rawData.auto_renewal)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+                    Auto Renewal: On
+                  </span>
+                  <span *ngIf="!isAutoRenewActive(selectedProvider.rawData.auto_renewal)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-xs">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <i class="fa-solid fa-ban text-[11px]"></i>
+                    Auto Renewal: Off
+                  </span>
+                </div>
+              </div>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div class="border-b md:border-b-0 md:border-r border-gray-50 pb-2 md:pb-0 pr-4">
                   <div class="text-gray-500 mb-1">Name</div>
@@ -343,10 +359,18 @@
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-4 gap-3 border-b border-gray-50 pb-3">
                   <h5 class="font-bold text-gray-800 text-base leading-snug">{{ item.planName }}</h5>
-                  <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-100 text-red-700 border-red-200': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
-                        class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
-                    {{ item.status }}
-                  </span>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
+                          [ngClass]="item.isAutoRenewal ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                          class="text-xs px-2.5 py-1 rounded-full font-bold border inline-flex items-center gap-1 shadow-xs">
+                      <i class="fa-solid" [ngClass]="item.isAutoRenewal ? 'fa-arrows-rotate' : 'fa-ban'"></i>
+                      Auto Renew: {{ item.isAutoRenewal ? 'On' : 'Off' }}
+                    </span>
+                    <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-100 text-red-700 border-red-200': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
+                          class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
+                      {{ item.status }}
+                    </span>
+                  </div>
                 </div>
 
                 <!-- Dates Grid -->
@@ -412,10 +436,18 @@
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-4 gap-3 border-b border-gray-50 pb-3">
                   <h5 class="font-bold text-gray-700 text-base leading-snug">{{ item.planName }}</h5>
-                  <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-50 text-red-600 border-red-100': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
-                        class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
-                    {{ item.status }}
-                  </span>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
+                          [ngClass]="item.isAutoRenewal ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'"
+                          class="text-xs px-2.5 py-1 rounded-full font-bold border inline-flex items-center gap-1 shadow-xs">
+                      <i class="fa-solid" [ngClass]="item.isAutoRenewal ? 'fa-arrows-rotate' : 'fa-ban'"></i>
+                      Auto Renew: {{ item.isAutoRenewal ? 'On' : 'Off' }}
+                    </span>
+                    <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-50 text-red-600 border-red-100': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
+                          class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
+                      {{ item.status }}
+                    </span>
+                  </div>
                 </div>
 
                 <!-- Dates Grid -->

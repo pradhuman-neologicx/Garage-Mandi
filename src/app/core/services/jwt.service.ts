@@ -215,6 +215,14 @@ export class JwtService {
     window.localStorage['Garage_Customer_Role'] = JSON.stringify(role);
   }
 
+  getServiceProvider(): any {
+    return JSON.parse(window.localStorage['Garage_Service_Provider'] || '{}');
+  }
+
+  saveServiceProvider(provider: any) {
+    window.localStorage['Garage_Service_Provider'] = JSON.stringify(provider);
+  }
+
   clearCustomerStorage() {
     window.localStorage.removeItem('Garage_Customer_isLoggedIn');
     window.localStorage.removeItem('Garage_Customer_Token');
@@ -224,5 +232,6 @@ export class JwtService {
     window.localStorage.removeItem('Garage_Customer_Username');
     window.localStorage.removeItem('Garage_Customer_Phone');
     window.localStorage.removeItem('Garage_Customer_Role');
+    window.localStorage.removeItem('Garage_Service_Provider');
   }
 }

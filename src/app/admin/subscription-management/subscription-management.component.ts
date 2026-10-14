@@ -299,6 +299,10 @@ export class SubscriptionManagementComponent implements OnInit {
     });
   }
 
+  isAutoRenewActive(val: any): boolean {
+    return val === true || val === 1 || val === '1' || val === 'true' || val === 'active';
+  }
+
   openPaymentModal(provider: any) {
     this.selectedProvider = { ...provider, isLoading: true, payments: [] };
     this.isPaymentModalOpen = true;
@@ -311,41 +315,50 @@ export class SubscriptionManagementComponent implements OnInit {
           if (res && (res.status === 200 || res.status === true)) {
             const data = res.data || {};
             this.selectedProvider.rawData = data;
+            this.selectedProvider.autoRenewal = data.auto_renewal !== undefined ? data.auto_renewal : null;
 
             const currentSubs = Array.isArray(data.current) ? data.current : [];
             const previousSubs = Array.isArray(data.previous) ? data.previous : [];
 
-            this.selectedProvider.currentSubs = currentSubs.map((p: any) => ({
-              planName: p.plan?.name || 'N/A',
-              amount: p.subscription_amount || p.plan?.amount || 0,
-              gstAmount: p.gst_amount || 0,
-              totalAmount: p.total_amount || 0,
-              paymentStatus: p.payment_status || 'N/A',
-              paymentMethod: p.payment_method || 'N/A',
-              paymentDate: p.payment_date ? this.formatDate(p.payment_date) : 'N/A',
-              activity: p.activity || 'N/A',
-              transactionId: p.transaction_id || 'N/A',
-              autoRenewal: p.auto_renewal ? 'Yes' : 'No',
-              startDate: this.formatDate(p.current_period_start || p.subscription_starts_at),
-              endDate: this.formatDate(p.current_period_end),
-              status: p.status || 'N/A'
-            }));
+            this.selectedProvider.currentSubs = currentSubs.map((p: any) => {
+              const autoRenVal = p.auto_renewal !== undefined ? p.auto_renewal : data.auto_renewal;
+              return {
+                planName: p.plan?.name || 'N/A',
+                amount: p.subscription_amount || p.plan?.amount || 0,
+                gstAmount: p.gst_amount || 0,
+                totalAmount: p.total_amount || 0,
+                paymentStatus: p.payment_status || 'N/A',
+                paymentMethod: p.payment_method || 'N/A',
+                paymentDate: p.payment_date ? this.formatDate(p.payment_date) : 'N/A',
+                activity: p.activity || 'N/A',
+                transactionId: p.transaction_id || 'N/A',
+                autoRenewal: autoRenVal,
+                isAutoRenewal: this.isAutoRenewActive(autoRenVal),
+                startDate: this.formatDate(p.current_period_start || p.subscription_starts_at),
+                endDate: this.formatDate(p.current_period_end),
+                status: p.status || 'N/A'
+              };
+            });
 
-            this.selectedProvider.history = previousSubs.map((p: any) => ({
-              planName: p.plan?.name || 'N/A',
-              amount: p.subscription_amount || p.plan?.amount || 0,
-              gstAmount: p.gst_amount || 0,
-              totalAmount: p.total_amount || 0,
-              paymentStatus: p.payment_status || 'N/A',
-              paymentMethod: p.payment_method || 'N/A',
-              paymentDate: p.payment_date ? this.formatDate(p.payment_date) : 'N/A',
-              activity: p.activity || 'N/A',
-              transactionId: p.transaction_id || 'N/A',
-              autoRenewal: p.auto_renewal ? 'Yes' : 'No',
-              startDate: this.formatDate(p.current_period_start || p.subscription_starts_at),
-              endDate: this.formatDate(p.current_period_end),
-              status: p.status || 'N/A'
-            }));
+            this.selectedProvider.history = previousSubs.map((p: any) => {
+              const autoRenVal = p.auto_renewal !== undefined ? p.auto_renewal : null;
+              return {
+                planName: p.plan?.name || 'N/A',
+                amount: p.subscription_amount || p.plan?.amount || 0,
+                gstAmount: p.gst_amount || 0,
+                totalAmount: p.total_amount || 0,
+                paymentStatus: p.payment_status || 'N/A',
+                paymentMethod: p.payment_method || 'N/A',
+                paymentDate: p.payment_date ? this.formatDate(p.payment_date) : 'N/A',
+                activity: p.activity || 'N/A',
+                transactionId: p.transaction_id || 'N/A',
+                autoRenewal: autoRenVal,
+                isAutoRenewal: this.isAutoRenewActive(autoRenVal),
+                startDate: this.formatDate(p.current_period_start || p.subscription_starts_at),
+                endDate: this.formatDate(p.current_period_end),
+                status: p.status || 'N/A'
+              };
+            });
           }
           this.selectedProvider.isLoading = false;
         },

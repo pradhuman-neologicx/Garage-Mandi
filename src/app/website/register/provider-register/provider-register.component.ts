@@ -375,11 +375,35 @@ export class ProviderRegisterComponent implements OnInit {
       formData.append('image', this.selectedFile);
     }
 
-    // Keep using the customer service register endpoint until the new provider endpoints are ready
     this.customerService.providerRegister(formData).subscribe({
       next: (res: any) => {
         this.isLoading = false;
         
+        if (res && res.data) {
+          const data = res.data;
+          
+          if (data.token) {
+            this.jwtService.saveCustomerToken(data.token);
+            this.jwtService.saveCustomerIsLoggedIn(true);
+          }
+          
+          if (data.user) {
+            this.jwtService.saveCustomerId(data.user.id);
+            this.jwtService.saveCustomerName(data.user.name);
+            this.jwtService.saveCustomerEmail(data.user.email);
+            this.jwtService.saveCustomerUsername(data.user.username);
+            this.jwtService.saveCustomerPhone(data.user.phone_number);
+            
+            if (data.user.role) {
+              this.jwtService.saveCustomerRole(data.user.role);
+            }
+          }
+
+          if (data.service_provider) {
+            this.jwtService.saveServiceProvider(data.service_provider);
+          }
+        }
+
         if (res && res.message) {
           this.notificationService.show(res.message, 'success');
         } else {

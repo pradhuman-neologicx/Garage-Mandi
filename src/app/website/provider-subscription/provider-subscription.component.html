@@ -1,232 +1,1097 @@
 <app-navbar></app-navbar>
 
-<main class="min-h-screen bg-gray-50 pt-[54px] pb-32 lg:pb-12">
-  <div class="bg-[#131e3d] text-white py-12 relative overflow-hidden">
+<main class="min-h-screen bg-gray-50 pt-[54px] pb-12 sm:pb-16">
+  <!-- Hero Banner -->
+  <div class="bg-[#131e3d] text-white py-8 sm:py-12 relative overflow-hidden">
     <div class="absolute inset-0 opacity-10 pointer-events-none">
       <div class="absolute right-0 top-0 w-96 h-96 rounded-full bg-[#db3333] blur-3xl translate-x-1/3 -translate-y-1/3"></div>
       <div class="absolute left-0 bottom-0 w-96 h-96 rounded-full bg-blue-500 blur-3xl -translate-x-1/3 translate-y-1/3"></div>
     </div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <h1 class="text-4xl font-extrabold mb-2">Subscription Plans</h1>
-      <p class="text-blue-100 max-w-xl">
-        Activate or renew your plans to unlock full features, receive customer requests, and grow your business with Garage Mandi.
-      </p>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold mb-2">Subscription Plans</h1>
+          <p class="text-blue-100 text-xs sm:text-sm md:text-base max-w-4xl">
+            Activate or manage your workshop subscription to receive customer inquiries, unlock live request broadcasts, and scale your business with Garage Mandi.
+          </p>
+        </div>
+
+        <div class="shrink-0 self-start sm:self-center">
+          <button (click)="goBack()" 
+                  class="inline-flex items-center gap-2 text-white/90 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 group cursor-pointer border border-white/10 shadow-sm">
+            <i class="fa-solid fa-arrow-left text-xs transform group-hover:-translate-x-1 transition-transform"></i>
+            <span>Back</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-    <div class="flex flex-col lg:flex-row gap-8 items-start">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 sm:mt-8 w-full">
+    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start w-full">
       
-      <!-- Plans List Section -->
-      <div class="flex-1 w-full space-y-6">
+      <!-- Main Content Section -->
+      <div class="flex-1 w-full min-w-0 space-y-6">
         
-        <!-- Status Banner -->
-        <!-- Active Subscription Banner -->
-        <div *ngIf="mySubscriptions.length > 0" class="bg-gradient-to-r from-emerald-500 to-green-600 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+        <!-- ======================================================== -->
+        <!-- 1. ACTIVE / GRACE / EXPIRED SUBSCRIPTION STATUS (UC-05)  -->
+        <!-- ======================================================== -->
+        
+        <!-- State A: Active with Auto-Renewal Enabled -->
+        <div *ngIf="currentSubscription && currentSubscription.status === 'Active' && currentSubscription.auto_renewal === 'Enabled'" 
+             class="bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden">
           <div class="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
-          <div class="flex items-start gap-4 relative z-10">
+          <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
             <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm shadow-inner">
-              <i class="fa-solid fa-check-circle text-2xl"></i>
+              <i class="fa-solid fa-check-circle text-2xl text-white"></i>
             </div>
-            <div>
-              <div class="flex items-center gap-3 mb-2">
-                <h2 class="text-2xl font-bold">Subscription Active</h2>
-                <span class="bg-white/20 px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider backdrop-blur-sm shadow-sm">Active</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <h2 class="text-lg sm:text-2xl font-bold leading-tight">Subscription Active</h2>
+                <span class="bg-white/20 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider backdrop-blur-sm shadow-sm shrink-0">
+                  Active
+                </span>
+                <span class="bg-emerald-950/30 px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full backdrop-blur-sm shrink-0 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+                  Auto-Renewal: Enabled
+                </span>
               </div>
-              <p class="text-white/90 leading-relaxed text-sm md:text-base max-w-2xl">
-                Your workshop can receive customer inquiries and service requests.
+              <p class="text-white/90 leading-relaxed text-xs sm:text-sm md:text-base">
+                Your workshop is active and receiving customer inquiries and service requests in real-time.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Inactive Subscription Banner -->
-        <div *ngIf="mySubscriptions.length === 0" class="bg-gradient-to-r from-orange-400 to-rose-500 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
-          <div class="flex items-start gap-4 relative z-10">
-            <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm shadow-inner">
+        <!-- State B: Active with Auto-Renewal Disabled (UC-06) -->
+        <div *ngIf="currentSubscription && currentSubscription.status === 'Active' && currentSubscription.auto_renewal === 'Disabled'" 
+             class="bg-gradient-to-r from-slate-700 via-indigo-900 to-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden border border-indigo-400/30">
+          <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
+          <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0 backdrop-blur-sm border border-amber-400/30">
+              <i class="fa-solid fa-clock-rotate-left text-2xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <h2 class="text-lg sm:text-2xl font-bold leading-tight">Subscription Active</h2>
+                <span class="bg-amber-400 text-gray-900 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shadow-sm shrink-0">
+                  Auto-Renewal Disabled
+                </span>
+              </div>
+              <p class="text-white/90 leading-relaxed text-xs sm:text-sm">
+                Future automatic renewal is cancelled (BR-11). You retain 100% full access until <strong>{{ currentSubscription.current_period_end | date:'dd MMM yyyy' }}</strong> (BR-12). No future payment will be deducted.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- State C: Grace Period (UC-08, BR-13) -->
+        <div *ngIf="currentSubscription && currentSubscription.status === 'Grace Period'" 
+             class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden">
+          <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
+            <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm">
+              <i class="fa-solid fa-triangle-exclamation text-2xl text-yellow-200"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <h2 class="text-lg sm:text-2xl font-bold leading-tight">Grace Period Active</h2>
+                <span *ngIf="currentSubscription.grace_ends_at" class="bg-red-700 text-white px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shrink-0 animate-pulse">
+                  Pay by {{ currentSubscription.grace_ends_at | date:'dd MMM yyyy' }}
+                </span>
+                <span *ngIf="!currentSubscription.grace_ends_at" class="bg-red-700 text-white px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shrink-0 animate-pulse">
+                  Day {{ currentSubscription.grace_days_remaining || 2 }} of 3
+                </span>
+              </div>
+              <p class="text-white/95 leading-relaxed text-xs sm:text-sm mb-3">
+                {{ currentSubscription.renewal_message || 'Automatic renewal payment could not be completed. You retain full platform access during the grace period. Complete manual payment to restore active status.' }}
+              </p>
+              <button *ngIf="currentSubscription.actions?.can_pay_manually !== false" 
+                      (click)="openGracePayModal()" 
+                      class="px-4 py-2 bg-white text-orange-600 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:bg-orange-50 transition-colors inline-flex items-center gap-2">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>Complete Manual Payment (₹{{ (currentSubscription.grace_amount_due || currentSubscription.total_amount) | number:'1.2-2' }})</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- State D: Subscription Expired (UC-05 Extension 3c, BR-17) -->
+        <div *ngIf="currentSubscription && currentSubscription.status === 'Expired'" 
+             class="bg-gradient-to-r from-rose-600 to-red-700 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden">
+          <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
+            <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
               <i class="fa-solid fa-lock text-2xl"></i>
             </div>
-            <div>
-              <div class="flex items-center gap-3 mb-2">
-                <h2 class="text-2xl font-bold">Subscription Required</h2>
-                <span class="bg-white/20 px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider backdrop-blur-sm shadow-sm">Inactive</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <h2 class="text-lg sm:text-2xl font-bold leading-tight">Subscription Expired</h2>
+                <span class="bg-black/30 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shrink-0">
+                  Expired
+                </span>
               </div>
-              <p class="text-white/90 leading-relaxed text-sm md:text-base max-w-2xl">
-                Service Providers cannot receive customer requests or inquiries without an active subscription. Select your required categories below.
+              <p class="text-white/90 leading-relaxed text-xs sm:text-sm mb-3">
+                Your previous subscription has ended and workshop services are temporarily locked. Choose a plan below to reactivate your access.
+              </p>
+              <button (click)="scrollToPlans()" 
+                      class="px-4 py-2 bg-white text-red-600 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:bg-red-50 transition-colors inline-flex items-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i>
+                <span>Choose Plan to Reactivate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- State E: Inactive Subscription Banner (No subscription yet) -->
+        <div *ngIf="!currentSubscription" 
+             class="bg-gradient-to-r from-orange-400 to-rose-500 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
+          <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm shadow-inner">
+              <i class="fa-solid fa-lock text-xl sm:text-2xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <h2 class="text-lg sm:text-2xl font-bold leading-tight">Subscription Required</h2>
+                <span class="bg-white/20 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider backdrop-blur-sm shadow-sm shrink-0">Inactive</span>
+              </div>
+              <p class="text-white/90 leading-relaxed text-xs sm:text-sm md:text-base">
+                Service Providers cannot receive customer inquiries or parts requests without an active subscription. Select your required plan(s) below to get started.
               </p>
             </div>
           </div>
         </div>
 
-        <!-- Active Subscriptions List -->
-        <div *ngIf="mySubscriptions.length > 0" class="space-y-4">
-          <div *ngFor="let sub of mySubscriptions" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-[#db3333] to-[#131e3d] px-6 py-4 flex items-center justify-between text-white">
-              <div class="flex items-center gap-3">
-                <i class="fa-solid fa-medal text-yellow-400 text-xl"></i>
-                <h4 class="font-bold text-lg truncate pr-4">{{ sub.plan?.name }}</h4>
+        <!-- ======================================================== -->
+        <!-- 2. CURRENT ACTIVE SUBSCRIPTION DETAILS CARD (UC-05)     -->
+        <!-- ======================================================== -->
+        <div *ngIf="currentSubscription && (currentSubscription.status === 'Active' || currentSubscription.status === 'Grace Period')" 
+             class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-gray-100 space-y-6">
+          
+          <!-- Card Header with Subscription ID -->
+          <div class="flex flex-wrap items-center justify-between pb-5 border-b border-gray-100 gap-3">
+            <div>
+              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Current Subscription</div>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-xl sm:text-2xl font-extrabold text-[#131e3d]">{{ currentSubscription.id }}</span>
+                <span *ngIf="currentSubscription.plans?.length > 1" 
+                      class="bg-purple-50 text-purple-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-purple-200">
+                  Combined 2-Plan Package
+                </span>
               </div>
-              <span class="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm uppercase shrink-0">Active</span>
             </div>
-            
-            <!-- Body -->
-            <div class="p-6">
-              <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-100 pb-4 mb-4 gap-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                    <i class="fa-solid fa-indian-rupee-sign"></i>
-                  </div>
-                  <div>
-                    <div class="text-sm text-gray-500">Paid:</div>
-                    <div class="text-2xl font-extrabold text-[#db3333] leading-none">₹{{ sub.total_amount | number:'1.2-2' }}</div>
-                    <div class="text-xs text-gray-400 mt-1">GST included (18%)</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="flex flex-wrap justify-between gap-4 text-sm font-medium text-gray-500 mb-4">
-                <div>
-                  Started: <span class="text-gray-900">{{ sub.subscription_starts_at | date:'dd MMM yyyy' }}</span>
-                </div>
-                <div>
-                  Expires: <span class="text-gray-900">{{ sub.current_period_end | date:'dd MMM yyyy' }}</span>
-                </div>
+
+            <!-- Auto-Renewal Status pill & controls (UC-06) -->
+            <div class="flex items-center gap-3">
+              <div *ngIf="currentSubscription.auto_renewal === 'Enabled'" class="flex items-center gap-2">
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrows-rotate text-[11px] text-emerald-500"></i>
+                  Auto-Renewal Active
+                </span>
+                <button (click)="openCancelRenewalModal()" 
+                        class="text-xs text-gray-500 hover:text-rose-600 font-semibold px-3 py-1.5 rounded-xl hover:bg-rose-50 transition-colors border border-gray-200 hover:border-rose-200 cursor-pointer">
+                  Cancel Auto-Renewal
+                </button>
               </div>
 
-              <div *ngIf="sub.is_first_purchase" class="bg-orange-50 text-orange-600 px-4 py-2 rounded-xl text-sm font-bold text-center flex items-center justify-center gap-2">
-                <span>🎉 First Purchase Benefits Applied</span>
+              <div *ngIf="currentSubscription.auto_renewal === 'Disabled'" class="flex items-center gap-2">
+                <span class="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5">
+                  <i class="fa-solid fa-ban text-[11px] text-amber-600"></i>
+                  Auto-Renewal Disabled
+                </span>
+                <!-- <button (click)="enableAutoRenewal()" 
+                        class="text-xs text-[#131e3d] hover:text-[#db3333] font-bold px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200">
+                  Re-Enable
+                </button> -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Entitled Plans List under this Subscription (BR-05) -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Subscribed Entitlements</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div *ngFor="let p of currentSubscription.plans" 
+                   class="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-red-100 text-[#db3333] flex items-center justify-center shrink-0">
+                  <i class="fa-solid" [ngClass]="p.icon || 'fa-shield-halved'"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                    {{ p.category || currentSubscription.vehicle_category || 'Service Plan' }}
+                  </span>
+                  <div class="font-bold text-sm text-gray-900 leading-snug truncate">
+                    {{ p.name || p.title }}
+                  </div>
+                  <div class="text-[#db3333] font-bold text-xs mt-1">
+                    ₹{{ (p.amount || p.price || 0) | number:'1.2-2' }} <span class="text-gray-400 font-normal">/ month</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Billing & Renewal Information Grid (UC-05) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-blue-50/40 border border-blue-100 text-xs">
+            <div>
+              <div class="text-gray-500 font-medium">Started On</div>
+              <div class="font-bold text-gray-900 mt-0.5">
+                {{ currentSubscription.subscription_starts_at | date:'dd MMM yyyy' }}
+              </div>
+            </div>
+            <div>
+              <div class="text-gray-500 font-medium">Current Period Ends</div>
+              <div class="font-bold text-gray-900 mt-0.5">
+                {{ currentSubscription.current_period_end | date:'dd MMM yyyy' }}
+              </div>
+            </div>
+            <div>
+              <div class="text-gray-500 font-medium">Next Renewal Date</div>
+              <div class="font-bold text-gray-900 mt-0.5">
+                {{ currentSubscription.next_renewal_date | date:'dd MMM yyyy' }}
+              </div>
+            </div>
+            <div>
+              <div class="text-gray-500 font-medium">Paid (incl. GST)</div>
+              <div class="font-bold text-[#db3333] text-sm mt-0.5">
+                ₹{{ currentSubscription.total_amount | number:'1.2-2' }}
               </div>
             </div>
           </div>
         </div>
 
-        <div *ngIf="plans.length > 0">
-          <h3 class="text-2xl font-bold text-[#131e3d] mb-2">Select Plans</h3>
-          <p class="text-gray-500 mb-6">Choose one or multiple plans. Your subscription amount is calculated automatically.</p>
-
-          <div *ngIf="isLoading" class="flex justify-center py-12">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#db3333]"></div>
+        <!-- ======================================================== -->
+        <!-- 3. SUBSCRIPTION & RENEWAL HISTORY (UC-03 / UC-05 Step 4) -->
+        <!-- ======================================================== -->
+        <div *ngIf="subscriptionHistory.length > 0" class="bg-white rounded-3xl p-5 sm:p-6 shadow-sm border border-gray-100 overflow-hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-gray-100">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-[#131e3d]/5 text-[#131e3d] flex items-center justify-center text-sm font-bold">
+                  <i class="fa-solid fa-clock-rotate-left"></i>
+                </span>
+                <h3 class="text-base sm:text-lg font-bold text-[#131e3d]">Subscription & Renewal History</h3>
+              </div>
+              <p class="text-xs text-gray-500 mt-0.5 ml-10">Chronological audit log of your plan activations, renewals & transactions.</p>
+            </div>
+            <div class="flex items-center gap-2 ml-10 sm:ml-0">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-600">
+                {{ subscriptionHistory.length }} {{ subscriptionHistory.length === 1 ? 'Record' : 'Records' }}
+              </span>
+            </div>
           </div>
 
-          <div *ngIf="!isLoading" class="space-y-4">
-            <!-- Plan Cards -->
-            <div *ngFor="let plan of plans" 
-                 (click)="togglePlan(plan.id)"
-                 class="relative p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer group bg-white hover:shadow-md flex items-center justify-between"
-                 [ngClass]="isSelected(plan.id) ? 'border-[#db3333] shadow-md bg-red-50/10' : 'border-gray-200 hover:border-red-300'">
-              
-              <div class="flex items-center gap-5">
-                <div [ngClass]="isSelected(plan.id) ? 'bg-[#db3333] text-white shadow-md' : 'bg-red-100 text-[#db3333]'" 
-                     class="w-14 h-14 rounded-2xl flex items-center justify-center transition-all shrink-0">
-                  <i class="fa-solid text-2xl" [ngClass]="plan.icon || 'fa-motorcycle'"></i>
-                </div>
-                
+          <!-- Desktop / Tablet Table View (md and up) -->
+          <div class="hidden md:block overflow-x-auto w-full max-w-full">
+            <table class="w-full text-left text-xs text-gray-600 min-w-[640px]">
+              <thead class="bg-gray-50/80 text-gray-500 uppercase font-bold text-[10px] tracking-wider border-b border-gray-100">
+                <tr>
+                  <th class="py-3 px-3.5">Transaction & Ref</th>
+                  <th class="py-3 px-3.5">Payment Date</th>
+                  <th class="py-3 px-3.5">Plans Included</th>
+                  <th class="py-3 px-3.5">Amount</th>
+                  <th class="py-3 px-3.5">Status</th>
+                  <th class="py-3 px-3.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let item of subscriptionHistory" class="hover:bg-gray-50/60 transition-colors group">
+                  <!-- Txn & Sub ID -->
+                  <td class="py-3.5 px-3.5">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-gray-900">{{ item.subscription_number || item.subscription_id || item.id }}</span>
+                      <span *ngIf="item.activity || item.event_type" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#131e3d]/5 text-[#131e3d] uppercase">
+                        {{ item.activity || item.event_type }}
+                      </span>
+                    </div>
+                    <div *ngIf="item.transaction_id" class="text-[11px] font-mono text-gray-400 mt-0.5 flex items-center gap-1">
+                      <span>Txn: {{ item.transaction_id }}</span>
+                    </div>
+                  </td>
+
+                  <!-- Date -->
+                  <td class="py-3.5 px-3.5">
+                    <div class="font-semibold text-gray-800">{{ item.payment_date | date:'dd MMM yyyy' }}</div>
+                    <div class="text-[11px] text-gray-400">{{ item.payment_date | date:'hh:mm a' }}</div>
+                  </td>
+
+                  <!-- Plans (Multi-plan list) -->
+                  <td class="py-3.5 px-3.5">
+                    <div *ngIf="item.plans && item.plans.length > 0" class="space-y-1.5 max-w-sm">
+                      <div class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-md mb-0.5"
+                           *ngIf="item.plans.length > 1">
+                        <i class="fa-solid fa-layer-group text-[9px]"></i>
+                        {{ item.plans.length }} Combined Plans
+                      </div>
+                      <div *ngFor="let p of item.plans" class="flex items-center gap-1.5 text-xs text-gray-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#db3333] shrink-0"></span>
+                        <span class="font-medium truncate max-w-[220px]" [title]="p.plan_name">{{ p.plan_name }}</span>
+                        <span *ngIf="p.price" class="text-[10px] text-gray-400 font-semibold shrink-0">(₹{{ p.price }})</span>
+                      </div>
+                    </div>
+                    <div *ngIf="!item.plans || item.plans.length === 0" class="font-medium text-gray-800">
+                      {{ item.plan_names || 'Subscription Plan' }}
+                    </div>
+                  </td>
+
+                  <!-- Amount -->
+                  <td class="py-3.5 px-3.5">
+                    <div class="font-extrabold text-[#db3333] text-sm">
+                      ₹{{ item.total_amount | number:'1.2-2' }}
+                    </div>
+                    <div class="text-[10px] text-gray-400">
+                      Base: ₹{{ item.subscription_amount | number:'1.2-2' }} + GST
+                    </div>
+                  </td>
+
+                  <!-- Status -->
+                  <td class="py-3.5 px-3.5">
+                    <span *ngIf="item.payment_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                          [ngClass]="(item.payment_status || '').toLowerCase() === 'paid' || item.payment_status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'">
+                      <span class="w-1.5 h-1.5 rounded-full"
+                            [ngClass]="(item.payment_status || '').toLowerCase() === 'paid' || item.payment_status === 'Completed' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+                      {{ item.payment_status }}
+                    </span>
+                    <div *ngIf="item.payment_method" class="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
+                      <i class="fa-regular fa-credit-card text-[9px]"></i>
+                      <span>{{ item.payment_method }}</span>
+                    </div>
+                  </td>
+
+                  <!-- Action: View Details Button -->
+                  <td class="py-3.5 px-3.5 text-right">
+                    <button type="button"
+                            (click)="openHistoryDetailModal(item)"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#131e3d] hover:bg-[#db3333] text-white rounded-xl text-xs font-semibold transition-colors shadow-sm cursor-pointer">
+                      <i class="fa-regular fa-eye text-xs"></i>
+                      <span>View Details</span>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Card View (< md) -->
+          <div class="space-y-3 block md:hidden">
+            <div *ngFor="let item of subscriptionHistory"
+                 class="p-4 bg-gray-50/60 rounded-2xl border border-gray-100 space-y-3">
+              <!-- Top Row: Sub # and Status -->
+              <div class="md:flex items-center justify-between">
                 <div>
-                  <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                    {{ plan.category || 'Category' }}
-                  </span>
-                  <h4 class="text-lg font-bold text-gray-900 group-hover:text-[#db3333] transition-colors leading-tight pr-4">
-                    {{ plan.name }}
-                  </h4>
-                  <div class="text-[#db3333] font-extrabold mt-1 text-xl">
-                    ₹{{ plan.price | number:'1.2-2' }}
+                  <div class="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+                    <span>{{ item.subscription_number || item.id }}</span>
+                    <span *ngIf="item.activity || item.event_type" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#131e3d]/5 text-[#131e3d] uppercase">
+                      {{ item.activity || item.event_type }}
+                    </span>
                   </div>
+                  <div *ngIf="item.payment_date" class="text-[10px] text-gray-400 mt-0.5">
+                    {{ item.payment_date | date:'dd MMM yyyy, hh:mm a' }}
+                  </div>
+                </div>
+                <span *ngIf="item.payment_status" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                      [ngClass]="(item.payment_status || '').toLowerCase() === 'paid' || item.payment_status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'">
+                  <span class="w-1.5 h-1.5 rounded-full"
+                        [ngClass]="(item.payment_status || '').toLowerCase() === 'paid' || item.payment_status === 'Completed' ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+                  {{ item.payment_status }}
+                </span>
+              </div>
+
+              <!-- Plans section -->
+              <div class="bg-white rounded-xl p-3 border border-gray-100">
+                <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span>Plans Included</span>
+                  <span *ngIf="item.plans?.length > 1" class="text-blue-600 text-[10px] font-bold">
+                    {{ item.plans.length }} combined
+                  </span>
+                </div>
+                <div *ngIf="item.plans && item.plans.length > 0" class="space-y-1.5">
+                  <div *ngFor="let p of item.plans" class="flex items-center gap-2 text-xs text-gray-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#db3333] shrink-0"></span>
+                    <span class="font-medium">{{ p.plan_name }}</span>
+                  </div>
+                </div>
+                <div *ngIf="!item.plans || item.plans.length === 0" class="text-xs font-medium text-gray-800">
+                  {{ item.plan_names || 'Subscription Plan' }}
                 </div>
               </div>
 
-              <!-- Checkbox Indicator -->
-              <div class="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300"
-                   [ngClass]="isSelected(plan.id) ? 'bg-[#db3333] border-[#db3333]' : 'border-gray-300 bg-gray-50'">
-                <i class="fa-solid fa-check text-white text-sm" [class.opacity-100]="isSelected(plan.id)" [class.opacity-0]="!isSelected(plan.id)"></i>
+              <!-- Bottom Row: Price and View Details Button -->
+              <div class="md:flex items-center justify-between pt-1">
+                <div>
+                  <div class="text-[10px] text-gray-400">Total Paid (incl. GST)</div>
+                  <div class="font-extrabold text-[#db3333] text-base">
+                    ₹{{ item.total_amount | number:'1.2-2' }}
+                  </div>
+                </div>
+                <button type="button"
+                        (click)="openHistoryDetailModal(item)"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#131e3d] hover:bg-[#db3333] text-white rounded-xl text-xs font-semibold transition-colors shadow-sm">
+                  <i class="fa-regular fa-eye"></i>
+                  <span>View Details</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- 4. AVAILABLE PLANS SELECTION (UC-04, BR-04, BR-07)      -->
+        <!-- ======================================================== -->
+        
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-10 sm:py-12 bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm">
+          <div class="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 border-b-2 border-[#db3333]"></div>
+          <p class="text-gray-500 mt-3 sm:mt-4 text-xs sm:text-sm font-medium">Loading subscription plans...</p>
+        </div>
+
+        <!-- Available Plans Container -->
+        <div *ngIf="!isLoading && plans.length > 0">
+          <div class="mb-4">
+            <h3 class="text-xl sm:text-2xl font-bold text-[#131e3d] mb-1">
+              {{ currentSubscription && (currentSubscription.status === 'Active' || currentSubscription.status === 'Grace Period') ? 'Explore Other Plan Packages' : 'Choose Your Subscription Plan' }}
+            </h3>
+            <p class="text-xs sm:text-sm text-gray-500">
+              Select 1 or up to 2 plans to activate your subscription entitlements.
+            </p>
+          </div>
+
+          <!-- Plans List -->
+          <div class="space-y-3.5">
+            <div *ngFor="let plan of plans" 
+                 (click)="togglePlan(plan)"
+                 class="relative p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer group bg-white hover:shadow-md flex flex-col gap-3"
+                 [ngClass]="isSelected(plan.id) ? 'border-[#db3333] shadow-md bg-red-50/10' : 'border-gray-200 hover:border-gray-300'">
+              
+              <div class="flex items-center justify-between gap-3 sm:gap-4">
+                <!-- Icon + Info -->
+                <div class="flex items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
+                  <div [ngClass]="isSelected(plan.id) ? 'bg-[#db3333] text-white shadow-md' : 'bg-red-50 text-[#db3333]'" 
+                       class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0">
+                    <i class="fa-solid text-lg sm:text-2xl" [ngClass]="plan.icon || 'fa-motorcycle'"></i>
+                  </div>
+                  
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-0.5 truncate">
+                      {{ plan.category }}
+                    </span>
+                    <h4 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 transition-colors leading-snug break-words">
+                      {{ plan.name }}
+                    </h4>
+                    
+                    <!-- Pricing breakdown -->
+                    <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mt-1">
+                      <div class="text-[#db3333] font-extrabold text-base sm:text-xl">
+                        ₹{{ plan.amount | number:'1.2-2' }}
+                      </div>
+                      <span *ngIf="plan.final_amount" class="text-[11px] sm:text-xs text-gray-500 font-medium">
+                        + ₹{{ plan.gst | number:'1.2-2' }} GST (Total: ₹{{ plan.final_amount | number:'1.2-2' }})
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Checkbox Indicator -->
+                <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300"
+                     [ngClass]="isSelected(plan.id) ? 'bg-[#db3333] border-[#db3333]' : 'border-gray-300 bg-gray-50'">
+                  <i class="fa-solid fa-check text-white text-xs sm:text-sm" [class.opacity-100]="isSelected(plan.id)" [class.opacity-0]="!isSelected(plan.id)"></i>
+                </div>
+              </div>
+
+              <!-- Included Features preview -->
+              <div *ngIf="plan.features && plan.features.length > 0" 
+                   class="pt-2.5 border-t border-gray-100 flex flex-wrap gap-x-4 gap-y-1">
+                <div *ngFor="let feat of plan.features" class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-600">
+                  <i class="fa-solid fa-check text-green-500 text-[10px]"></i>
+                  <span>{{ feat }}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Subscription Summary (Sticky) -->
-      <div class="w-full lg:w-[400px] shrink-0 sticky top-[90px] z-20 mt-8 lg:mt-0">
-        <div class="bg-[#131e3d] rounded-3xl p-6 md:p-8 text-white shadow-2xl relative overflow-hidden">
-          <!-- Background Decor -->
+      <!-- ======================================================== -->
+      <!-- 5. SUBSCRIPTION SUMMARY (STICKY SIDEBAR)                 -->
+      <!-- ======================================================== -->
+      <div class="w-full lg:w-[340px] xl:w-[380px] shrink-0 self-start lg:sticky lg:top-20 z-20 mt-6 lg:mt-0">
+        <div class="bg-[#131e3d] rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-white shadow-2xl relative overflow-hidden">
           <div class="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2"></div>
           
-          <h3 class="text-xl font-bold mb-6 flex items-center justify-between border-b border-white/10 pb-4">
-            Subscription Summary
-            <span class="bg-blue-500/20 text-blue-300 text-xs px-3 py-1 rounded-full font-semibold shadow-inner">{{ selectedPlans.size }} Selected</span>
-          </h3>
+          <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-3 mb-4 sm:mb-5">
+            <h3 class="text-base sm:text-lg font-bold text-white">
+              Subscription Summary
+            </h3>
+            <span class="bg-blue-500/20 text-blue-300 text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full font-semibold shrink-0">
+              {{ selectedPlans.size }} Selected
+            </span>
+          </div>
 
-          <div class="space-y-4 mb-6">
-            <div class="flex justify-between text-gray-300 text-sm font-medium">
-              <span>Selected Plans</span>
+          <!-- Selected Plans List -->
+          <div *ngIf="selectedPlansList.length > 0" class="mb-4 pb-4 border-b border-white/10 space-y-2.5">
+            <div *ngFor="let p of selectedPlansList" class="flex justify-between items-start text-xs text-gray-200 gap-2">
+              <span class="font-medium text-gray-200 leading-snug">• {{ p.name }}</span>
+              <span class="font-bold text-white whitespace-nowrap shrink-0">₹{{ p.amount | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="space-y-3 sm:space-y-3.5 mb-5 sm:mb-6 text-xs sm:text-sm">
+            <div class="flex justify-between text-gray-300 font-medium">
+              <span>Selected Entitlements</span>
               <span class="font-bold text-white">{{ selectedPlans.size }}</span>
             </div>
-            <div class="flex justify-between text-gray-300 text-sm font-medium">
-              <span>Subtotal</span>
+            <div class="flex justify-between text-gray-300 font-medium">
+              <span>Subtotal (Base Price)</span>
               <span class="font-bold text-white">₹{{ subtotal | number:'1.2-2' }}</span>
             </div>
-            <div class="flex justify-between text-gray-300 text-sm font-medium">
-              <span>GST (18%)</span>
+            <div class="flex justify-between text-gray-300 font-medium">
+              <span>Applicable GST (18%)</span>
               <span class="font-bold text-white">₹{{ gstAmount | number:'1.2-2' }}</span>
             </div>
           </div>
 
-          <div class="border-t border-white/10 pt-4 mb-8">
+          <div class="border-t border-white/10 pt-3 sm:pt-4 mb-5 sm:mb-7">
             <div class="flex justify-between items-end">
-              <span class="text-gray-300 font-medium">Total Amount</span>
-              <span class="text-3xl font-extrabold text-white">₹{{ totalAmount | number:'1.2-2' }}</span>
+              <div>
+                <span class="text-gray-300 text-xs sm:text-sm font-medium block">Total Payable</span>
+                <span class="text-[11px] text-gray-400">Auto-Renewal enabled</span>
+              </div>
+              <span class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white">
+                ₹{{ totalAmount | number:'1.2-2' }}
+              </span>
             </div>
           </div>
 
           <button (click)="openModal()" 
                   [disabled]="selectedPlans.size === 0"
-                  [ngClass]="selectedPlans.size === 0 ? 'bg-gray-500/50 text-gray-400 cursor-not-allowed' : 'bg-[#db3333] hover:bg-[#c22b2b] text-white shadow-lg hover:shadow-red-500/30 transform hover:-translate-y-1'"
-                  class="w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2">
-            <span *ngIf="selectedPlans.size === 0">Select Plan First</span>
-            <span *ngIf="selectedPlans.size > 0">Subscribe Now</span>
+                  [ngClass]="selectedPlans.size === 0 ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed' : 'bg-[#db3333] hover:bg-[#c22b2b] text-white shadow-lg hover:shadow-red-500/30 transform hover:-translate-y-0.5'"
+                  class="w-full py-3.5 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
+            <span *ngIf="selectedPlans.size === 0">Select Plan(s) to Continue</span>
+            <span *ngIf="selectedPlans.size > 0">Proceed to Subscribe</span>
             <i *ngIf="selectedPlans.size > 0" class="fa-solid fa-arrow-right"></i>
           </button>
+
+          <!-- PDF Policy Badges -->
+          <div class="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-center gap-3 text-[11px] text-gray-300 text-center">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-shield text-green-400 text-[10px]"></i> Secure Activation</span>
+            <span class="flex items-center gap-1"><i class="fa-solid fa-rotate text-blue-400 text-[10px]"></i> 30-Day Billing Cycle</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<!-- Executive Code Modal -->
+<!-- ======================================================== -->
+<!-- MODAL 1: EXECUTIVE CODE & CHECKOUT (UC-04)               -->
+<!-- ======================================================== -->
 <div *ngIf="showExecutiveModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
   <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm transition-opacity" (click)="closeModal()"></div>
   
-  <div class="bg-white rounded-3xl w-full max-w-md relative z-10 shadow-2xl overflow-hidden animate-fade-in-up">
-    <!-- Top indicator line -->
-    <div class="w-16 h-1.5 bg-gray-200 rounded-full mx-auto mt-4 mb-2"></div>
-    
-    <div class="p-8">
-      <h3 class="text-2xl font-bold text-center text-[#131e3d] mb-2">Complete Subscription</h3>
-      <p class="text-center text-gray-500 mb-8 font-medium">Enter the executive referral code below if you have one, or skip to continue.</p>
+  <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md relative z-10 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-fade-in-up">
+    <!-- Top-Right Close Button -->
+    <button type="button"
+            (click)="closeModal()"
+            class="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
+            title="Close">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
 
-      <div class="relative mb-6">
-        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-            <i class="fa-solid fa-id-badge text-gray-500"></i>
+    <div class="w-16 h-1.5 bg-gray-200 rounded-full mx-auto mt-4 mb-2 shrink-0"></div>
+    
+    <div class="p-6 sm:p-8 overflow-y-auto flex-1">
+      <div class="w-12 h-12 bg-red-50 text-[#db3333] rounded-2xl flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-bag-shopping text-xl"></i>
+      </div>
+      <h3 class="text-xl sm:text-2xl font-bold text-center text-[#131e3d] mb-1">Confirm Subscription</h3>
+      <p class="text-center text-gray-500 mb-6 text-xs sm:text-sm">
+        Enter executive referral code below if you have one, or proceed to activate.
+      </p>
+
+      <!-- Amount breakdown preview -->
+      <div class="bg-gray-50 rounded-2xl p-4 mb-4 border border-gray-100 text-xs space-y-2">
+        <div class="flex justify-between text-gray-600">
+          <span>Subtotal</span>
+          <span class="font-bold">₹{{ subtotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between text-gray-600">
+          <span>GST (18%)</span>
+          <span class="font-bold">₹{{ gstAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between text-gray-900 font-extrabold text-sm pt-2 border-t border-gray-200">
+          <span>Total Amount</span>
+          <span class="text-[#db3333]">₹{{ totalAmount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Payment Method Selection -->
+      <div class="mb-4">
+        <label class=" text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center justify-between">
+          <span>Payment Mode</span>
+          <span class="text-[10px] font-semibold text-gray-400">Card or UPI / QR</span>
+        </label>
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- Card Option -->
+          <div (click)="selectPaymentMethod('card')"
+               class="p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between"
+               [ngClass]="selectedPaymentMethod === 'card' ? 'border-[#db3333] bg-red-50/40 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
+                   [ngClass]="selectedPaymentMethod === 'card' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-100 text-gray-600'">
+                <i class="fa-regular fa-credit-card"></i>
+              </div>
+              <div class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors"
+                   [ngClass]="selectedPaymentMethod === 'card' ? 'border-[#db3333] bg-[#db3333]' : 'border-gray-300 bg-white'">
+                <div *ngIf="selectedPaymentMethod === 'card'" class="w-1.5 h-1.5 rounded-full bg-white"></div>
+              </div>
+            </div>
+            <div>
+              <div class="font-bold text-xs text-[#131e3d]">Card</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Debit / Credit</div>
+            </div>
+          </div>
+
+          <!-- UPI / QR Option -->
+          <div (click)="selectPaymentMethod('qr')"
+               class="p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between"
+               [ngClass]="selectedPaymentMethod === 'qr' ? 'border-[#db3333] bg-red-50/40 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'">
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
+                   [ngClass]="selectedPaymentMethod === 'qr' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-100 text-gray-600'">
+                <i class="fa-solid fa-qrcode"></i>
+              </div>
+              <div class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors"
+                   [ngClass]="selectedPaymentMethod === 'qr' ? 'border-[#db3333] bg-[#db3333]' : 'border-gray-300 bg-white'">
+                <div *ngIf="selectedPaymentMethod === 'qr'" class="w-1.5 h-1.5 rounded-full bg-white"></div>
+              </div>
+            </div>
+            <div>
+              <div class="font-bold text-xs text-[#131e3d]">UPI / QR</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Instant Scan & Pay</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative mb-5">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+          <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500">
+            <i class="fa-solid fa-id-badge text-xs"></i>
           </div>
         </div>
         <input type="text" [(ngModel)]="executiveCode" 
-               class="w-full pl-14 pr-4 py-4 bg-white border-2 border-gray-100 rounded-xl focus:ring-4 focus:ring-[#db3333]/10 focus:border-[#db3333] outline-none transition-all text-lg font-bold text-gray-800 placeholder-gray-400 shadow-sm"
-               placeholder="Enter Executive Code">
+               class="w-full pl-14 pr-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#db3333]/10 focus:border-[#db3333] outline-none transition-all text-sm font-semibold text-gray-800 placeholder:text-gray-400 placeholder:font-normal"
+               style="padding-left: 3.5rem !important;"
+               placeholder="Executive Code (Optional)">
       </div>
 
       <button (click)="subscribe(true)"
               [disabled]="!executiveCode.trim() || isSubmitting"
-              [ngClass]="!executiveCode.trim() ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#db3333] hover:bg-[#c22b2b] text-white shadow-lg hover:shadow-red-500/30 transform hover:-translate-y-0.5'"
-              class="w-full py-4 rounded-xl font-bold text-lg transition-all mb-4 flex justify-center items-center">
-        <span *ngIf="!isSubmitting">Apply & Continue</span>
-        <div *ngIf="isSubmitting" class="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              [ngClass]="!executiveCode.trim() ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#db3333] hover:bg-[#c22b2b] text-white shadow-lg'"
+              class="w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-3 flex justify-center items-center gap-2 cursor-pointer">
+        <span *ngIf="!isSubmitting">Apply Code & Activate</span>
+        <div *ngIf="isSubmitting" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
       </button>
 
       <button (click)="subscribe(false)" [disabled]="isSubmitting"
-              class="w-full py-3 rounded-xl font-bold text-gray-500 hover:text-[#131e3d] hover:bg-gray-50 transition-colors">
-        Skip & Continue
+              class="w-full py-3 rounded-xl font-bold text-sm text-gray-600 hover:text-[#131e3d] hover:bg-gray-100 transition-colors cursor-pointer">
+        Skip & Activate Directly
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 2: CANCEL AUTO-RENEWAL CONFIRMATION (UC-06)       -->
+<!-- ======================================================== -->
+<div *ngIf="showCancelRenewalModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm" (click)="closeCancelRenewalModal()"></div>
+  
+  <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md relative z-10 shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto animate-fade-in-up">
+    <!-- Top-Right Close Button -->
+    <button type="button"
+            (click)="closeCancelRenewalModal()"
+            class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
+            title="Close">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
+
+    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+      <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+    </div>
+    
+    <h3 class="text-xl font-bold text-center text-[#131e3d] mb-1">Cancel Auto-Renewal?</h3>
+    <p class="text-center text-gray-500 text-xs sm:text-sm mb-5">
+      Please review the consequences of cancelling automatic renewal:
+    </p>
+
+    <!-- 3 Consequences as per PDF (Page 15, UC-06) -->
+    <div class="bg-amber-50/60 border border-amber-200/60 rounded-2xl p-4 mb-6 space-y-2.5 text-xs text-gray-700">
+      <div class="flex items-start gap-2.5">
+        <i class="fa-solid fa-check text-amber-600 mt-0.5"></i>
+        <span><strong>Future automatic renewal will be stopped</strong> immediately.</span>
+      </div>
+      <div class="flex items-start gap-2.5">
+        <i class="fa-solid fa-check text-amber-600 mt-0.5"></i>
+        <span>Current access continues until <strong>{{ currentSubscription?.current_period_end | date:'dd MMM yyyy' }}</strong>.</span>
+      </div>
+      <div class="flex items-start gap-2.5">
+        <i class="fa-solid fa-check text-amber-600 mt-0.5"></i>
+        <span>No refund is issued for the remaining period under Phase 1 (BR-18).</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2.5">
+      <button (click)="confirmCancelAutoRenewal()" 
+              [disabled]="isSubmitting"
+              class="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer">
+        <span *ngIf="!isSubmitting">Confirm & Disable Auto-Renewal</span>
+        <div *ngIf="isSubmitting" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+      </button>
+      <button (click)="closeCancelRenewalModal()" 
+              class="w-full py-2.5 text-gray-500 hover:text-gray-800 font-semibold rounded-xl text-xs transition-colors">
+        Keep Auto-Renewal Active
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 3: SUCCESS ACTIVATION RECEIPT (UC-04 Step 27)      -->
+<!-- ======================================================== -->
+<div *ngIf="showSuccessReceiptModal && lastActivatedSubscription" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm" (click)="closeSuccessModal()"></div>
+  
+  <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-lg relative z-10 shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto animate-fade-in-up">
+    <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+      <i class="fa-solid fa-check text-2xl"></i>
+    </div>
+    
+    <h3 class="text-2xl font-extrabold text-center text-[#131e3d] mb-1">Subscription Activated!</h3>
+    <p class="text-center text-gray-500 text-xs sm:text-sm mb-6">
+      Your workshop is now active and ready to receive customer inquiries across Garage Mandi.
+    </p>
+
+    <!-- Receipt Details (PDF Special Requirements #6) -->
+    <div class="bg-gray-50 rounded-2xl p-4 sm:p-5 border border-gray-100 space-y-3 text-xs mb-6">
+      <div class="flex justify-between items-center pb-2 border-b border-gray-200">
+        <span class="text-gray-500">Subscription ID</span>
+        <span class="font-bold text-gray-900">{{ lastActivatedSubscription.id }}</span>
+      </div>
+      <div class="flex justify-between items-center pb-2 border-b border-gray-200">
+        <span class="text-gray-500">Purchased Plan(s)</span>
+        <span class="font-bold text-gray-900 text-right max-w-xs truncate">{{ lastActivatedSubscription.plan_names }}</span>
+      </div>
+      <div class="flex justify-between items-center pb-2 border-b border-gray-200">
+        <span class="text-gray-500">Start Date</span>
+        <span class="font-bold text-gray-900">{{ lastActivatedSubscription.subscription_starts_at | date:'dd MMM yyyy' }}</span>
+      </div>
+      <div class="flex justify-between items-center pb-2 border-b border-gray-200">
+        <span class="text-gray-500">Next Renewal Date</span>
+        <span class="font-bold text-gray-900">{{ lastActivatedSubscription.next_renewal_date | date:'dd MMM yyyy' }}</span>
+      </div>
+      <div class="flex justify-between items-center pb-2 border-b border-gray-200">
+        <span class="text-gray-500">Auto-Renewal</span>
+        <span class="font-bold text-emerald-600">Enabled</span>
+      </div>
+      <div class="flex justify-between items-center pt-1 text-sm font-extrabold text-gray-900">
+        <span>Amount Paid</span>
+        <span class="text-[#db3333]">₹{{ lastActivatedSubscription.total_amount | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <button (click)="closeSuccessModal()" 
+            class="w-full py-3.5 bg-[#131e3d] hover:bg-[#0c1429] text-white font-bold rounded-xl text-sm transition-colors shadow-lg">
+      View Current Subscription
+    </button>
+  </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 4: GRACE PERIOD MANUAL PAYMENT (UC-08)            -->
+<!-- ======================================================== -->
+<div *ngIf="showGracePayModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm" (click)="closeGracePayModal()"></div>
+  
+  <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md relative z-10 shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto animate-fade-in-up">
+    <!-- Top-Right Close Button -->
+    <button type="button"
+            (click)="closeGracePayModal()"
+            class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
+            title="Close">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
+
+    <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+      <i class="fa-solid fa-credit-card text-xl"></i>
+    </div>
+    
+    <h3 class="text-xl font-bold text-center text-[#131e3d] mb-1">Complete Renewal Payment</h3>
+    <p class="text-center text-gray-500 text-xs mb-5">
+      Pay the outstanding amount to restore subscription to Active status.
+    </p>
+
+    <div class="bg-orange-50 rounded-2xl p-4 border border-orange-100 mb-4 flex justify-between items-center">
+      <div>
+        <div class="text-xs text-gray-600">Renewal Amount Due</div>
+        <div class="text-xs text-orange-700 font-semibold">
+          {{ currentSubscription?.grace_ends_at ? ('Due by ' + (currentSubscription?.grace_ends_at | date:'dd MMM yyyy')) : ('Day ' + (currentSubscription?.grace_days_remaining || 2) + ' of grace period') }}
+        </div>
+      </div>
+      <div class="text-xl font-extrabold text-orange-600">
+        ₹{{ (currentSubscription?.grace_amount_due || currentSubscription?.total_amount) | number:'1.2-2' }}
+      </div>
+    </div>
+
+    <!-- Payment Method Selection -->
+    <div class="mb-5 text-left">
+      <label class=" text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center justify-between">
+        <span>Payment Mode</span>
+        <span class="text-[10px] font-semibold text-gray-400">Card or UPI / QR</span>
+      </label>
+      <div class="grid grid-cols-2 gap-2.5">
+        <!-- Card Option -->
+        <div (click)="selectPaymentMethod('card')"
+             class="p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between"
+             [ngClass]="selectedPaymentMethod === 'card' ? 'border-orange-600 bg-orange-50/40 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'">
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
+                 [ngClass]="selectedPaymentMethod === 'card' ? 'bg-orange-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600'">
+              <i class="fa-regular fa-credit-card"></i>
+            </div>
+            <div class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors"
+                 [ngClass]="selectedPaymentMethod === 'card' ? 'border-orange-600 bg-orange-600' : 'border-gray-300 bg-white'">
+              <div *ngIf="selectedPaymentMethod === 'card'" class="w-1.5 h-1.5 rounded-full bg-white"></div>
+            </div>
+          </div>
+          <div>
+            <div class="font-bold text-xs text-[#131e3d]">Card</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">Debit / Credit</div>
+          </div>
+        </div>
+
+        <!-- UPI / QR Option -->
+        <div (click)="selectPaymentMethod('qr')"
+             class="p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between"
+             [ngClass]="selectedPaymentMethod === 'qr' ? 'border-orange-600 bg-orange-50/40 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'">
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
+                 [ngClass]="selectedPaymentMethod === 'qr' ? 'bg-orange-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600'">
+              <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <div class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors"
+                 [ngClass]="selectedPaymentMethod === 'qr' ? 'border-orange-600 bg-orange-600' : 'border-gray-300 bg-white'">
+              <div *ngIf="selectedPaymentMethod === 'qr'" class="w-1.5 h-1.5 rounded-full bg-white"></div>
+            </div>
+          </div>
+          <div>
+            <div class="font-bold text-xs text-[#131e3d]">UPI / QR</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">Instant Scan & Pay</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button (click)="processGraceManualPayment()" 
+            [disabled]="isSubmitting"
+            class="w-full py-3.5 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-sm transition-colors shadow-md flex items-center justify-center gap-2 mb-3 cursor-pointer">
+      <span *ngIf="!isSubmitting">Proceed to Payment</span>
+      <div *ngIf="isSubmitting" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+    </button>
+
+    <button (click)="closeGracePayModal()" 
+            class="w-full py-2.5 text-gray-500 hover:text-gray-800 font-semibold rounded-xl text-xs transition-colors">
+      Cancel
+    </button>
+  </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- MODAL 5: SUBSCRIPTION & TRANSACTION HISTORY DETAILS     -->
+<!-- ======================================================== -->
+<div *ngIf="showHistoryDetailModal && selectedHistoryItem" class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
+  <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm" (click)="closeHistoryDetailModal()"></div>
+  
+  <div class="bg-white rounded-3xl w-full max-w-xl relative z-10 shadow-2xl p-5 sm:p-7 max-h-[92vh] overflow-y-auto animate-fade-in-up border border-gray-100 flex flex-col">
+    <!-- Header -->
+    <div class="flex items-start justify-between pb-4 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-[#131e3d]/5 text-[#131e3d] flex items-center justify-center text-lg font-bold">
+          <i class="fa-solid fa-receipt"></i>
+        </div>
+        <div>
+          <h3 class="text-lg sm:text-xl font-extrabold text-[#131e3d]">Transaction Details</h3>
+          <p class="text-xs text-gray-500 mt-0.5">
+            Subscription #{{ selectedHistoryItem.subscription_number || selectedHistoryItem.subscription_id }}
+          </p>
+        </div>
+      </div>
+      <button type="button"
+              (click)="closeHistoryDetailModal()"
+              class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="py-4 space-y-4">
+      <!-- Quick Status & Amount Banner -->
+      <div class="bg-gradient-to-br from-[#131e3d] to-[#1c2c58] text-white rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+          <div>
+            <div class="text-[11px] text-gray-300 font-medium">Total Amount Paid</div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
+              ₹{{ selectedHistoryItem.total_amount | number:'1.2-2' }}
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span *ngIf="selectedHistoryItem.payment_status" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+                  [ngClass]="(selectedHistoryItem.payment_status || '').toLowerCase() === 'paid' || selectedHistoryItem.payment_status === 'Completed' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'">
+              <span class="w-1.5 h-1.5 rounded-full"
+                    [ngClass]="(selectedHistoryItem.payment_status || '').toLowerCase() === 'paid' || selectedHistoryItem.payment_status === 'Completed' ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+              {{ selectedHistoryItem.payment_status }}
+            </span>
+            <span *ngIf="selectedHistoryItem.activity || selectedHistoryItem.event_type" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white/10 text-white uppercase text-[10px] tracking-wide">
+              {{ selectedHistoryItem.activity || selectedHistoryItem.event_type }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Transaction ID & Method details -->
+        <div class="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div *ngIf="selectedHistoryItem.transaction_id" class="flex items-center gap-2">
+            <span class="text-gray-300 text-[11px]">Txn ID:</span>
+            <span class="font-mono text-gray-100 text-[11px] select-all font-semibold">
+              {{ selectedHistoryItem.transaction_id }}
+            </span>
+            <button type="button"
+                    (click)="copyToClipboard(selectedHistoryItem.transaction_id)"
+                    class="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] text-gray-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                    [title]="copiedTxn ? 'Copied' : 'Copy Transaction ID'">
+              <i class="fa-regular" [ngClass]="copiedTxn ? 'fa-check text-emerald-400' : 'fa-copy'"></i>
+              <span>{{ copiedTxn ? 'Copied' : 'Copy' }}</span>
+            </button>
+          </div>
+          <div class="text-gray-300 text-[11px] flex items-center gap-1.5">
+            <span *ngIf="selectedHistoryItem.payment_method" class="flex items-center gap-1">
+              <i class="fa-regular fa-credit-card"></i>
+              <span>{{ selectedHistoryItem.payment_method }}</span>
+            </span>
+            <span *ngIf="selectedHistoryItem.payment_method && selectedHistoryItem.payment_date" class="text-white/30">•</span>
+            <span *ngIf="selectedHistoryItem.payment_date">{{ selectedHistoryItem.payment_date | date:'dd MMM yyyy, hh:mm a' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coverage / Validity Timeline -->
+      <div class="bg-gray-50 rounded-2xl p-3.5 sm:p-4 border border-gray-100 grid grid-cols-2 gap-3 text-xs">
+        <div>
+          <div class="text-[11px] font-medium text-gray-500">Subscription Period Start</div>
+          <div class="font-bold text-gray-900 mt-0.5">
+            {{ selectedHistoryItem.period_start | date:'dd MMM yyyy, hh:mm a' }}
+          </div>
+        </div>
+        <div>
+          <div class="text-[11px] font-medium text-gray-500">Subscription Period End</div>
+          <div class="font-bold text-gray-900 mt-0.5">
+            {{ selectedHistoryItem.period_end | date:'dd MMM yyyy, hh:mm a' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscribed Plans Breakdown (Where the multiple plans are displayed in full detail) -->
+      <div>
+        <div class="flex items-center justify-between mb-2.5">
+          <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-layer-group text-blue-600"></i>
+            <span>Plans in this Subscription</span>
+          </h4>
+          <span class="text-xs font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md">
+            {{ selectedHistoryItem.plans?.length || 1 }} {{ (selectedHistoryItem.plans?.length === 1) ? 'Plan' : 'Plans' }} Included
+          </span>
+        </div>
+
+        <div class="space-y-2.5">
+          <!-- Multi-plan cards -->
+          <div *ngFor="let p of selectedHistoryItem.plans"
+               class="bg-white rounded-2xl p-3.5 sm:p-4 border border-gray-200 hover:border-gray-300 shadow-sm transition-all">
+            <div class="md:flex items-start justify-between gap-3">
+              <div class="md:flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#db3333]/10 text-[#db3333] flex items-center justify-center text-base shrink-0 mt-0.5">
+                  <i class="fa-solid" [ngClass]="p.icon || 'fa-wrench'"></i>
+                </div>
+                <div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="font-extrabold text-sm text-[#131e3d]">{{ p.plan_name }}</span>
+                    <span *ngIf="p.vehicle_category" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-600">
+                      {{ p.vehicle_category }}
+                    </span>
+                    <span *ngIf="p.plan_id" class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-400">
+                      #{{ p.plan_id }}
+                    </span>
+                  </div>
+                  <p *ngIf="p.description" class="text-xs text-gray-500 mt-1 line-clamp-2">
+                    {{ p.description }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Plan Amount if present -->
+              <div *ngIf="p.price" class="text-right shrink-0">
+                <div class="text-xs font-bold text-gray-900">₹{{ p.price }}</div>
+                <div *ngIf="p.gst_amount" class="text-[10px] text-gray-400">+₹{{ p.gst_amount }} GST</div>
+                <div *ngIf="p.total_amount" class="text-[11px] font-extrabold text-[#db3333] mt-0.5">
+                  ₹{{ p.total_amount }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Features list if present -->
+            <div *ngIf="p.features && p.features.length > 0" class="mt-3 pt-2.5 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              <div *ngFor="let feat of p.features" class="flex items-center gap-1.5 text-[11px] text-gray-600">
+                <i class="fa-solid fa-check text-emerald-500 text-[10px]"></i>
+                <span class="truncate">{{ feat }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fallback when plans array is empty -->
+          <div *ngIf="!selectedHistoryItem.plans || selectedHistoryItem.plans.length === 0"
+               class="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+            <span class="font-bold text-gray-900 text-sm">{{ selectedHistoryItem.plan_names || 'Subscription Plan' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial & Tax Summary Box -->
+      <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-2 text-xs">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+          Billing & Tax Breakdown
+        </div>
+        <div class="flex justify-between items-center text-gray-600">
+          <span>Plan(s) Base Amount</span>
+          <span class="font-semibold text-gray-900">₹{{ selectedHistoryItem.subscription_amount | number:'1.2-2' }}</span>
+        </div>
+        <div class="flex justify-between items-center text-gray-600">
+          <span>Goods & Services Tax (GST 18%)</span>
+          <span class="font-semibold text-gray-900">₹{{ selectedHistoryItem.gst_amount | number:'1.2-2' }}</span>
+        </div>
+        <div *ngIf="selectedHistoryItem.round_off_amount" class="flex justify-between items-center text-gray-600">
+          <span>Round Off</span>
+          <span class="font-semibold text-gray-900">₹{{ selectedHistoryItem.round_off_amount }}</span>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-gray-200 text-sm font-extrabold text-gray-900">
+          <span>Total Paid</span>
+          <span class="text-[#db3333]">₹{{ selectedHistoryItem.total_amount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="pt-3 border-t border-gray-100 mt-2">
+      <button type="button"
+              (click)="closeHistoryDetailModal()" 
+              class="w-full py-3 bg-[#131e3d] hover:bg-[#0c1429] text-white font-bold rounded-xl text-sm transition-colors shadow-md cursor-pointer">
+        Close Details
       </button>
     </div>
   </div>

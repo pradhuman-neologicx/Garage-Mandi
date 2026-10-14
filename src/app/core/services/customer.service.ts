@@ -37,7 +37,57 @@ export class CustomerService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
-    return this.apiService.get('subscriptions/my', headers);
+    return this.apiService.get('subscriptions/current', headers);
+  }
+
+  cancelAutoRenewal(data: any = {}): Observable<any> {
+    const token = this.jwtService.getCustomerToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.apiService.post('subscriptions/auto-renew/cancel', data, headers);
+  }
+
+  subscriptionCheckout(data: any): Observable<any> {
+    const token = this.jwtService.getCustomerToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.apiService.post('subscriptions/checkout', data, headers);
+  }
+
+  renewalCheckout(data: any): Observable<any> {
+    const token = this.jwtService.getCustomerToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    const body = (typeof data === 'string') ? { mandate_method: data } : data;
+    return this.apiService.post('subscriptions/renewal/checkout', body, headers);
+  }
+
+  verifySubscriptionPayment(data: any): Observable<any> {
+    const token = this.jwtService.getCustomerToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.apiService.post('subscriptions/verify', data, headers);
+  }
+
+  cancelSubscriptionPayment(paymentId: number | string, data: any = {}): Observable<any> {
+    const token = this.jwtService.getCustomerToken();
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.apiService.post(`subscriptions/payments/${paymentId}/cancel`, data, headers);
+  }
+
+  getSubscriptionPlans(): Observable<any> {
+    const token = this.jwtService.getCustomerToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.apiService.get('subscription-plans', headers);
   }
 
   getHistory(): Observable<any> {
