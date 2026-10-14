@@ -281,19 +281,19 @@
           </div>
 
           <!-- Desktop / Tablet Table View (md and up) -->
-          <div class="hidden md:block overflow-x-auto w-full max-w-full">
+          <div class="hidden md:block overflow-x-auto overflow-y-auto max-h-[390px] w-full max-w-full rounded-2xl border border-gray-100 history-scroll-container">
             <table class="w-full text-left text-xs text-gray-600 min-w-[640px]">
-              <thead class="bg-gray-50/80 text-gray-500 uppercase font-bold text-[10px] tracking-wider border-b border-gray-100">
+              <thead class="sticky top-0 z-10 bg-gray-50 text-gray-500 uppercase font-bold text-[10px] tracking-wider border-b border-gray-200/80 shadow-xs">
                 <tr>
-                  <th class="py-3 px-3.5">Transaction & Ref</th>
-                  <th class="py-3 px-3.5">Payment Date</th>
-                  <th class="py-3 px-3.5">Plans Included</th>
-                  <th class="py-3 px-3.5">Amount</th>
-                  <th class="py-3 px-3.5">Status</th>
-                  <th class="py-3 px-3.5 text-right">Action</th>
+                  <th class="py-3 px-3.5 bg-gray-50">Transaction & Ref</th>
+                  <th class="py-3 px-3.5 bg-gray-50">Payment Date</th>
+                  <th class="py-3 px-3.5 bg-gray-50">Plans Included</th>
+                  <th class="py-3 px-3.5 bg-gray-50">Amount</th>
+                  <th class="py-3 px-3.5 bg-gray-50">Status</th>
+                  <th class="py-3 px-3.5 text-right bg-gray-50">Action</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
+              <tbody class="divide-y divide-gray-100 bg-white">
                 <tr *ngFor="let item of subscriptionHistory" class="hover:bg-gray-50/60 transition-colors group">
                   <!-- Txn & Sub ID -->
                   <td class="py-3.5 px-3.5">
@@ -372,7 +372,7 @@
           </div>
 
           <!-- Mobile Card View (< md) -->
-          <div class="space-y-3 block md:hidden">
+          <div class="space-y-3 block md:hidden max-h-[420px] overflow-y-auto pr-1 history-scroll-container">
             <div *ngFor="let item of subscriptionHistory"
                  class="p-4 bg-gray-50/60 rounded-2xl border border-gray-100 space-y-3">
               <!-- Top Row: Sub # and Status -->
