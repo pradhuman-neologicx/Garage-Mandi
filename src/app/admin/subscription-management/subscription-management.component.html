@@ -280,7 +280,7 @@
     <div *ngIf="isPaymentModalOpen"
       class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 transition-opacity p-4">
       <div
-        class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
+        class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
         <!-- Header -->
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
           <h3 class="text-lg font-bold text-gray-800">
@@ -355,22 +355,23 @@
               <i class="fa-solid fa-bolt text-yellow-500 mr-2"></i> Current Plans
             </h4>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-              <div *ngFor="let item of selectedProvider.currentSubs" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-all relative">
+              <div *ngFor="let item of selectedProvider.currentSubs" class="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm hover:shadow-md transition-all relative">
                 <!-- Header -->
-                <div class="flex justify-between items-start mb-4 gap-3 border-b border-gray-50 pb-3">
-                  <h5 class="font-bold text-gray-800 text-base leading-snug">{{ item.planName }}</h5>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
-                          [ngClass]="item.isAutoRenewal ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
-                          class="text-xs px-2.5 py-1 rounded-full font-bold border inline-flex items-center gap-1 shadow-xs">
-                      <i class="fa-solid" [ngClass]="item.isAutoRenewal ? 'fa-arrows-rotate' : 'fa-ban'"></i>
-                      Auto Renew: {{ item.isAutoRenewal ? 'On' : 'Off' }}
-                    </span>
+                <div class="border-b border-gray-100 pb-3 mb-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
                     <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-100 text-red-700 border-red-200': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
-                          class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
+                          class="text-xs px-2.5 py-0.5 rounded-full font-bold capitalize border inline-flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="item.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
                       {{ item.status }}
                     </span>
+                    <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
+                          [ngClass]="item.isAutoRenewal ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                          class="text-xs px-2.5 py-0.5 rounded-full font-bold border inline-flex items-center gap-1.5">
+                      <i class="fa-solid" [ngClass]="item.isAutoRenewal ? 'fa-arrows-rotate text-[10px]' : 'fa-ban text-[10px]'"></i>
+                      Auto Renew: {{ item.isAutoRenewal ? 'On' : 'Off' }}
+                    </span>
                   </div>
+                  <h5 class="font-bold text-gray-900 text-base leading-snug">{{ item.planName }}</h5>
                 </div>
 
                 <!-- Dates Grid -->
@@ -432,22 +433,23 @@
               <i class="fa-solid fa-clock-rotate-left text-gray-400 mr-2"></i> Subscription History
             </h4>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-2">
-              <div *ngFor="let item of selectedProvider.history" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-all relative grayscale-[0.2] opacity-90">
+              <div *ngFor="let item of selectedProvider.history" class="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm hover:shadow-md transition-all relative grayscale-[0.2] opacity-90">
                 <!-- Header -->
-                <div class="flex justify-between items-start mb-4 gap-3 border-b border-gray-50 pb-3">
-                  <h5 class="font-bold text-gray-700 text-base leading-snug">{{ item.planName }}</h5>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
-                          [ngClass]="item.isAutoRenewal ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'"
-                          class="text-xs px-2.5 py-1 rounded-full font-bold border inline-flex items-center gap-1 shadow-xs">
-                      <i class="fa-solid" [ngClass]="item.isAutoRenewal ? 'fa-arrows-rotate' : 'fa-ban'"></i>
-                      Auto Renew: {{ item.isAutoRenewal ? 'On' : 'Off' }}
-                    </span>
+                <div class="border-b border-gray-100 pb-3 mb-4">
+                  <div class="flex items-center justify-between gap-2 mb-2">
                     <span [ngClass]="{'bg-green-100 text-green-700 border-green-200': item.status === 'active', 'bg-red-50 text-red-600 border-red-100': item.status === 'expired', 'bg-gray-100 text-gray-700 border-gray-200': item.status !== 'active' && item.status !== 'expired'}"
-                          class="text-xs px-2.5 py-1 rounded-full font-bold capitalize shrink-0 border">
+                          class="text-xs px-2.5 py-0.5 rounded-full font-bold capitalize border inline-flex items-center gap-1.5">
+                      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="item.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
                       {{ item.status }}
                     </span>
+                    <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
+                          [ngClass]="item.isAutoRenewal ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'"
+                          class="text-xs px-2.5 py-0.5 rounded-full font-bold border inline-flex items-center gap-1.5">
+                      <i class="fa-solid" [ngClass]="item.isAutoRenewal ? 'fa-arrows-rotate text-[10px]' : 'fa-ban text-[10px]'"></i>
+                      Auto Renew: {{ item.isAutoRenewal ? 'On' : 'Off' }}
+                    </span>
                   </div>
+                  <h5 class="font-bold text-gray-800 text-base leading-snug">{{ item.planName }}</h5>
                 </div>
 
                 <!-- Dates Grid -->
