@@ -38,7 +38,7 @@
         <!-- ======================================================== -->
         
         <!-- State A: Active with Auto-Renewal Enabled -->
-        <div *ngIf="currentSubscription && currentSubscription.status === 'Active' && currentSubscription.auto_renewal === 'Enabled'" 
+        <div *ngIf="hasActiveSubscription && isAnyAutoRenewalEnabled && !isAnyGracePeriod" 
              class="bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden">
           <div class="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
           <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
@@ -51,9 +51,12 @@
                 <span class="bg-white/20 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider backdrop-blur-sm shadow-sm shrink-0">
                   Active
                 </span>
+                <span *ngIf="activeSubscriptions.length > 1" class="bg-white/20 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full backdrop-blur-sm shadow-sm shrink-0">
+                  {{ activeSubscriptions.length }} Active Subscriptions
+                </span>
                 <span class="bg-emerald-950/30 px-2.5 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full backdrop-blur-sm shrink-0 flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
-                  Auto-Renewal: Enabled
+                  Auto-Renewal: Active
                 </span>
               </div>
               <p class="text-white/90 leading-relaxed text-xs sm:text-sm md:text-base">
@@ -64,7 +67,7 @@
         </div>
 
         <!-- State B: Active with Auto-Renewal Disabled (UC-06) -->
-        <div *ngIf="currentSubscription && currentSubscription.status === 'Active' && currentSubscription.auto_renewal === 'Disabled'" 
+        <div *ngIf="hasActiveSubscription && !isAnyAutoRenewalEnabled && !isAnyGracePeriod" 
              class="bg-gradient-to-r from-slate-700 via-indigo-900 to-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden border border-indigo-400/30">
           <div class="absolute top-0 right-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
           <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
@@ -79,14 +82,14 @@
                 </span>
               </div>
               <p class="text-white/90 leading-relaxed text-xs sm:text-sm">
-                Future automatic renewal is cancelled (BR-11). You retain 100% full access until <strong>{{ currentSubscription.current_period_end | date:'dd MMM yyyy' }}</strong> (BR-12). No future payment will be deducted.
+                Future automatic renewal is cancelled (BR-11). You retain 100% full access until current period ends (BR-12). No future payment will be deducted.
               </p>
             </div>
           </div>
         </div>
 
         <!-- State C: Grace Period (UC-08, BR-13) -->
-        <div *ngIf="currentSubscription && currentSubscription.status === 'Grace Period'" 
+        <div *ngIf="isAnyGracePeriod" 
              class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden">
           <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
             <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0 backdrop-blur-sm">
@@ -95,28 +98,28 @@
             <div class="flex-1 min-w-0">
               <div class="flex flex-wrap items-center gap-2 mb-1">
                 <h2 class="text-lg sm:text-2xl font-bold leading-tight">Grace Period Active</h2>
-                <span *ngIf="currentSubscription.grace_ends_at" class="bg-red-700 text-white px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shrink-0 animate-pulse">
-                  Pay by {{ currentSubscription.grace_ends_at | date:'dd MMM yyyy' }}
+                <span *ngIf="(graceSubscription || currentSubscription)?.grace_ends_at" class="bg-red-700 text-white px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shrink-0 animate-pulse">
+                  Pay by {{ (graceSubscription || currentSubscription)?.grace_ends_at | date:'dd MMM yyyy' }}
                 </span>
-                <span *ngIf="!currentSubscription.grace_ends_at" class="bg-red-700 text-white px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shrink-0 animate-pulse">
-                  Day {{ currentSubscription.grace_days_remaining || 2 }} of 3
+                <span *ngIf="!(graceSubscription || currentSubscription)?.grace_ends_at" class="bg-red-700 text-white px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full uppercase tracking-wider shrink-0 animate-pulse">
+                  Day {{ (graceSubscription || currentSubscription)?.grace_days_remaining || 2 }} of 3
                 </span>
               </div>
               <p class="text-white/95 leading-relaxed text-xs sm:text-sm mb-3">
-                {{ currentSubscription.renewal_message || 'Automatic renewal payment could not be completed. You retain full platform access during the grace period. Complete manual payment to restore active status.' }}
+                {{ (graceSubscription || currentSubscription)?.renewal_message || 'Automatic renewal payment could not be completed. You retain full platform access during the grace period. Complete manual payment to restore active status.' }}
               </p>
-              <button *ngIf="currentSubscription.actions?.can_pay_manually !== false" 
+              <button *ngIf="(graceSubscription || currentSubscription)?.actions?.can_pay_manually !== false" 
                       (click)="openGracePayModal()" 
-                      class="px-4 py-2 bg-white text-orange-600 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:bg-orange-50 transition-colors inline-flex items-center gap-2">
+                      class="px-4 py-2 bg-white text-orange-600 rounded-xl font-bold text-xs sm:text-sm shadow-md hover:bg-orange-50 transition-colors inline-flex items-center gap-2 cursor-pointer">
                 <i class="fa-solid fa-credit-card"></i>
-                <span>Complete Manual Payment (₹{{ (currentSubscription.grace_amount_due || currentSubscription.total_amount) | number:'1.2-2' }})</span>
+                <span>Complete Manual Payment (₹{{ ((graceSubscription || currentSubscription)?.grace_amount_due || (graceSubscription || currentSubscription)?.total_amount) | number:'1.2-2' }})</span>
               </button>
             </div>
           </div>
         </div>
 
         <!-- State D: Subscription Expired (UC-05 Extension 3c, BR-17) -->
-        <div *ngIf="currentSubscription && currentSubscription.status === 'Expired'" 
+        <div *ngIf="isExpired" 
              class="bg-gradient-to-r from-rose-600 to-red-700 rounded-2xl sm:rounded-3xl p-5 sm:p-7 text-white shadow-lg relative overflow-hidden">
           <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
             <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
@@ -142,7 +145,7 @@
         </div>
 
         <!-- State E: Inactive Subscription Banner (No subscription yet) -->
-        <div *ngIf="!currentSubscription" 
+        <div *ngIf="!hasActiveSubscription && !isExpired" 
              class="bg-gradient-to-r from-orange-400 to-rose-500 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
           <div class="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3"></div>
           <div class="flex items-start sm:items-center gap-3 sm:gap-4 relative z-10">
@@ -162,102 +165,108 @@
         </div>
 
         <!-- ======================================================== -->
-        <!-- 2. CURRENT ACTIVE SUBSCRIPTION DETAILS CARD (UC-05)     -->
+        <!-- 2. CURRENT ACTIVE SUBSCRIPTION DETAILS CARDS (UC-05)    -->
         <!-- ======================================================== -->
-        <div *ngIf="currentSubscription && (currentSubscription.status === 'Active' || currentSubscription.status === 'Grace Period')" 
-             class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-gray-100 space-y-6">
-          
-          <!-- Card Header with Subscription ID -->
-          <div class="flex flex-wrap items-center justify-between pb-5 border-b border-gray-100 gap-3">
-            <div>
-              <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Current Subscription</div>
-              <div class="flex items-center gap-2 mt-0.5">
-                <span class="text-xl sm:text-2xl font-extrabold text-[#131e3d]">{{ currentSubscription.id }}</span>
-                <span *ngIf="currentSubscription.plans?.length > 1" 
-                      class="bg-purple-50 text-purple-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-purple-200">
-                  Combined 2-Plan Package
-                </span>
-              </div>
-            </div>
-
-            <!-- Auto-Renewal Status pill & controls (UC-06) -->
-            <div class="flex items-center gap-3">
-              <div *ngIf="currentSubscription.auto_renewal === 'Enabled'" class="flex items-center gap-2">
-                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
-                  <i class="fa-solid fa-arrows-rotate text-[11px] text-emerald-500"></i>
-                  Auto-Renewal Active
-                </span>
-                <button (click)="openCancelRenewalModal()" 
-                        class="text-xs text-gray-500 hover:text-rose-600 font-semibold px-3 py-1.5 rounded-xl hover:bg-rose-50 transition-colors border border-gray-200 hover:border-rose-200 cursor-pointer">
-                  Cancel Auto-Renewal
-                </button>
-              </div>
-
-              <div *ngIf="currentSubscription.auto_renewal === 'Disabled'" class="flex items-center gap-2">
-                <span class="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5">
-                  <i class="fa-solid fa-ban text-[11px] text-amber-600"></i>
-                  Auto-Renewal Disabled
-                </span>
-                <!-- <button (click)="enableAutoRenewal()" 
-                        class="text-xs text-[#131e3d] hover:text-[#db3333] font-bold px-3 py-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-gray-200">
-                  Re-Enable
-                </button> -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Entitled Plans List under this Subscription (BR-05) -->
-          <div>
-            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Subscribed Entitlements</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              <div *ngFor="let p of currentSubscription.plans" 
-                   class="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-red-100 text-[#db3333] flex items-center justify-center shrink-0">
-                  <i class="fa-solid" [ngClass]="p.icon || 'fa-shield-halved'"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                    {{ p.category || currentSubscription.vehicle_category || 'Service Plan' }}
+        <ng-container *ngIf="hasActiveSubscription">
+          <div *ngFor="let sub of (activeSubscriptions.length > 0 ? activeSubscriptions : (currentSubscription ? [currentSubscription] : [])); let i = index" 
+               class="bg-white rounded-3xl p-6 sm:p-7 shadow-sm border border-gray-100 space-y-6">
+            
+            <!-- Card Header with Subscription ID -->
+            <div class="flex flex-wrap items-center justify-between pb-5 border-b border-gray-100 gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    Current Subscription {{ activeSubscriptions.length > 1 ? '#' + (i + 1) : '' }}
                   </span>
-                  <div class="font-bold text-sm text-gray-900 leading-snug truncate">
-                    {{ p.name || p.title }}
+                  <span *ngIf="sub.vehicle_category" class="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                    {{ sub.vehicle_category }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xl sm:text-2xl font-extrabold text-[#131e3d]">{{ sub.subscription_number || sub.id }}</span>
+                  <span *ngIf="sub.plans?.length > 1" 
+                        class="bg-purple-50 text-purple-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-purple-200">
+                    Combined 2-Plan Package
+                  </span>
+                </div>
+              </div>
+
+              <!-- Auto-Renewal Status pill & controls (UC-06) -->
+              <div class="flex items-center gap-3">
+                <div *ngIf="sub.auto_renewal === 'Enabled'" class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-rotate text-[11px] text-emerald-500"></i>
+                    Auto-Renewal Active
+                  </span>
+                  <button *ngIf="sub.actions?.can_cancel_auto_renew !== false" 
+                          (click)="openCancelRenewalModal(sub)" 
+                          class="text-xs text-gray-500 hover:text-rose-600 font-semibold px-3 py-1.5 rounded-xl hover:bg-rose-50 transition-colors border border-gray-200 hover:border-rose-200 cursor-pointer">
+                    Cancel Auto-Renewal
+                  </button>
+                </div>
+
+                <div *ngIf="sub.auto_renewal === 'Disabled'" class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-ban text-[11px] text-amber-600"></i>
+                    Auto-Renewal Disabled
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Entitled Plans List under this Subscription (BR-05) -->
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Subscribed Entitlements</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                <div *ngFor="let p of sub.plans" 
+                     class="p-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-start gap-3.5">
+                  <div class="w-10 h-10 rounded-xl bg-red-100 text-[#db3333] flex items-center justify-center shrink-0">
+                    <i class="fa-solid" [ngClass]="p.icon || 'fa-shield-halved'"></i>
                   </div>
-                  <div class="text-[#db3333] font-bold text-xs mt-1">
-                    ₹{{ (p.amount || p.price || 0) | number:'1.2-2' }} <span class="text-gray-400 font-normal">/ month</span>
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      {{ p.category || sub.vehicle_category || 'Service Plan' }}
+                    </span>
+                    <div class="font-bold text-sm text-gray-900 leading-snug truncate" [title]="p.name || p.title">
+                      {{ p.name || p.title }}
+                    </div>
+                    <div class="text-[#db3333] font-bold text-xs mt-1">
+                      ₹{{ (p.amount || p.price || 0) | number:'1.2-2' }} <span class="text-gray-400 font-normal">/ month</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Billing & Renewal Information Grid (UC-05) -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-blue-50/40 border border-blue-100 text-xs">
-            <div>
-              <div class="text-gray-500 font-medium">Started On</div>
-              <div class="font-bold text-gray-900 mt-0.5">
-                {{ currentSubscription.subscription_starts_at | date:'dd MMM yyyy' }}
+            <!-- Billing & Renewal Information Grid (UC-05) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-blue-50/40 border border-blue-100 text-xs">
+              <div>
+                <div class="text-gray-500 font-medium">Started On</div>
+                <div class="font-bold text-gray-900 mt-0.5">
+                  {{ sub.subscription_starts_at | date:'dd MMM yyyy' }}
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="text-gray-500 font-medium">Current Period Ends</div>
-              <div class="font-bold text-gray-900 mt-0.5">
-                {{ currentSubscription.current_period_end | date:'dd MMM yyyy' }}
+              <div>
+                <div class="text-gray-500 font-medium">Current Period Ends</div>
+                <div class="font-bold text-gray-900 mt-0.5">
+                  {{ sub.current_period_end | date:'dd MMM yyyy' }}
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="text-gray-500 font-medium">Next Renewal Date</div>
-              <div class="font-bold text-gray-900 mt-0.5">
-                {{ currentSubscription.next_renewal_date | date:'dd MMM yyyy' }}
+              <div>
+                <div class="text-gray-500 font-medium">Next Renewal Date</div>
+                <div class="font-bold text-gray-900 mt-0.5">
+                  {{ sub.next_renewal_date | date:'dd MMM yyyy' }}
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="text-gray-500 font-medium">Paid (incl. GST)</div>
-              <div class="font-bold text-[#db3333] text-sm mt-0.5">
-                ₹{{ currentSubscription.total_amount | number:'1.2-2' }}
+              <div>
+                <div class="text-gray-500 font-medium">Paid (incl. GST)</div>
+                <div class="font-bold text-[#db3333] text-sm mt-0.5">
+                  ₹{{ sub.total_amount | number:'1.2-2' }}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ng-container>
 
         <!-- ======================================================== -->
         <!-- 3. SUBSCRIPTION & RENEWAL HISTORY (UC-03 / UC-05 Step 4) -->
@@ -448,10 +457,18 @@
         <div *ngIf="!isLoading && plans.length > 0">
           <div class="mb-4">
             <h3 class="text-xl sm:text-2xl font-bold text-[#131e3d] mb-1">
-              {{ currentSubscription && (currentSubscription.status === 'Active' || currentSubscription.status === 'Grace Period') ? 'Explore Other Plan Packages' : 'Choose Your Subscription Plan' }}
+              {{ hasActiveSubscription ? 'Subscription Plans & Entitlements' : 'Choose Your Subscription Plan' }}
             </h3>
             <p class="text-xs sm:text-sm text-gray-500">
-              Select 1 or up to 2 plans to activate your subscription entitlements.
+              <span *ngIf="!canPurchaseMorePlans">
+                You have reached the maximum allowed limit of 2 active plans.
+              </span>
+              <span *ngIf="canPurchaseMorePlans && totalActivePlansCount === 1">
+                You have 1 active plan. You can select 1 additional plan in the same category.
+              </span>
+              <span *ngIf="totalActivePlansCount === 0">
+                Select 1 or up to 2 plans to activate your subscription entitlements.
+              </span>
             </p>
           </div>
 
@@ -459,21 +476,32 @@
           <div class="space-y-3.5">
             <div *ngFor="let plan of plans" 
                  (click)="togglePlan(plan)"
-                 class="relative p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer group bg-white hover:shadow-md flex flex-col gap-3"
-                 [ngClass]="isSelected(plan.id) ? 'border-[#db3333] shadow-md bg-red-50/10' : 'border-gray-200 hover:border-gray-300'">
+                 class="relative p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 group bg-white flex flex-col gap-3"
+                 [ngClass]="{
+                   'border-emerald-300 bg-emerald-50/15 cursor-default': isPlanActive(plan.id),
+                   'border-[#db3333] shadow-md bg-red-50/10 cursor-pointer': isSelected(plan.id) && !isPlanActive(plan.id),
+                   'border-gray-200 hover:border-gray-300 hover:shadow-md cursor-pointer': !isSelected(plan.id) && !isPlanActive(plan.id) && canPurchaseMorePlans,
+                   'border-gray-200 opacity-70 cursor-not-allowed': !isSelected(plan.id) && !isPlanActive(plan.id) && !canPurchaseMorePlans
+                 }">
               
               <div class="flex items-center justify-between gap-3 sm:gap-4">
                 <!-- Icon + Info -->
                 <div class="flex items-center gap-3.5 sm:gap-4 flex-1 min-w-0">
-                  <div [ngClass]="isSelected(plan.id) ? 'bg-[#db3333] text-white shadow-md' : 'bg-red-50 text-[#db3333]'" 
+                  <div [ngClass]="isPlanActive(plan.id) ? 'bg-emerald-100 text-emerald-700' : (isSelected(plan.id) ? 'bg-[#db3333] text-white shadow-md' : 'bg-red-50 text-[#db3333]')" 
                        class="w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0">
                     <i class="fa-solid text-lg sm:text-2xl" [ngClass]="plan.icon || 'fa-motorcycle'"></i>
                   </div>
                   
                   <div class="flex-1 min-w-0">
-                    <span class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider block mb-0.5 truncate">
-                      {{ plan.category }}
-                    </span>
+                    <div class="flex items-center gap-2 mb-0.5">
+                      <span class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider truncate">
+                        {{ plan.category }}
+                      </span>
+                      <span *ngIf="isPlanActive(plan.id)" 
+                            class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                        <i class="fa-solid fa-check text-[9px]"></i> Subscribed & Active
+                      </span>
+                    </div>
                     <h4 class="text-sm sm:text-base md:text-lg font-bold text-gray-900 transition-colors leading-snug break-words">
                       {{ plan.name }}
                     </h4>
@@ -492,8 +520,8 @@
 
                 <!-- Checkbox Indicator -->
                 <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300"
-                     [ngClass]="isSelected(plan.id) ? 'bg-[#db3333] border-[#db3333]' : 'border-gray-300 bg-gray-50'">
-                  <i class="fa-solid fa-check text-white text-xs sm:text-sm" [class.opacity-100]="isSelected(plan.id)" [class.opacity-0]="!isSelected(plan.id)"></i>
+                     [ngClass]="isPlanActive(plan.id) ? 'bg-emerald-500 border-emerald-500' : (isSelected(plan.id) ? 'bg-[#db3333] border-[#db3333]' : 'border-gray-300 bg-gray-50')">
+                  <i class="fa-solid fa-check text-white text-xs sm:text-sm" [class.opacity-100]="isPlanActive(plan.id) || isSelected(plan.id)" [class.opacity-0]="!isPlanActive(plan.id) && !isSelected(plan.id)"></i>
                 </div>
               </div>
 
@@ -563,9 +591,10 @@
 
           <button (click)="openModal()" 
                   [disabled]="selectedPlans.size === 0"
-                  [ngClass]="selectedPlans.size === 0 ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed' : 'bg-[#db3333] hover:bg-[#c22b2b] text-white shadow-lg hover:shadow-red-500/30 transform hover:-translate-y-0.5'"
-                  class="w-full py-3.5 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
-            <span *ngIf="selectedPlans.size === 0">Select Plan(s) to Continue</span>
+                  [ngClass]="selectedPlans.size === 0 ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed' : 'bg-[#db3333] hover:bg-[#c22b2b] text-white shadow-lg hover:shadow-red-500/30 transform hover:-translate-y-0.5 cursor-pointer'"
+                  class="w-full py-3.5 sm:py-4 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 flex items-center justify-center gap-2">
+            <span *ngIf="selectedPlans.size === 0 && !canPurchaseMorePlans">All Entitlements Active (2/2)</span>
+            <span *ngIf="selectedPlans.size === 0 && canPurchaseMorePlans">Select Plan(s) to Continue</span>
             <span *ngIf="selectedPlans.size > 0">Proceed to Subscribe</span>
             <i *ngIf="selectedPlans.size > 0" class="fa-solid fa-arrow-right"></i>
           </button>
@@ -720,8 +749,11 @@
     </div>
     
     <h3 class="text-xl font-bold text-center text-[#131e3d] mb-1">Cancel Auto-Renewal?</h3>
-    <p class="text-center text-gray-500 text-xs sm:text-sm mb-5">
-      Please review the consequences of cancelling automatic renewal:
+    <p class="text-center text-xs font-semibold text-gray-500 mb-4 bg-gray-50 py-1.5 px-3 rounded-xl border border-gray-100">
+      Subscription: <strong class="text-[#131e3d]">{{ (selectedSubToCancel || currentSubscription)?.subscription_number || (selectedSubToCancel || currentSubscription)?.id }}</strong>
+    </p>
+    <p class="text-center text-gray-500 text-xs sm:text-sm mb-4">
+      Please review the consequences of cancelling automatic renewal for this subscription:
     </p>
 
     <!-- 3 Consequences as per PDF (Page 15, UC-06) -->
@@ -732,7 +764,7 @@
       </div>
       <div class="flex items-start gap-2.5">
         <i class="fa-solid fa-check text-amber-600 mt-0.5"></i>
-        <span>Current access continues until <strong>{{ currentSubscription?.current_period_end | date:'dd MMM yyyy' }}</strong>.</span>
+        <span>Current access continues until <strong>{{ (selectedSubToCancel || currentSubscription)?.current_period_end | date:'dd MMM yyyy' }}</strong>.</span>
       </div>
       <div class="flex items-start gap-2.5">
         <i class="fa-solid fa-check text-amber-600 mt-0.5"></i>
@@ -1093,6 +1125,40 @@
               class="w-full py-3 bg-[#131e3d] hover:bg-[#0c1429] text-white font-bold rounded-xl text-sm transition-colors shadow-md cursor-pointer">
         Close Details
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================== -->
+<!-- FULLSCREEN PAYMENT VERIFICATION OVERLAY LOADER           -->
+<!-- ======================================================== -->
+<div *ngIf="isVerifyingPayment" 
+     class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#131e3d]/85 backdrop-blur-md animate-fade-in">
+  <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center relative overflow-hidden border border-gray-100">
+    <!-- Ambient glowing pulses -->
+    <div class="absolute -top-12 -right-12 w-32 h-32 bg-emerald-100 rounded-full blur-2xl opacity-60"></div>
+    <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-red-100 rounded-full blur-2xl opacity-60"></div>
+
+    <div class="relative z-10 flex flex-col items-center">
+      <!-- Animated Dual Ring Spinner & Icon -->
+      <div class="relative w-20 h-20 mb-5 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full border-4 border-emerald-100 border-t-[#db3333] border-r-[#db3333] animate-spin"></div>
+        <div class="w-12 h-12 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center shadow-inner">
+          <i class="fa-solid fa-shield-halved text-2xl animate-pulse"></i>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-extrabold text-[#131e3d] mb-1.5">
+        Verifying Payment...
+      </h3>
+      <p class="text-xs sm:text-sm text-gray-500 mb-4 max-w-xs leading-relaxed">
+        Please wait while we securely confirm your payment with the bank and activate your subscription.
+      </p>
+
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-semibold text-amber-800">
+        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-xs"></i>
+        <span>Do not close or refresh this page</span>
+      </div>
     </div>
   </div>
 </div>

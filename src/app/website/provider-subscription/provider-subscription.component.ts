@@ -18,6 +18,8 @@ import { FooterComponent } from '../components/footer/footer.component';
 export class ProviderSubscriptionComponent implements OnInit {
   // Current active subscription (or null if none)
   currentSubscription: any = null;
+  activeSubscriptions: any[] = [];
+  selectedSubToCancel: any = null;
   mySubscriptions: any[] = [];
   subscriptionHistory: any[] = [];
 
@@ -28,6 +30,7 @@ export class ProviderSubscriptionComponent implements OnInit {
   // Loading & submission flags
   isLoading = true;
   isSubmitting = false;
+  isVerifyingPayment = false;
 
   // Modals
   showExecutiveModal = false;
@@ -75,9 +78,23 @@ export class ProviderSubscriptionComponent implements OnInit {
       next: (res: any) => {
         if (res && (res.status === 200 || res.status === true) && res.data) {
           const subObj = Array.isArray(res.data) ? res.data[0] : res.data;
-          if (subObj && (subObj.subscription_id || subObj.subscription_number || subObj.id)) {
-            this.currentSubscription = this.normalizeSubscription(subObj);
-            this.mySubscriptions = [this.currentSubscription];
+          if (subObj && (subObj.subscription_id || subObj.subscription_number || subObj.id || (subObj.active_subscriptions && subObj.active_subscriptions.length > 0))) {
+            if (subObj.active_subscriptions && Array.isArray(subObj.active_subscriptions) && subObj.active_subscriptions.length > 0) {
+              this.activeSubscriptions = subObj.active_subscriptions.map((s: any) => {
+                const actions = s.actions || (s.subscription_id === subObj.subscription_id ? subObj.actions : null) || {
+                  can_cancel_auto_renew: s.auto_renew !== false && s.mandate_status !== 'cancelled',
+                  can_pay_manually: false,
+                  can_update_payment_method: false,
+                  can_purchase: subObj.actions?.can_purchase ?? false
+                };
+                return this.normalizeSubscription({ ...s, actions });
+              });
+              this.currentSubscription = this.activeSubscriptions[0];
+            } else {
+              this.currentSubscription = this.normalizeSubscription(subObj);
+              this.activeSubscriptions = [this.currentSubscription];
+            }
+            this.mySubscriptions = this.activeSubscriptions;
 
             // Populate history directly from API
             if (subObj.history && Array.isArray(subObj.history)) {
@@ -144,6 +161,7 @@ export class ProviderSubscriptionComponent implements OnInit {
       error: (err) => {
         console.warn('Subscriptions API returned error or empty:', err);
         this.currentSubscription = null;
+        this.activeSubscriptions = [];
         this.mySubscriptions = [];
         this.subscriptionHistory = [];
         this.loadAvailablePlans();
@@ -215,6 +233,8 @@ export class ProviderSubscriptionComponent implements OnInit {
     let autoRenewal = 'Enabled';
     if (sub.auto_renew !== undefined) {
       autoRenewal = sub.auto_renew ? 'Enabled' : 'Disabled';
+    } else if (sub.mandate_status) {
+      autoRenewal = (sub.mandate_status === 'confirmed' || sub.mandate_status === 'active') ? 'Enabled' : 'Disabled';
     } else if (sub.auto_renewal !== undefined) {
       autoRenewal = sub.auto_renewal;
     }
@@ -268,6 +288,10 @@ export class ProviderSubscriptionComponent implements OnInit {
       ? Number(sub.grace.amount_due.total_amount)
       : totalAmount;
 
+    const canCancel = sub.actions?.can_cancel_auto_renew !== undefined
+      ? sub.actions.can_cancel_auto_renew
+      : (autoRenewal === 'Enabled' && sub.mandate_status !== 'cancelled');
+
     return {
       id: sub.subscription_number || (sub.subscription_id ? String(sub.subscription_id) : (sub.id || '')),
       subscription_id: sub.subscription_id,
@@ -292,9 +316,80 @@ export class ProviderSubscriptionComponent implements OnInit {
       total_amount: totalAmount,
       grace_amount_due: graceAmountDue,
       grace_days_remaining: graceDaysRemaining,
-      actions: sub.actions || {},
+      actions: {
+        can_cancel_auto_renew: canCancel,
+        can_pay_manually: sub.actions?.can_pay_manually ?? false,
+        can_update_payment_method: sub.actions?.can_update_payment_method ?? false,
+        can_purchase: sub.actions?.can_purchase ?? true,
+        ...(sub.actions || {})
+      },
       is_first_purchase: false
     };
+  }
+
+  get hasActiveSubscription(): boolean {
+    return this.activeSubscriptions.some(s => s.status === 'Active' || s.status === 'Grace Period') ||
+           (!!this.currentSubscription && (this.currentSubscription.status === 'Active' || this.currentSubscription.status === 'Grace Period'));
+  }
+
+  get isAnyGracePeriod(): boolean {
+    return this.activeSubscriptions.some(s => s.status === 'Grace Period') ||
+           (!!this.currentSubscription && this.currentSubscription.status === 'Grace Period');
+  }
+
+  get graceSubscription(): any {
+    return this.activeSubscriptions.find(s => s.status === 'Grace Period') || 
+           (this.currentSubscription?.status === 'Grace Period' ? this.currentSubscription : null);
+  }
+
+  get isAnyAutoRenewalEnabled(): boolean {
+    return this.activeSubscriptions.some(s => (s.status === 'Active' || s.status === 'Grace Period') && s.auto_renewal === 'Enabled') ||
+           (!!this.currentSubscription && (this.currentSubscription.status === 'Active' || this.currentSubscription.status === 'Grace Period') && this.currentSubscription.auto_renewal === 'Enabled');
+  }
+
+  get isExpired(): boolean {
+    return !this.hasActiveSubscription && (
+      this.activeSubscriptions.some(s => s.status === 'Expired') ||
+      (!!this.currentSubscription && this.currentSubscription.status === 'Expired')
+    );
+  }
+
+  get activePlanIds(): Set<number> {
+    const ids = new Set<number>();
+    for (const sub of this.activeSubscriptions) {
+      if (sub.status === 'Active' || sub.status === 'Grace Period') {
+        if (Array.isArray(sub.plans)) {
+          for (const p of sub.plans) {
+            const pid = Number(p.plan_id || p.id);
+            if (pid) ids.add(pid);
+          }
+        }
+      }
+    }
+    if (ids.size === 0 && this.currentSubscription && (this.currentSubscription.status === 'Active' || this.currentSubscription.status === 'Grace Period')) {
+      if (Array.isArray(this.currentSubscription.plans)) {
+        for (const p of this.currentSubscription.plans) {
+          const pid = Number(p.plan_id || p.id);
+          if (pid) ids.add(pid);
+        }
+      }
+    }
+    return ids;
+  }
+
+  isPlanActive(planId: any): boolean {
+    return this.activePlanIds.has(Number(planId));
+  }
+
+  get totalActivePlansCount(): number {
+    return this.activePlanIds.size;
+  }
+
+  get canPurchaseMorePlans(): boolean {
+    if (this.currentSubscription?.actions?.can_purchase === false) {
+      return false;
+    }
+    return this.totalActivePlansCount < 2;
   }
 
   get availableCategories(): string[] {
@@ -328,13 +423,49 @@ export class ProviderSubscriptionComponent implements OnInit {
   togglePlan(plan: any) {
     const planId = Number(plan.id);
 
+    // If plan is already subscribed and active
+    if (this.isPlanActive(planId)) {
+      this.notificationService.show('You already have an active subscription for this plan.', 'info');
+      return;
+    }
+
+    // If maximum active plans reached overall
+    if (this.totalActivePlansCount >= 2 && !this.selectedPlans.has(planId)) {
+      this.notificationService.show('You already have the maximum of 2 active plans.', 'info');
+      return;
+    }
+
+    if (this.currentSubscription?.actions?.can_purchase === false && !this.selectedPlans.has(planId)) {
+      this.notificationService.show('You already have the maximum active subscriptions allowed.', 'info');
+      return;
+    }
+
     // If already selected, deselect it
     if (this.selectedPlans.has(planId)) {
       this.selectedPlans.delete(planId);
       return;
     }
 
-    // Check if another plan is already selected
+    // Check category against existing active subscription
+    const existingActiveCategory = this.activeSubscriptions[0]?.vehicle_category || this.currentSubscription?.vehicle_category;
+    if (existingActiveCategory && plan.category && existingActiveCategory.toLowerCase() !== plan.category.toLowerCase()) {
+      this.notificationService.show(
+        `Cross-category combinations are not permitted. Your active plan is in ${existingActiveCategory} (BR-07).`,
+        'error'
+      );
+      return;
+    }
+
+    // Check max selected plans limit (active plans count + selected plans size cannot exceed 2)
+    if (this.totalActivePlansCount + this.selectedPlans.size >= 2) {
+      this.notificationService.show(
+        'You can select a maximum of 2 plans in total (BR-04).',
+        'error'
+      );
+      return;
+    }
+
+    // Check if another plan is already selected in current selection
     if (this.selectedPlans.size > 0) {
       const selectedPlanObjects = this.plans.filter(p => this.selectedPlans.has(p.id));
       const existingCategory = selectedPlanObjects[0]?.category;
@@ -346,15 +477,6 @@ export class ProviderSubscriptionComponent implements OnInit {
         this.notificationService.show(
           `Switched to ${plan.category} plans. Cross-category combinations are not permitted (BR-07).`,
           'info'
-        );
-        return;
-      }
-
-      // BR-04: Maximum 2 plans within the same category
-      if (this.selectedPlans.size >= 2) {
-        this.notificationService.show(
-          'You can select a maximum of 2 plans within the same category (BR-04).',
-          'error'
         );
         return;
       }
@@ -427,6 +549,10 @@ export class ProviderSubscriptionComponent implements OnInit {
             ...rzpData
           })
             .then((rzpSuccess: RazorpaySuccessResponse) => {
+              this.closeModal();
+              this.isVerifyingPayment = true;
+              this.isSubmitting = true;
+
               const verifyPayload = {
                 payment_id: paymentId,
                 razorpay_payment_id: rzpSuccess.razorpay_payment_id,
@@ -436,14 +562,15 @@ export class ProviderSubscriptionComponent implements OnInit {
 
               this.customerService.verifySubscriptionPayment(verifyPayload).subscribe({
                 next: (verifyRes: any) => {
+                  this.isVerifyingPayment = false;
                   this.isSubmitting = false;
-                  this.closeModal();
                   this.selectedPlans.clear();
                   const msg = verifyRes?.message || 'Subscription activated successfully!';
                   this.notificationService.show(msg, 'success');
                   this.fetchData();
                 },
                 error: (verifyErr: any) => {
+                  this.isVerifyingPayment = false;
                   this.isSubmitting = false;
                   console.error('Payment verification failed:', verifyErr);
                   const errMsg = verifyErr?.message || verifyErr?.error?.message || 'Payment verification failed.';
@@ -452,6 +579,7 @@ export class ProviderSubscriptionComponent implements OnInit {
               });
             })
             .catch((rzpErr: any) => {
+              this.isVerifyingPayment = false;
               this.isSubmitting = false;
               if (paymentId) {
                 this.customerService.cancelSubscriptionPayment(paymentId).subscribe({
@@ -497,26 +625,29 @@ export class ProviderSubscriptionComponent implements OnInit {
   }
 
   // --- Auto-Renewal Cancellation Flow (UC-06) ---
-  openCancelRenewalModal() {
+  openCancelRenewalModal(sub?: any) {
+    this.selectedSubToCancel = sub || this.currentSubscription;
     this.showCancelRenewalModal = true;
     document.body.style.overflow = 'hidden';
   }
 
   closeCancelRenewalModal() {
     this.showCancelRenewalModal = false;
+    this.selectedSubToCancel = null;
     document.body.style.overflow = 'auto';
   }
 
   confirmCancelAutoRenewal() {
-    if (!this.currentSubscription) return;
+    const targetSub = this.selectedSubToCancel || this.currentSubscription;
+    if (!targetSub) return;
 
     this.isSubmitting = true;
     const payload: any = {};
-    if (this.currentSubscription.subscription_id) {
-      payload.subscription_id = this.currentSubscription.subscription_id;
+    if (targetSub.subscription_id) {
+      payload.subscription_id = targetSub.subscription_id;
     }
-    if (this.currentSubscription.subscription_number) {
-      payload.subscription_number = this.currentSubscription.subscription_number;
+    if (targetSub.subscription_number) {
+      payload.subscription_number = targetSub.subscription_number;
     }
 
     this.customerService.cancelAutoRenewal(payload).subscribe({
@@ -524,9 +655,9 @@ export class ProviderSubscriptionComponent implements OnInit {
         this.isSubmitting = false;
         this.closeCancelRenewalModal();
 
-        this.currentSubscription.auto_renewal = 'Disabled';
-        if (this.currentSubscription.actions) {
-          this.currentSubscription.actions.can_cancel_auto_renew = false;
+        targetSub.auto_renewal = 'Disabled';
+        if (targetSub.actions) {
+          targetSub.actions.can_cancel_auto_renew = false;
         }
 
         // Refresh actual data from API
@@ -576,6 +707,10 @@ export class ProviderSubscriptionComponent implements OnInit {
             ...rzpData
           })
             .then((rzpSuccess: RazorpaySuccessResponse) => {
+              this.closeGracePayModal();
+              this.isVerifyingPayment = true;
+              this.isSubmitting = true;
+
               // Payment completed in Razorpay popup! Verify signature with backend
               const verifyPayload = {
                 payment_id: paymentId,
@@ -586,13 +721,14 @@ export class ProviderSubscriptionComponent implements OnInit {
 
               this.customerService.verifySubscriptionPayment(verifyPayload).subscribe({
                 next: (verifyRes: any) => {
+                  this.isVerifyingPayment = false;
                   this.isSubmitting = false;
-                  this.closeGracePayModal();
                   const msg = verifyRes?.message || 'Renewal payment verified and subscription activated successfully!';
                   this.notificationService.show(msg, 'success');
                   this.fetchData();
                 },
                 error: (verifyErr: any) => {
+                  this.isVerifyingPayment = false;
                   this.isSubmitting = false;
                   console.error('Payment verification failed:', verifyErr);
                   const errMsg = verifyErr?.message || verifyErr?.error?.message || 'Payment verification failed. Please contact support with payment ID: ' + rzpSuccess.razorpay_payment_id;
@@ -601,6 +737,7 @@ export class ProviderSubscriptionComponent implements OnInit {
               });
             })
             .catch((rzpErr: any) => {
+              this.isVerifyingPayment = false;
               this.isSubmitting = false;
               // Notify backend that this payment was cancelled/dismissed
               if (paymentId) {
