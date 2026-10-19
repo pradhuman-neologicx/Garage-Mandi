@@ -272,6 +272,11 @@ export class SubscriptionManagementComponent implements OnInit {
       return;
     }
 
+    if (Number(this.editPlanData.price) < 1) {
+      this.notificationService.show('The amount must be at least 1.', 'error');
+      return;
+    }
+
     const payload = {
       name: this.editPlanData.name,
       description: this.editPlanData.description,
@@ -327,11 +332,11 @@ export class SubscriptionManagementComponent implements OnInit {
                 amount: p.subscription_amount || p.plan?.amount || 0,
                 gstAmount: p.gst_amount || 0,
                 totalAmount: p.total_amount || 0,
-                paymentStatus: p.payment_status || 'N/A',
-                paymentMethod: p.payment_method || 'N/A',
-                paymentDate: p.payment_date ? this.formatDate(p.payment_date) : 'N/A',
-                activity: p.activity || 'N/A',
-                transactionId: p.transaction_id || 'N/A',
+                paymentStatus: p.payment_status || data.payment_status || 'N/A',
+                paymentMethod: p.payment_method || data.payment_method || 'N/A',
+                paymentDate: p.payment_date ? this.formatDate(p.payment_date) : (data.payment_date ? this.formatDate(data.payment_date) : 'N/A'),
+                activity: p.activity || data.activity || 'N/A',
+                transactionId: p.transaction_id || data.transaction_id || 'N/A',
                 autoRenewal: autoRenVal,
                 isAutoRenewal: this.isAutoRenewActive(autoRenVal),
                 startDate: this.formatDate(p.current_period_start || p.subscription_starts_at),
@@ -373,8 +378,50 @@ export class SubscriptionManagementComponent implements OnInit {
     }
   }
 
+  copiedTxnId: string | null = null;
+
+  copyToClipboard(text: string) {
+    if (!text || text === 'N/A') return;
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.copiedTxnId = text;
+        this.notificationService.show('Transaction ID copied to clipboard', 'success');
+        setTimeout(() => {
+          if (this.copiedTxnId === text) {
+            this.copiedTxnId = null;
+          }
+        }, 2000);
+      }).catch(() => {
+        this.fallbackCopy(text);
+      });
+    } else {
+      this.fallbackCopy(text);
+    }
+  }
+
+  private fallbackCopy(text: string) {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      this.copiedTxnId = text;
+      this.notificationService.show('Transaction ID copied to clipboard', 'success');
+      setTimeout(() => {
+        if (this.copiedTxnId === text) {
+          this.copiedTxnId = null;
+        }
+      }, 2000);
+    } catch (e) {
+      this.notificationService.show('Failed to copy', 'error');
+    }
+  }
+
   closePaymentModal() {
     this.isPaymentModalOpen = false;
     this.selectedProvider = null;
+    this.copiedTxnId = null;
   }
 }

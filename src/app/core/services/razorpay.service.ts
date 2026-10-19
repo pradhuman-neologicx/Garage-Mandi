@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 
 export interface RazorpayPaymentOptions {
   key: string;
-  order_id: string;
-  amount: number;
+  order_id?: string;
+  subscription_id?: string;
+  amount?: number;
   currency?: string;
   name?: string;
   description?: string;
@@ -24,7 +25,8 @@ export interface RazorpayPaymentOptions {
 
 export interface RazorpaySuccessResponse {
   razorpay_payment_id: string;
-  razorpay_order_id: string;
+  razorpay_order_id?: string;
+  razorpay_subscription_id?: string;
   razorpay_signature: string;
 }
 
@@ -94,11 +96,10 @@ export class RazorpayService {
         const rzpOptions: any = {
           ...options,
           key: options.key,
-          amount: Number(options.amount),
+          // amount: Number(options.amount),
           currency: options.currency || 'INR',
           name: (options.name && options.name !== 'Laravel') ? options.name : 'Garage Mandi',
           description: options.description || 'Subscription Payment',
-          order_id: options.order_id,
           prefill: {
             name: options.prefill?.name || '',
             email: options.prefill?.email || '',
@@ -120,6 +121,19 @@ export class RazorpayService {
             }
           }
         };
+
+        if (options.subscription_id) {
+          rzpOptions.subscription_id = options.subscription_id;
+          delete rzpOptions.order_id;
+        } else if (options.order_id) {
+          rzpOptions.order_id = options.order_id;
+        }
+
+        if (options.amount !== undefined && options.amount !== null && !isNaN(Number(options.amount))) {
+          rzpOptions.amount = Number(options.amount);
+        } else {
+          delete rzpOptions.amount;
+        }
 
         const rzp = new (window as any).Razorpay(rzpOptions);
         rzp.on('payment.failed', (errResponse: any) => {

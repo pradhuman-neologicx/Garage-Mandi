@@ -544,7 +544,7 @@ export class ProviderSubscriptionComponent implements OnInit {
         const paymentId = res?.data?.payment_id;
         const rzpData = res?.data?.razorpay;
 
-        if (rzpData && rzpData.order_id && rzpData.key) {
+        if (rzpData && (rzpData.subscription_id || rzpData.order_id) && rzpData.key) {
           this.razorpayService.pay({
             ...rzpData
           })
@@ -553,12 +553,17 @@ export class ProviderSubscriptionComponent implements OnInit {
               this.isVerifyingPayment = true;
               this.isSubmitting = true;
 
-              const verifyPayload = {
+              const verifyPayload: any = {
                 payment_id: paymentId,
                 razorpay_payment_id: rzpSuccess.razorpay_payment_id,
-                razorpay_order_id: rzpSuccess.razorpay_order_id,
                 razorpay_signature: rzpSuccess.razorpay_signature
               };
+              if (rzpSuccess.razorpay_subscription_id || rzpData.subscription_id) {
+                verifyPayload.razorpay_subscription_id = rzpSuccess.razorpay_subscription_id || rzpData.subscription_id;
+              }
+              if (rzpSuccess.razorpay_order_id || rzpData.order_id) {
+                verifyPayload.razorpay_order_id = rzpSuccess.razorpay_order_id || rzpData.order_id;
+              }
 
               this.customerService.verifySubscriptionPayment(verifyPayload).subscribe({
                 next: (verifyRes: any) => {
@@ -599,7 +604,6 @@ export class ProviderSubscriptionComponent implements OnInit {
 
         const redirectUrl = res?.data?.payment_url || res?.data?.url || res?.data?.short_url;
         if (redirectUrl) {
-          this.isSubmitting = false;
           window.location.href = redirectUrl;
           return;
         }
@@ -701,8 +705,7 @@ export class ProviderSubscriptionComponent implements OnInit {
         const paymentId = res?.data?.payment_id;
         const rzpData = res?.data?.razorpay;
 
-        // If backend returns Razorpay order configuration, launch Razorpay modal via RazorpayService
-        if (rzpData && rzpData.order_id && rzpData.key) {
+        if (rzpData && (rzpData.subscription_id || rzpData.order_id) && rzpData.key) {
           this.razorpayService.pay({
             ...rzpData
           })
@@ -712,12 +715,17 @@ export class ProviderSubscriptionComponent implements OnInit {
               this.isSubmitting = true;
 
               // Payment completed in Razorpay popup! Verify signature with backend
-              const verifyPayload = {
+              const verifyPayload: any = {
                 payment_id: paymentId,
                 razorpay_payment_id: rzpSuccess.razorpay_payment_id,
-                razorpay_order_id: rzpSuccess.razorpay_order_id,
                 razorpay_signature: rzpSuccess.razorpay_signature
               };
+              if (rzpSuccess.razorpay_subscription_id || rzpData.subscription_id) {
+                verifyPayload.razorpay_subscription_id = rzpSuccess.razorpay_subscription_id || rzpData.subscription_id;
+              }
+              if (rzpSuccess.razorpay_order_id || rzpData.order_id) {
+                verifyPayload.razorpay_order_id = rzpSuccess.razorpay_order_id || rzpData.order_id;
+              }
 
               this.customerService.verifySubscriptionPayment(verifyPayload).subscribe({
                 next: (verifyRes: any) => {

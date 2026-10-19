@@ -614,16 +614,35 @@
 <!-- MODAL 1: EXECUTIVE CODE & CHECKOUT (UC-04)               -->
 <!-- ======================================================== -->
 <div *ngIf="showExecutiveModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm transition-opacity" (click)="closeModal()"></div>
+  <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm transition-opacity" (click)="!isSubmitting && closeModal()"></div>
   
   <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md relative z-10 shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-fade-in-up">
     <!-- Top-Right Close Button -->
-    <button type="button"
+    <button *ngIf="!isSubmitting"
+            type="button"
             (click)="closeModal()"
             class="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
             title="Close">
       <i class="fa-solid fa-xmark text-sm"></i>
     </button>
+
+    <!-- Full Modal Redirecting / Loading Overlay -->
+    <div *ngIf="isSubmitting" class="absolute inset-0 bg-white/95 backdrop-blur-sm z-30 flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+      <div class="relative w-16 h-16 mb-4 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full border-4 border-red-100 border-t-[#db3333] border-r-[#db3333] animate-spin"></div>
+        <div class="w-10 h-10 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center shadow-inner">
+          <i class="fa-solid fa-lock text-lg"></i>
+        </div>
+      </div>
+      <h4 class="text-lg font-extrabold text-[#131e3d] mb-1">Redirecting to Payment Gateway...</h4>
+      <p class="text-xs text-gray-500 mb-4 max-w-xs leading-relaxed">
+        Please wait while we securely connect to Razorpay. Do not refresh or close this window.
+      </p>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-700">
+        <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+        <span>100% Secure 256-bit Encryption</span>
+      </div>
+    </div>
 
     <div class="w-16 h-1.5 bg-gray-200 rounded-full mx-auto mt-4 mb-2 shrink-0"></div>
     
@@ -718,12 +737,20 @@
               [ngClass]="!executiveCode.trim() ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#db3333] hover:bg-[#c22b2b] text-white shadow-lg'"
               class="w-full py-3.5 rounded-xl font-bold text-sm transition-all mb-3 flex justify-center items-center gap-2 cursor-pointer">
         <span *ngIf="!isSubmitting">Apply Code & Activate</span>
-        <div *ngIf="isSubmitting" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+        <div *ngIf="isSubmitting" class="flex items-center gap-2">
+          <div class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+          <span>Redirecting to Gateway...</span>
+        </div>
       </button>
 
       <button (click)="subscribe(false)" [disabled]="isSubmitting"
-              class="w-full py-3 rounded-xl font-bold text-sm text-gray-600 hover:text-[#131e3d] hover:bg-gray-100 transition-colors cursor-pointer">
-        Skip & Activate Directly
+              [ngClass]="isSubmitting ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-[#131e3d] hover:bg-gray-100 cursor-pointer'"
+              class="w-full py-3 rounded-xl font-bold text-sm transition-colors flex justify-center items-center gap-2">
+        <span *ngIf="!isSubmitting">Skip & Activate Directly</span>
+        <div *ngIf="isSubmitting" class="flex items-center gap-2 text-gray-500">
+          <div class="animate-spin rounded-full h-4 w-4 border-2 border-[#db3333] border-t-transparent"></div>
+          <span>Redirecting to Gateway...</span>
+        </div>
       </button>
     </div>
   </div>
@@ -768,7 +795,7 @@
       </div>
       <div class="flex items-start gap-2.5">
         <i class="fa-solid fa-check text-amber-600 mt-0.5"></i>
-        <span>No refund is issued for the remaining period under Phase 1 (BR-18).</span>
+        <span>No refund is issued for the remaining period.</span>
       </div>
     </div>
 
@@ -982,9 +1009,9 @@
                     [ngClass]="(selectedHistoryItem.payment_status || '').toLowerCase() === 'paid' || selectedHistoryItem.payment_status === 'Completed' ? 'bg-emerald-400' : 'bg-amber-400'"></span>
               {{ selectedHistoryItem.payment_status }}
             </span>
-            <span *ngIf="selectedHistoryItem.activity || selectedHistoryItem.event_type" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white/10 text-white uppercase text-[10px] tracking-wide">
+            <!-- <span *ngIf="selectedHistoryItem.activity || selectedHistoryItem.event_type" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white/10 text-white uppercase text-[10px] tracking-wide">
               {{ selectedHistoryItem.activity || selectedHistoryItem.event_type }}
-            </span>
+            </span> -->
           </div>
         </div>
 
