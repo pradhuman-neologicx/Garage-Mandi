@@ -1,0 +1,575 @@
+<app-navbar></app-navbar>
+
+<main class="min-h-screen bg-slate-50 pt-[58px] pb-16 font-sans">
+
+  <!-- ========================================================== -->
+  <!-- HERO HEADER SECTION -->
+  <!-- ========================================================== -->
+  <section class="bg-[#131e3d] text-white pt-8 pb-16 relative overflow-hidden">
+    <!-- Decorative Ambient Glow -->
+    <div class="absolute inset-0 pointer-events-none opacity-20">
+      <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#db3333] blur-3xl"></div>
+      <div class="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-blue-500 blur-3xl"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <!-- Top Bar: Back to Workshop Operations -->
+      <nav class="flex items-center gap-2 text-xs md:text-sm text-slate-300 mb-5">
+        <a routerLink="/" class="hover:text-white transition-colors">Home</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <a routerLink="/workshop-operations" class="hover:text-white transition-colors">Workshop Operations</a>
+        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <span class="text-red-400 font-semibold">Purchase Requests</span>
+      </nav>
+
+      <!-- Main Header Row -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2.5 mb-1.5">
+            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+              <span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
+              Provider Portal
+            </span>
+            <span class="text-xs text-slate-300">Customer Purchase Inquiries</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-3">
+            <span>Purchase Requests</span>
+          </h1>
+          <p class="mt-1 text-sm sm:text-base text-slate-300 max-w-2xl font-light">
+            Review customer purchase requests, calculate unit prices, and submit binding quotations.
+          </p>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center gap-2.5 self-start md:self-auto">
+          <button (click)="loadRequests(true)" [disabled]="isRefreshing"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-bold transition-all backdrop-blur-sm active:scale-95 disabled:opacity-50">
+            <i class="fa-solid fa-arrows-rotate" [ngClass]="{ 'fa-spin': isRefreshing }"></i>
+            <span>{{ isRefreshing ? 'Refreshing...' : 'Refresh' }}</span>
+          </button>
+          <button (click)="resetAllMockData()" title="Reset mock data to initial state"
+            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-all">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span class="hidden sm:inline">Reset Mock</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- MAIN CONTAINER (Overlaps Hero) -->
+  <!-- ========================================================== -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+
+    <!-- KPI STATS CARDS RIBBON (Balanced for Mobile & Desktop) -->
+    <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
+      <!-- Total Requests -->
+      <div class="bg-white rounded-2xl p-3 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
+        <div class="flex items-center justify-between gap-1 mb-1.5">
+          <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">Total Requests</p>
+          <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xs sm:text-base shrink-0">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ kpis.total }}</h3>
+          <span class="text-[10px] sm:text-xs text-slate-400 hidden sm:inline">All items</span>
+        </div>
+      </div>
+
+      <!-- Quotation Required -->
+      <div class="bg-white rounded-2xl p-3 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-12 h-12 bg-red-500/10 rounded-bl-full pointer-events-none"></div>
+        <div class="flex items-center justify-between gap-1 mb-1.5">
+          <p class="text-[11px] sm:text-xs font-bold text-red-600 uppercase tracking-wider flex items-center gap-1 truncate">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
+            Action Needed
+          </p>
+          <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-xs sm:text-base shrink-0 border border-red-100">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <h3 class="text-xl sm:text-3xl font-black text-red-600 tracking-tight">{{ kpis.required }}</h3>
+          <span class="text-[10px] sm:text-xs text-slate-400 hidden sm:inline">Pending quotes</span>
+        </div>
+      </div>
+
+      <!-- Quotation Submitted -->
+      <div class="bg-white rounded-2xl p-3 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
+        <div class="flex items-center justify-between gap-1 mb-1.5">
+          <p class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider truncate">Submitted</p>
+          <div class="w-7 h-7 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs sm:text-base shrink-0">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <h3 class="text-xl sm:text-3xl font-black text-emerald-600 tracking-tight">{{ kpis.submitted }}</h3>
+          <span class="text-[10px] sm:text-xs text-slate-400 hidden sm:inline">Quotes sent</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- INFORMATION NOTICE BANNER (MATCHING IMAGE 2 EXACTLY) -->
+    <!-- ========================================================== -->
+    <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 mb-6 shadow-xs">
+      <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0 text-[#db3333] mt-0.5">
+        <i class="fa-solid fa-circle-info text-base"></i>
+      </div>
+      <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+        Review customer purchase requests and submit your quotation. The customer will accept the quotation and complete payment. The order is confirmed only after successful payment.
+      </p>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- CONTROLS & FILTER TOOLBAR -->
+    <!-- ========================================================== -->
+    <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-xs border border-slate-200/70 mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <!-- Status Tabs -->
+      <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+        <button (click)="setTab('all')"
+          [ngClass]="activeTab === 'all' ? 'bg-[#db3333] text-white shadow-xs font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm transition-all whitespace-nowrap">
+          All ({{ kpis.total }})
+        </button>
+
+        <button (click)="setTab('required')"
+          [ngClass]="activeTab === 'required' ? 'bg-[#db3333] text-white shadow-xs font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>Quotation Required</span>
+          <span [ngClass]="activeTab === 'required' ? 'bg-white/20 text-white' : 'bg-red-100 text-red-600'"
+            class="px-1.5 py-0.2 rounded-full text-[10px] font-black">
+            {{ kpis.required }}
+          </span>
+        </button>
+
+        <button (click)="setTab('submitted')"
+          [ngClass]="activeTab === 'submitted' ? 'bg-[#db3333] text-white shadow-xs font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold'"
+          class="px-4 py-2 rounded-xl text-xs sm:text-sm transition-all whitespace-nowrap flex items-center gap-1.5">
+          <span>Quotation Submitted</span>
+          <span [ngClass]="activeTab === 'submitted' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-700'"
+            class="px-1.5 py-0.2 rounded-full text-[10px] font-black">
+            {{ kpis.submitted }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Search Box -->
+      <div class="relative w-full sm:w-72 shrink-0">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
+          placeholder="Search product or REQ code..."
+          class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 focus:border-[#db3333] transition-all" />
+      </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- REQUESTS LISTING (MATCHING IMAGE 2 APP CARDS ELEVATED FOR WEB) -->
+    <!-- ========================================================== -->
+
+    <!-- Loading State Skeleton -->
+    <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div *ngFor="let _ of [1, 2, 3, 4]" class="bg-white rounded-3xl p-5 border border-slate-200 animate-pulse space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="w-32 h-6 bg-slate-200 rounded-lg"></div>
+          <div class="w-24 h-6 bg-slate-200 rounded-full"></div>
+        </div>
+        <div class="h-16 bg-slate-100 rounded-2xl"></div>
+        <div class="w-40 h-4 bg-slate-200 rounded"></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredRequests.length === 0"
+      class="bg-white rounded-3xl p-10 sm:p-14 text-center border border-slate-200 shadow-xs">
+      <div class="w-16 h-16 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center mx-auto mb-4 text-2xl">
+        <i class="fa-solid fa-box-open"></i>
+      </div>
+      <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">No Purchase Requests Found</h3>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
+        {{ searchQuery ? 'No purchase requests match your search criteria. Try a different query.' : 'There are no purchase requests in this tab.' }}
+      </p>
+      <button *ngIf="searchQuery" (click)="searchQuery = ''; applyFilter()"
+        class="mt-4 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">
+        Clear Search
+      </button>
+    </div>
+
+    <!-- Cards Grid -->
+    <div *ngIf="!isLoading && pagedRequests.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div *ngFor="let req of pagedRequests"
+        class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
+
+        <div>
+          <!-- Header Row (Image 2 Match) -->
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-3 min-w-0">
+              <!-- Shopping Bag Icon in rounded soft container -->
+              <div class="w-11 h-11 rounded-2xl bg-red-50 text-[#db3333] flex items-center justify-center text-lg shrink-0 border border-red-100">
+                <i class="fa-solid fa-bag-shopping"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Purchase Request</p>
+                <h4 class="text-base sm:text-lg font-black text-[#db3333] tracking-tight truncate">{{ req.requestCode }}</h4>
+              </div>
+            </div>
+
+            <!-- Status Pill Badge (Image 2 Match) -->
+            <span *ngIf="req.status === 'Quotation Required'"
+              class="px-3 py-1 rounded-full text-xs font-extrabold bg-red-50 text-red-600 border border-red-200/80 uppercase tracking-wide shrink-0">
+              Quotation Required
+            </span>
+            <span *ngIf="req.status === 'Quotation Submitted'"
+              class="px-3 py-1 rounded-full text-xs font-extrabold bg-red-50 text-red-600 border border-red-200/80 uppercase tracking-wide shrink-0">
+              Quotation Submitted
+            </span>
+          </div>
+
+          <!-- Product & Quantity Highlight Box (Image 2 Match) -->
+          <div class="bg-slate-50/80 rounded-2xl p-4 border border-slate-100 flex items-center justify-between gap-4 mb-4">
+            <!-- Product -->
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="w-9 h-9 rounded-xl bg-red-100/70 text-[#db3333] flex items-center justify-center text-sm shrink-0">
+                <i class="fa-solid fa-box-archive"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-slate-400 uppercase">Product</p>
+                <p class="text-sm sm:text-base font-extrabold text-slate-900 truncate">{{ req.product }}</p>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="w-px h-8 bg-slate-200 shrink-0"></div>
+
+            <!-- Quantity -->
+            <div class="flex items-center gap-3 shrink-0 pr-1">
+              <div class="w-9 h-9 rounded-xl bg-slate-200/60 text-slate-600 flex items-center justify-center text-sm shrink-0">
+                <i class="fa-solid fa-list-ol"></i>
+              </div>
+              <div>
+                <p class="text-[11px] font-semibold text-slate-400 uppercase">Quantity</p>
+                <p class="text-sm sm:text-base font-black text-slate-900">{{ req.quantity }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Requirement & Request Date -->
+          <div class="space-y-2 mb-4">
+            <!-- Request Date -->
+            <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
+              <i class="fa-regular fa-calendar text-slate-400"></i>
+              <span>Request Date: <strong class="text-slate-700">{{ req.requestDate }}</strong></span>
+            </div>
+
+            <!-- Requirement Description -->
+            <p class="text-xs text-slate-600 line-clamp-2 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+              <strong class="text-slate-800 font-semibold">Requirement:</strong> {{ req.customerRequirement }}
+            </p>
+
+            <!-- Vehicle Model if present -->
+            <p *ngIf="req.vehicleModel" class="text-[11px] text-slate-500 flex items-center gap-1.5">
+              <i class="fa-solid fa-car text-slate-400"></i>
+              <span>Vehicle: <strong class="text-slate-700">{{ req.vehicleModel }}</strong></span>
+            </p>
+          </div>
+
+          <!-- Existing Quotation Pill if submitted -->
+          <div *ngIf="req.quotation" class="mb-4 p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 text-emerald-800">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i>
+              <span>Quoted Amount:</span>
+              <strong class="text-emerald-900 font-extrabold text-sm">₹{{ req.quotation.finalPayable | number:'1.2-2' }}</strong>
+            </div>
+            <span class="text-[11px] text-emerald-700 font-medium">{{ req.quotation.submittedAt }}</span>
+          </div>
+        </div>
+
+        <!-- Action Row (Image 2 Match) -->
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-end">
+          <!-- View & Quote Button -->
+          <button (click)="openQuoteModal(req)"
+            class="px-5 py-2.5 rounded-xl border border-[#db3333] text-[#db3333] hover:bg-red-50 hover:border-red-600 text-xs sm:text-sm font-bold transition-all shadow-xs active:scale-95 flex items-center gap-2">
+            <i class="fa-regular" [ngClass]="req.status === 'Quotation Submitted' ? 'fa-eye' : 'fa-pen-to-square'"></i>
+            <span>{{ req.status === 'Quotation Submitted' ? 'View Quotation' : 'View & Quote' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGINATION CONTROLS -->
+    <div *ngIf="!isLoading && totalRecords > 0"
+      class="mt-6 mb-12 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+
+      <!-- Left: Inquiries Range & Total -->
+      <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-600">
+        <span class="font-medium">
+          Showing <strong class="text-slate-900 font-bold">{{ paginationFrom }}</strong>
+          to <strong class="text-slate-900 font-bold">{{ paginationTo }}</strong>
+          of <strong class="text-slate-900 font-bold">{{ totalRecords }}</strong> requests
+        </span>
+      </div>
+
+      <!-- Right: Page Size Selector + Prev / Next Page Buttons -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Per Page Dropdown -->
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <span>Show:</span>
+          <select [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)"
+            class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 cursor-pointer">
+            <option [value]="4">4 per page</option>
+            <option [value]="6">6 per page</option>
+            <option [value]="12">12 per page</option>
+            <option [value]="24">24 per page</option>
+          </select>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="inline-flex items-center gap-1.5">
+          <!-- Prev Button -->
+          <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+            [ngClass]="currentPage === 1 ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400 border-slate-200' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs active:scale-95'"
+            class="px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+            <span>Prev</span>
+          </button>
+
+          <!-- Dynamic Page Numbers -->
+          <ng-container *ngFor="let p of getPageNumbers()">
+            <span *ngIf="p === '...'" class="px-2 text-slate-400 text-xs font-bold select-none">...</span>
+            <button *ngIf="p !== '...'" (click)="goToPage(+p)"
+              [ngClass]="currentPage === p ? 'bg-[#db3333] text-white shadow-md shadow-red-500/20 font-extrabold' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold'"
+              class="w-9 h-9 rounded-xl text-xs sm:text-sm transition-all flex items-center justify-center active:scale-95">
+              {{ p }}
+            </button>
+          </ng-container>
+
+          <!-- Next Button -->
+          <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages"
+            [ngClass]="currentPage >= totalPages ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400 border-slate-200' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-xs active:scale-95'"
+            class="px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5">
+            <span>Next</span>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SUBMIT QUOTATION MODAL (MATCHING IMAGE 1, 3, 4) -->
+  <!-- ========================================================== -->
+  <div *ngIf="isQuoteModalOpen && selectedRequest"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" (click)="closeQuoteModal()"></div>
+
+    <!-- Modal Dialog -->
+    <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden z-10 animate-scale-up my-auto">
+
+      <!-- Modal Header (Image 4 Match) -->
+      <div class="px-6 py-4 flex items-start justify-between border-b border-slate-100 shrink-0">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Purchase Request</h2>
+          <p class="text-sm font-bold text-[#db3333] mt-0.5">{{ selectedRequest.requestCode }}</p>
+        </div>
+        <button (click)="closeQuoteModal()"
+          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Modal Scrollable Content -->
+      <div class="p-5 sm:p-6 space-y-5 flex-1 overflow-y-auto min-h-0">
+
+        <!-- SECTION 1: REQUEST STATUS (Image 4 Match) -->
+        <div>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2">Request Status</h3>
+          <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
+            <span class="text-sm font-bold text-slate-800">{{ selectedRequest.status }}</span>
+            <span [ngClass]="selectedRequest.status === 'Quotation Submitted' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'"
+              class="px-3 py-1 rounded-full text-xs font-extrabold border uppercase">
+              {{ selectedRequest.status }}
+            </span>
+          </div>
+        </div>
+
+        <!-- SECTION 2: CUSTOMER REQUIREMENT (Image 4 Match) -->
+        <div>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2">Customer Requirement</h3>
+          <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl space-y-2 text-xs sm:text-sm">
+            <div class="flex items-center justify-between py-1 border-b border-slate-200/60">
+              <span class="text-slate-500 font-medium">Request ID</span>
+              <span class="font-bold text-slate-800">{{ selectedRequest.requestCode }}</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-slate-200/60">
+              <span class="text-slate-500 font-medium">Product</span>
+              <span class="font-extrabold text-slate-900">{{ selectedRequest.product }}</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-slate-200/60">
+              <span class="text-slate-500 font-medium">Requested Quantity</span>
+              <span class="font-black text-slate-900">{{ selectedRequest.quantity }}</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-slate-200/60">
+              <span class="text-slate-500 font-medium">Request Date</span>
+              <span class="font-semibold text-slate-700">{{ selectedRequest.requestDate }}</span>
+            </div>
+            <div class="pt-1">
+              <span class="text-slate-500 font-medium block mb-1">Requirement</span>
+              <p class="font-bold text-slate-900 leading-relaxed">{{ selectedRequest.customerRequirement }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: SUBMIT QUOTATION FORM (Image 1, 3, 4 Match) -->
+        <div>
+          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">Submit Quotation</h3>
+          <p class="text-xs text-slate-500 leading-relaxed mb-4">
+            Enter your quotation. The requested quantity is fixed and cannot be changed by the provider.
+          </p>
+
+          <!-- Input Fields Stack (Image 3 Match) -->
+          <div class="space-y-3.5">
+
+            <!-- Field 1: Unit Price (Red outline input) -->
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">
+                Unit Price <span class="text-red-500">*</span>
+              </label>
+              <div class="relative rounded-2xl shadow-xs">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 text-base font-bold">
+                  ₹
+                </span>
+                <input type="number" [(ngModel)]="quoteUnitPrice" min="1" step="10" placeholder="Unit Price"
+                  class="w-full pl-9 pr-4 py-3 bg-white border border-red-300 rounded-2xl text-base font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 focus:border-[#db3333] transition-all" />
+              </div>
+            </div>
+
+            <!-- Field 2: Requested Quantity (Disabled / Readonly Box) -->
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Requested Quantity</label>
+              <input type="text" [value]="selectedRequest.quantity" readonly disabled
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-base font-bold text-slate-700 cursor-not-allowed" />
+            </div>
+
+            <!-- Field 3: Product Amount (Calculated: Unit Price * Quantity) -->
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Product Amount</label>
+              <input type="text" [value]="'₹' + (productAmount | number:'1.2-2')" readonly disabled
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-base font-bold text-slate-900 cursor-not-allowed" />
+            </div>
+
+            <!-- Field 4: GST / Tax -->
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">GST / Tax</label>
+              <div class="relative rounded-2xl shadow-xs">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 text-base font-bold">
+                  ₹
+                </span>
+                <input type="number" [(ngModel)]="quoteGstTax" min="0" step="10" placeholder="0"
+                  class="w-full pl-9 pr-4 py-3 bg-white border border-red-300 rounded-2xl text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 focus:border-[#db3333] transition-all" />
+              </div>
+            </div>
+
+            <!-- Field 5: Delivery Fee -->
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Delivery Fee</label>
+              <div class="relative rounded-2xl shadow-xs">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 text-base font-bold">
+                  ₹
+                </span>
+                <input type="number" [(ngModel)]="quoteDeliveryFee" min="0" step="10" placeholder="250"
+                  class="w-full pl-9 pr-4 py-3 bg-white border border-red-300 rounded-2xl text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 focus:border-[#db3333] transition-all" />
+              </div>
+            </div>
+
+            <!-- Field 6: Convenience / Platform Fee -->
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Convenience / Platform Fee</label>
+              <div class="relative rounded-2xl shadow-xs">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 text-base font-bold">
+                  ₹
+                </span>
+                <input type="number" [(ngModel)]="quoteConvenienceFee" min="0" step="5" placeholder="425"
+                  class="w-full pl-9 pr-4 py-3 bg-white border border-red-300 rounded-2xl text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 focus:border-[#db3333] transition-all" />
+              </div>
+            </div>
+
+            <!-- QUOTATION SUMMARY CARD (Image 1 & 3 Match) -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-2.5 mt-4">
+              <h4 class="text-sm font-extrabold text-slate-900 mb-3">Quotation Summary</h4>
+
+              <div class="flex items-center justify-between text-xs sm:text-sm text-slate-600">
+                <span>Product Amount</span>
+                <span class="font-bold text-slate-800">₹{{ productAmount | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs sm:text-sm text-slate-600">
+                <span>GST / Tax</span>
+                <span class="font-bold text-slate-800">₹{{ (quoteGstTax || 0) | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs sm:text-sm text-slate-600">
+                <span>Delivery Fee</span>
+                <span class="font-bold text-slate-800">₹{{ (quoteDeliveryFee || 0) | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs sm:text-sm text-slate-600">
+                <span>Convenience / Platform Fee</span>
+                <span class="font-bold text-slate-800">₹{{ (quoteConvenienceFee || 0) | number:'1.2-2' }}</span>
+              </div>
+
+              <div class="border-t border-slate-200 pt-2.5 flex items-center justify-between">
+                <span class="text-sm sm:text-base font-extrabold text-slate-900">Final Payable</span>
+                <span class="text-base sm:text-xl font-black text-[#db3333]">₹{{ finalPayable | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <!-- Field 7: Remarks (Image 1 Match) -->
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">Remarks</label>
+              <textarea [(ngModel)]="quoteRemarks" rows="3" placeholder="Remarks"
+                class="w-full px-4 py-3 bg-white border border-red-300 rounded-2xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 focus:border-[#db3333] transition-all resize-none"></textarea>
+            </div>
+
+            <!-- Quotation validity notice (Image 1 Match) -->
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-800 pt-1">
+              <i class="fa-regular fa-clock text-[#db3333] text-sm"></i>
+              <span>Quotation validity: 24 hours from submission.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Action Buttons (Image 1 Match) -->
+      <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col gap-2 shrink-0">
+        <!-- Submit Button (When Quotation Required) -->
+        <button *ngIf="selectedRequest.status === 'Quotation Required'" (click)="submitQuotation()" [disabled]="isSubmittingQuote || !isQuoteValid"
+          class="w-full py-3.5 px-4 rounded-2xl bg-[#db3333] hover:bg-[#c22b2b] text-white font-extrabold text-sm transition-all shadow-md shadow-red-500/30 hover:shadow-red-500/50 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2">
+          <i *ngIf="isSubmittingQuote" class="fa-solid fa-circle-notch fa-spin"></i>
+          <span>{{ isSubmittingQuote ? 'Submitting...' : 'Submit Quotation' }}</span>
+        </button>
+
+        <!-- Status Info Banner (When Quotation Submitted) -->
+        <div *ngIf="selectedRequest.status === 'Quotation Submitted'" class="text-center py-1">
+          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Quotation already submitted for this request</span>
+          </span>
+        </div>
+
+        <!-- Close Button -->
+        <button (click)="closeQuoteModal()" [disabled]="isSubmittingQuote"
+          class="w-full py-3 px-4 rounded-2xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-sm transition-all active:scale-95 shadow-xs">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<app-footer></app-footer>

@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
 import { CustomerService } from '../../core/services/customer.service';
+import { JwtService } from 'src/app/core/services/jwt.service';
 
 @Component({
   selector: 'app-request-service',
@@ -24,16 +25,36 @@ export class RequestServiceComponent implements OnInit {
   isSubmitting = false;
   successMessage = '';
   errorMessage = '';
+  backLink = '/request-quote';
 
   constructor(
     private fb: FormBuilder,
     private customerService: CustomerService,
+    private jwtService: JwtService,
     private router: Router
   ) {}
 
   ngOnInit() {
+    this.initBackLink();
     this.initForm();
     this.fetchVehicleCategories();
+  }
+
+  initBackLink() {
+    try {
+      const role = this.jwtService.getCustomerRole();
+      const roleName = (role?.name || '').toLowerCase();
+      const roleSlug = (role?.slug || '').toLowerCase();
+      const sp = this.jwtService.getServiceProvider();
+
+      if (roleName.includes('service provider') || roleSlug.includes('service-provider') || (sp && (sp.id || sp.is_service_provider))) {
+        this.backLink = '/workshop-operations';
+      } else {
+        this.backLink = '/request-quote';
+      }
+    } catch (_) {
+      this.backLink = '/request-quote';
+    }
   }
 
   initForm() {

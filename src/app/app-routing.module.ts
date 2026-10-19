@@ -126,6 +126,76 @@ const routes: Routes = [
     loadComponent: () => import('./website/workshop-operations/workshop-operations.component').then(m => m.WorkshopOperationsComponent),
   },
   {
+    path: 'provider',
+    redirectTo: 'incoming-requests',
+    pathMatch: 'full'
+  },
+  {
+    path: 'incoming-requests',
+    loadComponent: () => import('./website/provider/incoming-requests/incoming-requests.component').then(m => m.IncomingRequestsComponent),
+  },
+  {
+    path: 'provider/incoming-requests',
+    loadComponent: () => import('./website/provider/incoming-requests/incoming-requests.component').then(m => m.IncomingRequestsComponent),
+  },
+  {
+    path: 'purchase-requests',
+    loadComponent: () => import('./website/provider/purchase-requests/purchase-requests.component').then(m => m.PurchaseRequestsComponent),
+  },
+  {
+    path: 'provider/purchase-requests',
+    loadComponent: () => import('./website/provider/purchase-requests/purchase-requests.component').then(m => m.PurchaseRequestsComponent),
+  },
+  {
+    path: 'purchase-quotations',
+    loadComponent: () => import('./website/provider/purchase-quotations/purchase-quotations.component').then(m => m.PurchaseQuotationsComponent),
+  },
+  {
+    path: 'provider/purchase-quotations',
+    loadComponent: () => import('./website/provider/purchase-quotations/purchase-quotations.component').then(m => m.PurchaseQuotationsComponent),
+  },
+  {
+    path: 'confirmed-orders',
+    loadComponent: () => import('./website/provider/confirmed-orders/confirmed-orders.component').then(m => m.ConfirmedOrdersComponent),
+  },
+  {
+    path: 'provider/confirmed-orders',
+    loadComponent: () => import('./website/provider/confirmed-orders/confirmed-orders.component').then(m => m.ConfirmedOrdersComponent),
+  },
+  {
+    path: 'service-quote-sent',
+    loadComponent: () => import('./website/provider/service-quote-sent/service-quote-sent.component').then(m => m.ServiceQuoteSentComponent),
+  },
+  {
+    path: 'provider/service-quote-sent',
+    loadComponent: () => import('./website/provider/service-quote-sent/service-quote-sent.component').then(m => m.ServiceQuoteSentComponent),
+  },
+  {
+    path: 'quotes-sent',
+    loadComponent: () => import('./website/provider/service-quote-sent/service-quote-sent.component').then(m => m.ServiceQuoteSentComponent),
+  },
+
+  {
+    path: 'customer-vehicle-requests',
+    loadComponent: () => import('./website/provider/custome-vehicle-requests/custome-vehicle-requests.component').then(m => m.CustomeVehicleRequestsComponent),
+  },
+  {
+    path: 'provider/customer-vehicle-requests',
+    loadComponent: () => import('./website/provider/custome-vehicle-requests/custome-vehicle-requests.component').then(m => m.CustomeVehicleRequestsComponent),
+  },
+  {
+    path: 'resale-vehicles',
+    loadComponent: () => import('./website/provider/resale-vehicles/resale-vehicles.component').then(m => m.ResaleVehiclesComponent),
+  },
+  {
+    path: 'provider/resale-vehicles',
+    loadComponent: () => import('./website/provider/resale-vehicles/resale-vehicles.component').then(m => m.ResaleVehiclesComponent),
+  },
+  {
+    path: 'my-resale-vehicles',
+    loadComponent: () => import('./website/provider/resale-vehicles/resale-vehicles.component').then(m => m.ResaleVehiclesComponent),
+  },
+  {
     path: '',
     component: LoginpagesComponent,
     children: [
