@@ -53,13 +53,7 @@
 
         <!-- Header Actions: + Add Vehicle Button (Screenshot 1 Match) -->
         <div class="flex items-center gap-2.5 self-start md:self-auto">
-          <!-- Refresh Button -->
-          <button (click)="loadVehicles(true)" [disabled]="isRefreshing"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-bold transition-all backdrop-blur-sm active:scale-95 disabled:opacity-50">
-            <i class="fa-solid fa-arrows-rotate" [ngClass]="{ 'fa-spin': isRefreshing }"></i>
-            <span>{{ isRefreshing ? 'Refreshing...' : 'Refresh' }}</span>
-          </button>
-
+         
           <!-- Primary Add Vehicle Button (Screenshot 1 Match) -->
           <button (click)="openAddModal()"
             class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#db3333] hover:bg-red-700 text-white text-sm font-black transition-all shadow-lg shadow-red-500/30 active:scale-95">
@@ -67,12 +61,6 @@
             <span>Add Vehicle</span>
           </button>
 
-          <!-- Reset Mock Data Button -->
-          <button (click)="resetMockData()" title="Reset mock data to initial 6 vehicles"
-            class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-all">
-            <i class="fa-solid fa-rotate-left"></i>
-            <span class="hidden sm:inline">Reset</span>
-          </button>
         </div>
       </div>
     </div>
