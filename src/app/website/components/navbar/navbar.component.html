@@ -31,7 +31,7 @@
         <!-- Book Now Button (Only visible to customers) -->
         <a *ngIf="isLoggedIn && userRoleSlug !== 'service-provider'" routerLink="/request-quote"
           class="ml-2 px-4 py-2 rounded-lg text-sm font-bold text-white bg-[#db3333] hover:bg-[#c22b2b] transition-all duration-200 shadow-md hover:shadow-lg">
-          Request a quote
+          Request
         </a>
 
         <!-- Login Button (Visible if not logged in) -->
@@ -107,7 +107,7 @@
       <!-- Mobile Book Now (Logged in customers) -->
       <a *ngIf="isLoggedIn && userRoleSlug !== 'service-provider'" routerLink="/request-quote"
         class="text-white bg-[#db3333] hover:bg-[#c22b2b] block px-4 py-3 rounded-lg text-base font-bold transition-all text-center mt-4">
-        Request a quote
+        Request
       </a>
 
       <!-- Mobile Login (Not logged in) -->

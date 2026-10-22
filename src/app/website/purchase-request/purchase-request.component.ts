@@ -380,8 +380,8 @@ export class PurchaseRequestComponent implements OnInit {
   }
 
   submitCreateRequest(): void {
-    if (!this.newRequest.product) {
-      this.displayToast('Please select a product from the dropdown.');
+    if (!this.newRequest.product || !this.newRequest.product.trim()) {
+      this.displayToast('Please enter a product name.');
       return;
     }
 
@@ -395,7 +395,7 @@ export class PurchaseRequestComponent implements OnInit {
 
     const createdReq: PurchaseRequest = {
       id: nextId,
-      product: this.newRequest.product,
+      product: this.newRequest.product.trim(),
       category: 'Spare Parts Inquiry',
       quantity: this.newRequest.quantity,
       requestDate: today,

@@ -1,18 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavbarComponent, FooterComponent],
+  imports: [CommonModule, RouterModule, FormsModule, NavbarComponent, FooterComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
   currentYear: number;
+  currentScreen = 0;
+
+  // Coming Soon Modal State
+  isComingSoonModalOpen = false;
+  selectedPlatform: 'Google Play' | 'App Store' = 'Google Play';
+  notifyEmail = '';
+  isNotified = false;
   features = [
     {
       icon: 'fa-solid fa-warehouse',
@@ -52,7 +60,29 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {}
-  currentScreen = 0;
+
+  openComingSoon(platform: 'Google Play' | 'App Store' = 'Google Play', event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    this.selectedPlatform = platform;
+    this.isComingSoonModalOpen = true;
+    this.isNotified = false;
+    this.notifyEmail = '';
+  }
+
+  closeComingSoon(): void {
+    this.isComingSoonModalOpen = false;
+  }
+
+
+
+  @HostListener('document:keydown.escape')
+  onEscapePress(): void {
+    if (this.isComingSoonModalOpen) {
+      this.closeComingSoon();
+    }
+  }
 
   nextScreen() {
     if (this.currentScreen < 5) {

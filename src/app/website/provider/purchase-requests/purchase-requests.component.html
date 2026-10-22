@@ -47,10 +47,10 @@
             <i class="fa-solid fa-arrows-rotate" [ngClass]="{ 'fa-spin': isRefreshing }"></i>
             <span>{{ isRefreshing ? 'Refreshing...' : 'Refresh' }}</span>
           </button>
-          <button (click)="resetAllMockData()" title="Reset mock data to initial state"
+          <button routerLink="/workshop-operations" title="Back to Workshop Operations"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white text-xs font-medium transition-all">
-            <i class="fa-solid fa-rotate-left"></i>
-            <span class="hidden sm:inline">Reset Mock</span>
+            <i class="fa-solid fa-arrow-left"></i>
+            <span class="hidden sm:inline">Back</span>
           </button>
         </div>
       </div>
