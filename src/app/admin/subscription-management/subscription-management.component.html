@@ -471,12 +471,12 @@
                       <span class="w-1.5 h-1.5 rounded-full" [ngClass]="item.status === 'active' ? 'bg-green-500' : 'bg-red-500'"></span>
                       {{ item.status }}
                     </span>
-                    <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
+                    <!-- <span *ngIf="item.autoRenewal !== undefined && item.autoRenewal !== null"
                           [ngClass]="item.isAutoRenewal ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'"
                           class="text-xs px-2.5 py-0.5 rounded-full font-bold border inline-flex items-center gap-1.5">
                       <i class="fa-solid" [ngClass]="item.isAutoRenewal ? 'fa-arrows-rotate text-[10px]' : 'fa-ban text-[10px]'"></i>
                       Auto Renew: {{ item.isAutoRenewal ? 'On' : 'Off' }}
-                    </span>
+                    </span> -->
                   </div>
                   <h5 class="font-bold text-gray-800 text-base leading-snug">{{ item.planName }}</h5>
                 </div>

@@ -61,7 +61,9 @@ export class CustomerService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
-    const body = (typeof data === 'string') ? { mandate_method: data } : data;
+    const body = (typeof data === 'number' || (typeof data === 'string' && !isNaN(Number(data))))
+      ? { subscription_id: Number(data) }
+      : data;
     return this.apiService.post('subscriptions/renewal/checkout', body, headers);
   }
 

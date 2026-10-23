@@ -231,7 +231,9 @@
                       {{ p.name || p.title }}
                     </div>
                     <div class="text-[#db3333] font-bold text-xs mt-1">
-                      ₹{{ (p.amount || p.price || 0) | number:'1.2-2' }} <span class="text-gray-400 font-normal">/ month</span>
+                      ₹{{ (p.total_amount || p.final_amount || p.amount || p.price || 0) | number:'1.2-2' }}
+                      <span class="text-gray-400 font-normal">/ month</span>
+                      <span class="text-gray-400 font-normal text-[10px] ml-1">(GST included)</span>
                     </div>
                   </div>
                 </div>
@@ -456,7 +458,7 @@
         <!-- Available Plans Container -->
         <div *ngIf="!isLoading && plans.length > 0">
           <div class="mb-4">
-            <h3 class="text-xl sm:text-2xl font-bold text-[#131e3d] mb-1">
+            <h3 id="choose-plan-header" class="text-xl sm:text-2xl font-bold text-[#131e3d] mb-1">
               {{ hasActiveSubscription ? 'Subscription Plans & Entitlements' : 'Choose Your Subscription Plan' }}
             </h3>
             <p class="text-xs sm:text-sm text-gray-500">
@@ -889,64 +891,15 @@
       Pay the outstanding amount to restore subscription to Active status.
     </p>
 
-    <div class="bg-orange-50 rounded-2xl p-4 border border-orange-100 mb-4 flex justify-between items-center">
+    <div class="bg-orange-50 rounded-2xl p-4 border border-orange-100 mb-5 flex justify-between items-center">
       <div>
         <div class="text-xs text-gray-600">Renewal Amount Due</div>
         <div class="text-xs text-orange-700 font-semibold">
-          {{ currentSubscription?.grace_ends_at ? ('Due by ' + (currentSubscription?.grace_ends_at | date:'dd MMM yyyy')) : ('Day ' + (currentSubscription?.grace_days_remaining || 2) + ' of grace period') }}
+          {{ (selectedGraceSub || graceSubscription || currentSubscription)?.grace_ends_at ? ('Due by ' + ((selectedGraceSub || graceSubscription || currentSubscription)?.grace_ends_at | date:'dd MMM yyyy')) : ('Day ' + ((selectedGraceSub || graceSubscription || currentSubscription)?.grace_days_remaining || 2) + ' of grace period') }}
         </div>
       </div>
       <div class="text-xl font-extrabold text-orange-600">
-        ₹{{ (currentSubscription?.grace_amount_due || currentSubscription?.total_amount) | number:'1.2-2' }}
-      </div>
-    </div>
-
-    <!-- Payment Method Selection -->
-    <div class="mb-5 text-left">
-      <label class=" text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center justify-between">
-        <span>Payment Mode</span>
-        <span class="text-[10px] font-semibold text-gray-400">Card or UPI / QR</span>
-      </label>
-      <div class="grid grid-cols-2 gap-2.5">
-        <!-- Card Option -->
-        <div (click)="selectPaymentMethod('card')"
-             class="p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between"
-             [ngClass]="selectedPaymentMethod === 'card' ? 'border-orange-600 bg-orange-50/40 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'">
-          <div class="flex items-center justify-between mb-1.5">
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
-                 [ngClass]="selectedPaymentMethod === 'card' ? 'bg-orange-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600'">
-              <i class="fa-regular fa-credit-card"></i>
-            </div>
-            <div class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors"
-                 [ngClass]="selectedPaymentMethod === 'card' ? 'border-orange-600 bg-orange-600' : 'border-gray-300 bg-white'">
-              <div *ngIf="selectedPaymentMethod === 'card'" class="w-1.5 h-1.5 rounded-full bg-white"></div>
-            </div>
-          </div>
-          <div>
-            <div class="font-bold text-xs text-[#131e3d]">Card</div>
-            <div class="text-[10px] text-gray-400 mt-0.5">Debit / Credit</div>
-          </div>
-        </div>
-
-        <!-- UPI / QR Option -->
-        <div (click)="selectPaymentMethod('qr')"
-             class="p-3 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between"
-             [ngClass]="selectedPaymentMethod === 'qr' ? 'border-orange-600 bg-orange-50/40 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'">
-          <div class="flex items-center justify-between mb-1.5">
-            <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs"
-                 [ngClass]="selectedPaymentMethod === 'qr' ? 'bg-orange-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600'">
-              <i class="fa-solid fa-qrcode"></i>
-            </div>
-            <div class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors"
-                 [ngClass]="selectedPaymentMethod === 'qr' ? 'border-orange-600 bg-orange-600' : 'border-gray-300 bg-white'">
-              <div *ngIf="selectedPaymentMethod === 'qr'" class="w-1.5 h-1.5 rounded-full bg-white"></div>
-            </div>
-          </div>
-          <div>
-            <div class="font-bold text-xs text-[#131e3d]">UPI / QR</div>
-            <div class="text-[10px] text-gray-400 mt-0.5">Instant Scan & Pay</div>
-          </div>
-        </div>
+        ₹{{ ((selectedGraceSub || graceSubscription || currentSubscription)?.grace_amount_due || (selectedGraceSub || graceSubscription || currentSubscription)?.total_amount) | number:'1.2-2' }}
       </div>
     </div>
 
@@ -958,7 +911,7 @@
     </button>
 
     <button (click)="closeGracePayModal()" 
-            class="w-full py-2.5 text-gray-500 hover:text-gray-800 font-semibold rounded-xl text-xs transition-colors">
+            class="w-full py-2.5 text-gray-500 hover:text-gray-800 font-semibold rounded-xl text-xs transition-colors cursor-pointer">
       Cancel
     </button>
   </div>
@@ -967,10 +920,10 @@
 <!-- ======================================================== -->
 <!-- MODAL 5: SUBSCRIPTION & TRANSACTION HISTORY DETAILS     -->
 <!-- ======================================================== -->
-<div *ngIf="showHistoryDetailModal && selectedHistoryItem" class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4">
+<div *ngIf="showHistoryDetailModal && selectedHistoryItem" class="fixed inset-0 z-[100] flex items-center justify-center p-3">
   <div class="absolute inset-0 bg-[#131e3d]/80 backdrop-blur-sm" (click)="closeHistoryDetailModal()"></div>
   
-  <div class="bg-white rounded-3xl w-full max-w-xl relative z-10 shadow-2xl p-5 sm:p-7 max-h-[92vh] overflow-y-auto animate-fade-in-up border border-gray-100 flex flex-col">
+  <div class="bg-white rounded-3xl w-full max-w-xl relative z-10 shadow-2xl p-4 max-h-[92vh] overflow-y-auto animate-fade-in-up border border-gray-100 flex flex-col">
     <!-- Header -->
     <div class="flex items-start justify-between pb-4 border-b border-gray-100">
       <div class="flex items-center gap-3">

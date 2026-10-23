@@ -38,6 +38,7 @@ export class ProviderSubscriptionComponent implements OnInit {
   showCancelRenewalModal = false;
   showSuccessReceiptModal = false;
   showGracePayModal = false;
+  selectedGraceSub: any = null;
   showHistoryDetailModal = false;
   selectedHistoryItem: any = null;
   copiedTxn = false;
@@ -686,21 +687,33 @@ export class ProviderSubscriptionComponent implements OnInit {
   }
 
   // --- Grace Period & Manual Payment Recovery (UC-08) ---
-  openGracePayModal() {
+  openGracePayModal(sub?: any) {
+    this.selectedGraceSub = sub || this.graceSubscription || this.currentSubscription;
     this.showGracePayModal = true;
     document.body.style.overflow = 'hidden';
   }
 
   closeGracePayModal() {
     this.showGracePayModal = false;
+    this.selectedGraceSub = null;
     document.body.style.overflow = 'auto';
   }
 
   processGraceManualPayment() {
-    this.isSubmitting = true;
-    const mandateMethod = this.selectedPaymentMethod === 'qr' ? 'upi' : 'card';
+    const targetSub = this.selectedGraceSub || this.graceSubscription || this.currentSubscription;
+    const subscriptionId = targetSub?.subscription_id || targetSub?.id;
 
-    this.customerService.renewalCheckout({ mandate_method: mandateMethod }).subscribe({
+    if (!subscriptionId) {
+      this.notificationService.show('Subscription ID not found. Please refresh the page and try again.', 'error');
+      return;
+    }
+
+    this.isSubmitting = true;
+    const payload = {
+      subscription_id: Number(subscriptionId) || subscriptionId
+    };
+
+    this.customerService.renewalCheckout(payload).subscribe({
       next: (res: any) => {
         const paymentId = res?.data?.payment_id;
         const rzpData = res?.data?.razorpay;
@@ -791,7 +804,10 @@ export class ProviderSubscriptionComponent implements OnInit {
   }
 
   scrollToPlans() {
-    window.scrollTo({ top: 350, behavior: 'smooth' });
+    const el = document.getElementById('choose-plan-header');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   // --- History Detail Modal Handlers ---
