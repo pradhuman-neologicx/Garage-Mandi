@@ -4,6 +4,8 @@ export interface RazorpayPaymentOptions {
   key: string;
   order_id?: string;
   subscription_id?: string;
+  customer_id?: string;
+  recurring?: 0 | 1;
   amount?: number;
   currency?: string;
   name?: string;
@@ -100,6 +102,8 @@ export class RazorpayService {
           currency: options.currency || 'INR',
           name: (options.name && options.name !== 'Laravel') ? options.name : 'Garage Mandi',
           description: options.description || 'Subscription Payment',
+          ...(options.customer_id ? { customer_id: options.customer_id } : {}),
+          recurring: options.recurring !== undefined ? options.recurring : 1,
           prefill: {
             name: options.prefill?.name || '',
             email: options.prefill?.email || '',
