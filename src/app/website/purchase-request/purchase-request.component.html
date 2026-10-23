@@ -102,22 +102,22 @@
         <button (click)="activeFilter = 'ALL'"
           [ngClass]="activeFilter === 'ALL' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
           class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
-          All ({{ totalCount }})
+          All
         </button>
         <button (click)="activeFilter = 'QUOTE_RECEIVED'"
           [ngClass]="activeFilter === 'QUOTE_RECEIVED' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
           class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
-          Quote Received ({{ quoteReceivedCount }})
+          Quote Received
         </button>
         <button (click)="activeFilter = 'AWAITING_QUOTATION'"
           [ngClass]="activeFilter === 'AWAITING_QUOTATION' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
           class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
-          Awaiting Quote ({{ awaitingQuotationCount }})
+          Awaiting Quote
         </button>
         <button (click)="activeFilter = 'CONFIRMED'"
           [ngClass]="activeFilter === 'CONFIRMED' ? 'bg-[#db3333] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
           class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer">
-          Confirmed ({{ confirmedCount }})
+          Confirmed
         </button>
       </div>
 
