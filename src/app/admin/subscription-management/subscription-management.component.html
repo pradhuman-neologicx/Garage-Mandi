@@ -12,16 +12,16 @@
     <div *ngFor="let plan of platformPlans"
       class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col relative transition-transform hover:-translate-y-1 hover:shadow-md">
       <!-- Header -->
-      <div class="bg-custom-primary p-6 text-white">
-        <div class="flex justify-between items-start gap-4">
-          <h3 class="font-bold text-lg leading-tight">{{ plan.name }}</h3>
-          <button (click)="openEditPlanModal(plan)"
-            class="text-sm bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors cursor-pointer shrink-0"
-            title="Edit Plan">
-            <i class="fa-solid fa-pen"></i>
-          </button>
-        </div>
-        <p class="text-justify text-sm opacity-90 mt-3">{{ plan.description || 'No description available.' }}</p>
+      <div class="bg-custom-primary p-6 text-white min-h-[210px] flex flex-col justify-start relative">
+        <!-- Edit Button -->
+        <button (click)="openEditPlanModal(plan)"
+          class="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/20 hover:bg-white/35 active:scale-95 text-white flex items-center justify-center transition-all cursor-pointer shadow-xs"
+          title="Edit Plan">
+          <i class="fa-solid fa-pen text-xs"></i>
+        </button>
+
+        <h3 class="font-bold text-lg leading-tight pr-7 min-h-[4.25rem] flex items-start">{{ plan.name }}</h3>
+        <p class="text-justify text-sm opacity-90 mt-3 min-h-[5rem]">{{ plan.description || 'No description available.' }}</p>
       </div>
 
       <!-- Features Listing -->
