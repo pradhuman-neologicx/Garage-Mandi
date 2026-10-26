@@ -24,7 +24,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <a *ngFor="let op of operations; let i = index" [routerLink]="op.link"
-         class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 overflow-hidden flex flex-col animate-fade-in-up"
+         class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 transform  border border-gray-100 overflow-hidden flex flex-col animate-fade-in-up"
          [ngStyle]="{'animation-delay': (i * 50) + 'ms'}">
          
          <div class="p-8 flex-1 flex flex-col items-center text-center">

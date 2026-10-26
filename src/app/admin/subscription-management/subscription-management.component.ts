@@ -294,6 +294,7 @@ export class SubscriptionManagementComponent implements OnInit {
             this.platformPlans[index] = JSON.parse(JSON.stringify(this.editPlanData));
           }
           this.closeEditPlanModal();
+          this.fetchSubscriptionPlan();
         } else {
           this.notificationService.show(response.message || 'Failed to update plan', 'error');
         }
