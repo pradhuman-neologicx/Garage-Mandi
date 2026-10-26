@@ -25,9 +25,13 @@ export class ProviderProfileComponent implements OnInit {
 
   // Password Modal
   showPasswordModal = false;
+  isChangingPassword = false;
   currentPassword = '';
   newPassword = '';
   confirmPassword = '';
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
 
   // Delete Modal
   showDeleteModal = false;
@@ -92,6 +96,15 @@ export class ProviderProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchProfile();
+    this.fetchStates();
+    this.fetchVehicleCategories();
+  }
+
+  compareIds(item1: any, item2: any): boolean {
+    if (item1 === null || item1 === undefined || item1 === '' || item2 === null || item2 === undefined || item2 === '') {
+      return item1 === item2;
+    }
+    return String(item1) === String(item2);
   }
 
   fetchProfile() {
@@ -106,7 +119,7 @@ export class ProviderProfileComponent implements OnInit {
       },
       error: (err: any) => {
         this.isLoading = false;
-        this.notificationService.show('Failed to fetch provider profile', 'error');
+        // this.notificationService.show('Failed to fetch provider profile', 'error');
         console.error('Error fetching provider profile:', err);
       }
     });
@@ -123,8 +136,7 @@ export class ProviderProfileComponent implements OnInit {
 
   openEditModal() {
     this.showEditModal = true;
-    this.fetchStates();
-    this.fetchVehicleCategories();
+    this.apiError = '';
 
     if (this.profileData) {
       this.fullName = this.profileData.name || '';
@@ -144,37 +156,44 @@ export class ProviderProfileComponent implements OnInit {
       this.oldSpareParts = sp.spare_parts_old == 1;
       this.newSpareParts = sp.spare_parts_new == 1;
 
-      this.selectedState = sp.state_id || '';
-      if (this.selectedState) this.onStateChange();
-      setTimeout(() => {
-        this.selectedDistrict = sp.district_id || '';
-        if (this.selectedDistrict) this.onDistrictChange();
-        setTimeout(() => {
-          this.selectedCity = sp.city_id || '';
-        }, 300);
-      }, 300);
-
       this.selectedBusinessType = [];
       if (sp.is_service_provider == 1) this.selectedBusinessType.push('service_provider');
       if (sp.is_spare_part_seller == 1) this.selectedBusinessType.push('spare_part_seller');
       if (sp.is_vehicle_reseller == 1) this.selectedBusinessType.push('vehicle_reseller');
 
-      if (this.selectedBusinessType.length > 0) {
-        this.onBusinessTypeChange();
-      }
-
       this.selectedBusinessCategories = sp.business_category?.map((bc: any) => Number(bc.id)) || sp.business_category_id?.map((id: any) => Number(id)) || [];
       this.selectedTags = sp.tags?.map((t: any) => Number(t.id)) || sp.tag_id?.map((id: any) => Number(id)) || [];
-      this.selectedVehicleCategory = sp.vehicle_category?.[0]?.id ? Number(sp.vehicle_category[0].id) : (sp.vehicle_category_id?.[0] ? Number(sp.vehicle_category_id[0]) : '');
-      
-      if (this.selectedVehicleCategory) {
-        this.onVehicleCategoryChange();
+
+      // Service Offered (Vehicle Category) - Read Only
+      const rawVehId = sp.vehicle_category?.[0]?.id ?? sp.vehicle_category_id?.[0] ?? '';
+      if (rawVehId && this.vehicleCategories && this.vehicleCategories.length > 0) {
+        const found = this.vehicleCategories.find((vc: any) => String(vc.id) === String(rawVehId));
+        this.selectedVehicleCategory = found ? found.id : (isNaN(Number(rawVehId)) ? rawVehId : Number(rawVehId));
+      } else {
+        this.selectedVehicleCategory = rawVehId ? (isNaN(Number(rawVehId)) ? rawVehId : Number(rawVehId)) : '';
+      }
+
+      if (this.selectedBusinessType.length > 0) {
+        this.onBusinessTypeChange();
+      } else if (this.selectedVehicleCategory) {
+        this.fetchTags();
       }
 
       this.profileImagePreview = sp.image_url || null;
       this.galleryPreviews = sp.gallery?.map((g: any) => g.image_url) || [];
       this.selectedFile = null;
       this.selectedFiles = [];
+
+      // State, District, City prefill with dependency chain
+      this.selectedState = sp.state_id !== null && sp.state_id !== undefined ? sp.state_id : '';
+      this.selectedDistrict = sp.district_id !== null && sp.district_id !== undefined ? sp.district_id : '';
+      this.selectedCity = sp.city_id !== null && sp.city_id !== undefined ? sp.city_id : '';
+
+      this.ensureStatesLoaded(() => {
+        if (this.selectedState) {
+          this.onStateChange(true);
+        }
+      });
     }
   }
 
@@ -182,36 +201,54 @@ export class ProviderProfileComponent implements OnInit {
     this.showEditModal = false;
   }
 
-  fetchStates() {
+  fetchStates(callback?: () => void) {
     this.customerService.getStates().subscribe({
       next: (res: any) => {
         this.states = res.data || res;
+        if (callback) callback();
       },
-      error: (err: any) => console.error('Failed to fetch states', err)
+      error: (err: any) => {
+        console.error('Failed to fetch states', err);
+        if (callback) callback();
+      }
     });
   }
 
-  onStateChange() {
-    this.districts = [];
-    this.cities = [];
-    if (!this.profileData || this.selectedState !== this.profileData.service_provider_profile?.state_id) {
-        this.selectedDistrict = '';
-        this.selectedCity = '';
+  ensureStatesLoaded(callback?: () => void) {
+    if (this.states && this.states.length > 0) {
+      if (callback) callback();
+    } else {
+      this.fetchStates(callback);
+    }
+  }
+
+  onStateChange(fetchDependencies = false) {
+    if (!fetchDependencies) {
+      this.selectedDistrict = '';
+      this.selectedCity = '';
+      this.districts = [];
+      this.cities = [];
     }
     if (this.selectedState) {
       this.customerService.getDistricts(this.selectedState).subscribe({
         next: (res: any) => {
           this.districts = res.data || res;
+          if (fetchDependencies && this.selectedDistrict) {
+            this.onDistrictChange(true);
+          }
         },
         error: (err: any) => console.error('Failed to fetch districts', err)
       });
+    } else {
+      this.districts = [];
+      this.cities = [];
     }
   }
 
-  onDistrictChange() {
-    this.cities = [];
-    if (!this.profileData || this.selectedDistrict !== this.profileData.service_provider_profile?.district_id) {
-        this.selectedCity = '';
+  onDistrictChange(fetchDependencies = false) {
+    if (!fetchDependencies) {
+      this.selectedCity = '';
+      this.cities = [];
     }
     if (this.selectedDistrict) {
       this.customerService.getCities(this.selectedDistrict).subscribe({
@@ -220,15 +257,29 @@ export class ProviderProfileComponent implements OnInit {
         },
         error: (err: any) => console.error('Failed to fetch cities', err)
       });
+    } else {
+      this.cities = [];
     }
   }
 
-  fetchVehicleCategories() {
+  fetchVehicleCategories(callback?: () => void) {
     this.customerService.getVehicleCategoriesPublic().subscribe({
       next: (res: any) => {
         this.vehicleCategories = res.data || res;
+        if (this.profileData && !this.selectedVehicleCategory) {
+          const sp = this.profileData.service_provider_profile || {};
+          const rawVehId = sp.vehicle_category?.[0]?.id ?? sp.vehicle_category_id?.[0] ?? '';
+          if (rawVehId) {
+            const found = this.vehicleCategories.find((vc: any) => String(vc.id) === String(rawVehId));
+            this.selectedVehicleCategory = found ? found.id : (isNaN(Number(rawVehId)) ? rawVehId : Number(rawVehId));
+          }
+        }
+        if (callback) callback();
       },
-      error: (err: any) => console.error('Failed to fetch vehicle categories', err)
+      error: (err: any) => {
+        console.error('Failed to fetch vehicle categories', err);
+        if (callback) callback();
+      }
     });
   }
 
@@ -411,7 +462,7 @@ export class ProviderProfileComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSaving = false;
-        this.notificationService.show(err.error?.message || 'Failed to update profile', 'error');
+        // this.notificationService.show(err.error?.message || 'Failed to update profile', 'error');
         console.error('Update error', err);
       }
     });
@@ -420,6 +471,13 @@ export class ProviderProfileComponent implements OnInit {
 
   // Password Change Logic
   changePassword() {
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.showCurrentPassword = false;
+    this.showNewPassword = false;
+    this.showConfirmPassword = false;
+    this.isChangingPassword = false;
     this.showPasswordModal = true;
   }
 
@@ -428,6 +486,10 @@ export class ProviderProfileComponent implements OnInit {
     this.currentPassword = '';
     this.newPassword = '';
     this.confirmPassword = '';
+    this.showCurrentPassword = false;
+    this.showNewPassword = false;
+    this.showConfirmPassword = false;
+    this.isChangingPassword = false;
   }
 
   submitPasswordChange() {
@@ -435,8 +497,8 @@ export class ProviderProfileComponent implements OnInit {
       this.notificationService.show('Please fill in all fields', 'error');
       return;
     }
-    if (this.newPassword.length < 6) {
-      this.notificationService.show('New password must be at least 6 characters long', 'error');
+    if (this.newPassword.length < 8) {
+      this.notificationService.show('New password must be at least 8 characters long', 'error');
       return;
     }
     if (this.newPassword !== this.confirmPassword) {
@@ -444,6 +506,7 @@ export class ProviderProfileComponent implements OnInit {
       return;
     }
 
+    this.isChangingPassword = true;
     const payload = {
       current_password: this.currentPassword,
       new_password: this.newPassword,
@@ -452,6 +515,7 @@ export class ProviderProfileComponent implements OnInit {
 
     this.customerService.changePasswordAuth(payload).subscribe({
       next: (res: any) => {
+        this.isChangingPassword = false;
         if (res.status === 200 || res.success || (res.message && res.message.toLowerCase().includes('success'))) {
           this.notificationService.show(res.message || 'Password changed successfully!', 'success');
           this.closePasswordModal();
@@ -460,7 +524,8 @@ export class ProviderProfileComponent implements OnInit {
         }
       },
       error: (err: any) => {
-        this.notificationService.show(err.error?.message || 'Failed to change password', 'error');
+        this.isChangingPassword = false;
+        // this.notificationService.show(err.error?.message || err.message || 'Failed to change password', 'error');
       }
     });
   }
@@ -488,7 +553,7 @@ export class ProviderProfileComponent implements OnInit {
         this.router.navigate(['/']);
       },
       error: (err: any) => {
-        this.notificationService.show(err.error?.message || 'Failed to deactivate account', 'error');
+        // this.notificationService.show(err.error?.message || 'Failed to deactivate account', 'error');
       }
     });
   }

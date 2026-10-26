@@ -304,3 +304,15 @@
     transform: translateX(20px);
   }
 }
+
+.readonly-select {
+  pointer-events: none;
+  user-select: none;
+  ::ng-deep .ng-select-container {
+    background-color: #f3f4f6 !important;
+    border-color: #e5e7eb !important;
+    cursor: not-allowed !important;
+    color: #4b5563 !important;
+  }
+}
+

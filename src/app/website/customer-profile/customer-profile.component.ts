@@ -202,7 +202,7 @@ export class CustomerProfileComponent implements OnInit {
       },
       error: (err: any) => {
         this.isSaving = false;
-        this.notificationService.show(err.message || 'Failed to update profile', 'error');
+        // this.notificationService.show(err.message || 'Failed to update profile', 'error');
       }
     });
   }
@@ -256,7 +256,7 @@ export class CustomerProfileComponent implements OnInit {
       },
       error: (err: any) => {
         this.isChangingPassword = false;
-        this.notificationService.show(err.error?.message || err.message || 'Failed to change password', 'error');
+        // this.notificationService.show(err.error?.message || err.message || 'Failed to change password', 'error');
       }
     });
   }
