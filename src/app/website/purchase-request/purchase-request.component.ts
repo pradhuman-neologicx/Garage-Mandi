@@ -211,6 +211,38 @@ export class PurchaseRequestComponent implements OnInit {
     product: '',
     quantity: 1
   };
+  createFormSubmitted: boolean = false;
+  productTouched: boolean = false;
+  quantityTouched: boolean = false;
+
+  getProductError(): string {
+    if (!this.createFormSubmitted && !this.productTouched) {
+      return '';
+    }
+    if (!this.newRequest.product || !this.newRequest.product.trim()) {
+      return 'Please enter a product name.';
+    }
+    if (this.newRequest.product.trim().length < 2) {
+      return 'Product name must be at least 2 characters.';
+    }
+    return '';
+  }
+
+  getQuantityError(): string {
+    if (!this.createFormSubmitted && !this.quantityTouched) {
+      return '';
+    }
+    if (this.newRequest.quantity === null || this.newRequest.quantity === undefined || (this.newRequest.quantity as any) === '') {
+      return 'Please enter a valid quantity.';
+    }
+    if (this.newRequest.quantity < 1) {
+      return 'Quantity must be at least 1.';
+    }
+    if (this.newRequest.quantity > 100) {
+      return 'Quantity cannot exceed 100.';
+    }
+    return '';
+  }
 
   // Toast / notification
   toastMessage: string = '';
@@ -372,21 +404,29 @@ export class PurchaseRequestComponent implements OnInit {
       product: '',
       quantity: 1
     };
+    this.createFormSubmitted = false;
+    this.productTouched = false;
+    this.quantityTouched = false;
     this.isCreateModalOpen = true;
   }
 
   closeCreateModal(): void {
+    this.createFormSubmitted = false;
+    this.productTouched = false;
+    this.quantityTouched = false;
     this.isCreateModalOpen = false;
   }
 
   submitCreateRequest(): void {
-    if (!this.newRequest.product || !this.newRequest.product.trim()) {
-      this.displayToast('Please enter a product name.');
-      return;
-    }
+    this.createFormSubmitted = true;
+    this.productTouched = true;
+    this.quantityTouched = true;
 
-    if (!this.newRequest.quantity || this.newRequest.quantity < 1) {
-      this.displayToast('Please enter a valid quantity.');
+    const productErr = this.getProductError();
+    const qtyErr = this.getQuantityError();
+
+    if (productErr || qtyErr) {
+      this.displayToast(productErr || qtyErr);
       return;
     }
 
