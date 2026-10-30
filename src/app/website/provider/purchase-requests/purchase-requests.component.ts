@@ -5,15 +5,23 @@ import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { NotificationService } from 'src/app/core/services/notificationnew.service';
+import { EcomService } from 'src/app/core/services/ecom.service';
+
+export interface DeliveryLocation {
+  city?: string;
+  state?: string;
+  pincode?: string;
+}
 
 export interface PurchaseQuotation {
+  id?: number | string;
   unitPrice: number;
-  requestedQuantity: number;
+  gstPercent: number;
+  deliveryFee: number;
   productAmount: number;
   gstTax: number;
-  deliveryFee: number;
-  convenienceFee: number;
   finalPayable: number;
+  notes?: string;
   remarks?: string;
   submittedAt?: string;
 }
@@ -21,207 +29,18 @@ export interface PurchaseQuotation {
 export interface PurchaseRequestItem {
   id: string | number;
   requestCode: string;
+  reference: string;
   product: string;
   quantity: number;
   requestDate: string;
   status: 'Quotation Required' | 'Quotation Submitted';
+  rawStatus: string;
   customerRequirement: string;
   vehicleCategory?: string;
-  vehicleModel?: string;
+  deliveryLocation?: DeliveryLocation;
+  myQuotation?: any;
   quotation?: PurchaseQuotation;
 }
-
-const STORAGE_KEY = 'garage_mandi_mock_purchase_requests_v2';
-
-const INITIAL_MOCK_DATA: PurchaseRequestItem[] = [
-  {
-    id: 1001,
-    requestCode: 'REQ-1001',
-    product: 'Brake Pad Set',
-    quantity: 2,
-    requestDate: '18 Sep 2026',
-    status: 'Quotation Required',
-    customerRequirement: 'Front brake pad set required for vehicle.',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Maruti Suzuki Swift'
-  },
-  {
-    id: 1002,
-    requestCode: 'REQ-1002',
-    product: 'Clutch Plate',
-    quantity: 1,
-    requestDate: '17 Sep 2026',
-    status: 'Quotation Submitted',
-    customerRequirement: 'Original OEM clutch assembly plate with smooth friction lining.',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Hyundai Creta',
-    quotation: {
-      unitPrice: 2850,
-      requestedQuantity: 1,
-      productAmount: 2850,
-      gstTax: 513,
-      deliveryFee: 250,
-      convenienceFee: 425,
-      finalPayable: 4038,
-      remarks: 'Genuine OEM clutch plate with 6 months warranty.',
-      submittedAt: '17 Sep 2026, 04:30 PM'
-    }
-  },
-  {
-    id: 1003,
-    requestCode: 'REQ-1003',
-    product: 'LED Headlight Assembly (Right)',
-    quantity: 1,
-    requestDate: '16 Sep 2026',
-    status: 'Quotation Required',
-    customerRequirement: 'Right side LED projector headlamp unit without scratch or damage.',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Kia Seltos'
-  },
-  {
-    id: 1004,
-    requestCode: 'REQ-1004',
-    product: 'Engine Oil Filter & O-Ring',
-    quantity: 4,
-    requestDate: '15 Sep 2026',
-    status: 'Quotation Required',
-    customerRequirement: 'Pack of 4 heavy-duty diesel engine oil filter elements.',
-    vehicleCategory: 'Commercial Vehicle',
-    vehicleModel: 'Tata Ace Gold'
-  },
-  {
-    id: 1005,
-    requestCode: 'REQ-1005',
-    product: 'Front Shock Absorber Strut Pair',
-    quantity: 2,
-    requestDate: '14 Sep 2026',
-    status: 'Quotation Submitted',
-    customerRequirement: 'Complete front gas-charged suspension strut pair with bush kit.',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Honda City',
-    quotation: {
-      unitPrice: 3400,
-      requestedQuantity: 2,
-      productAmount: 6800,
-      gstTax: 1224,
-      deliveryFee: 250,
-      convenienceFee: 425,
-      finalPayable: 8699,
-      remarks: 'Heavy duty twin-tube gas struts with 1 year warranty.',
-      submittedAt: '15 Sep 2026, 11:15 AM'
-    }
-  },
-  {
-    id: 1006,
-    requestCode: 'REQ-1006',
-    product: 'Gearbox Oil & Seal Kit',
-    quantity: 1,
-    requestDate: '14 Sep 2026',
-    status: 'Quotation Required',
-    customerRequirement: 'High-viscosity manual transmission oil with OEM oil seal set.',
-    vehicleCategory: 'Commercial Vehicle',
-    vehicleModel: 'Mahindra Bolero Maxi Truck'
-  },
-  {
-    id: 1007,
-    requestCode: 'REQ-1007',
-    product: 'Rear Brake Shoe Set',
-    quantity: 2,
-    requestDate: '13 Sep 2026',
-    status: 'Quotation Submitted',
-    customerRequirement: 'Original drum brake shoe set with tension spring fittings.',
-    vehicleCategory: 'Two Wheeler',
-    vehicleModel: 'TVS Jupiter 125',
-    quotation: {
-      unitPrice: 580,
-      requestedQuantity: 2,
-      productAmount: 1160,
-      gstTax: 208,
-      deliveryFee: 250,
-      convenienceFee: 425,
-      finalPayable: 2043,
-      remarks: 'Genuine TVS OEM rear brake shoes.',
-      submittedAt: '13 Sep 2026, 03:45 PM'
-    }
-  },
-  {
-    id: 1008,
-    requestCode: 'REQ-1008',
-    product: 'Alternator Pulley & V-Belt',
-    quantity: 1,
-    requestDate: '12 Sep 2026',
-    status: 'Quotation Required',
-    customerRequirement: 'Overrunning alternator pulley with heavy-duty serpentine drive belt.',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Maruti Suzuki Dzire'
-  },
-  {
-    id: 1009,
-    requestCode: 'REQ-1009',
-    product: 'Laser Iridium Spark Plugs (Pack of 4)',
-    quantity: 4,
-    requestDate: '11 Sep 2026',
-    status: 'Quotation Submitted',
-    customerRequirement: 'Laser iridium spark plugs for petrol turbo engine.',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Hyundai i20 N Line',
-    quotation: {
-      unitPrice: 750,
-      requestedQuantity: 4,
-      productAmount: 3000,
-      gstTax: 540,
-      deliveryFee: 250,
-      convenienceFee: 425,
-      finalPayable: 4215,
-      remarks: 'NGK Laser Iridium plugs with pre-calibrated gap.',
-      submittedAt: '12 Sep 2026, 10:00 AM'
-    }
-  },
-  {
-    id: 1010,
-    requestCode: 'REQ-1010',
-    product: 'Radiator Cooling Fan Motor Assembly',
-    quantity: 1,
-    requestDate: '10 Sep 2026',
-    status: 'Quotation Required',
-    customerRequirement: 'High CFM brushless radiator cooling fan with shroud.',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Tata Nexon'
-  },
-  {
-    id: 1011,
-    requestCode: 'REQ-1011',
-    product: 'All-Weather Aerodynamic Wiper Blades',
-    quantity: 2,
-    requestDate: '09 Sep 2026',
-    status: 'Quotation Required',
-    customerRequirement: 'Frameless silicone wiper blades (22 inch & 18 inch).',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Mahindra Thar'
-  },
-  {
-    id: 1012,
-    requestCode: 'REQ-1012',
-    product: 'Timing Belt & Tensioner Roller Kit',
-    quantity: 1,
-    requestDate: '08 Sep 2026',
-    status: 'Quotation Submitted',
-    customerRequirement: 'Complete timing belt overhaul kit with hydraulic damper.',
-    vehicleCategory: 'Commercial Vehicle',
-    vehicleModel: 'Force Traveller 3350',
-    quotation: {
-      unitPrice: 4200,
-      requestedQuantity: 1,
-      productAmount: 4200,
-      gstTax: 756,
-      deliveryFee: 250,
-      convenienceFee: 425,
-      finalPayable: 5631,
-      remarks: 'Gates heavy-duty timing kit with 80,000 km warranty.',
-      submittedAt: '09 Sep 2026, 05:20 PM'
-    }
-  }
-];
 
 @Component({
   selector: 'app-purchase-requests',
@@ -234,7 +53,7 @@ export class PurchaseRequestsComponent implements OnInit {
   isLoading = false;
   isRefreshing = false;
 
-  // Requests Data
+  // Requests Data from API
   requests: PurchaseRequestItem[] = [];
   filteredRequests: PurchaseRequestItem[] = [];
   pagedRequests: PurchaseRequestItem[] = [];
@@ -260,14 +79,16 @@ export class PurchaseRequestsComponent implements OnInit {
   selectedRequest: PurchaseRequestItem | null = null;
   isSubmittingQuote = false;
 
-  // Quotation Form Inputs
+  // Quotation Form Inputs (aligned with API: unit_price, gst_percent, delivery_fee, notes)
   quoteUnitPrice: number | string = '';
-  quoteGstTax: number | string = 0;
-  quoteDeliveryFee: number | string = 250;
-  quoteConvenienceFee: number | string = 425;
-  quoteRemarks = '';
+  quoteGstPercent: number | string = 18;
+  quoteDeliveryFee: number | string = 40;
+  quoteNotes = '';
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private ecomService: EcomService
+  ) {}
 
   ngOnInit(): void {
     this.loadRequests();
@@ -343,7 +164,7 @@ export class PurchaseRequestsComponent implements OnInit {
   }
 
   // ==========================================
-  // DATA MANAGEMENT & MOCK API
+  // DATA MANAGEMENT & LIVE API
   // ==========================================
 
   loadRequests(isRefresh = false): void {
@@ -353,37 +174,91 @@ export class PurchaseRequestsComponent implements OnInit {
       this.isLoading = true;
     }
 
-    // Mock API latency
-    setTimeout(() => {
-      this.isLoading = false;
-      this.isRefreshing = false;
+    this.ecomService.getSellerPurchaseRequests().subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
 
-      let stored = null;
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) stored = JSON.parse(raw);
-        } catch (_) {}
+        const items = res?.data?.items || (Array.isArray(res?.data) ? res.data : []);
+        if (Array.isArray(items)) {
+          this.requests = items.map((item: any) => this.mapApiItem(item));
+        } else {
+          this.requests = [];
+        }
+
+        this.computeKpis();
+        this.applyFilter(true);
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
+        const msg = err?.error?.message || err?.message || 'Failed to load purchase requests from server.';
+        this.notificationService.show(msg, 'error');
       }
-
-      if (stored && Array.isArray(stored) && stored.length > 0) {
-        this.requests = stored;
-      } else {
-        this.requests = JSON.parse(JSON.stringify(INITIAL_MOCK_DATA));
-        this.persistRequests();
-      }
-
-      this.computeKpis();
-      this.applyFilter(true);
-    }, isRefresh ? 400 : 250);
+    });
   }
 
-  private persistRequests(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
+  private mapApiItem(item: any): PurchaseRequestItem {
+    let dateStr = 'Recent';
+    if (item.created_at) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.requests));
-      } catch (_) {}
+        dateStr = new Date(item.created_at).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+      } catch (_) {
+        dateStr = item.created_at;
+      }
     }
+
+    const myQ = item.my_quotation;
+    let quotation: PurchaseQuotation | undefined = undefined;
+
+    if (myQ) {
+      const uPrice = Number(myQ.unit_price || 0);
+      const qty = Number(item.quantity || 1);
+      const prodAmt = uPrice * qty;
+      const gstPct = Number(myQ.gst_percent || 0);
+      const gstAmt = Math.round(((prodAmt * gstPct) / 100) * 100) / 100;
+      const delFee = Number(myQ.delivery_fee || 0);
+      quotation = {
+        id: myQ.id,
+        unitPrice: uPrice,
+        gstPercent: gstPct,
+        deliveryFee: delFee,
+        productAmount: prodAmt,
+        gstTax: gstAmt,
+        finalPayable: prodAmt + gstAmt + delFee,
+        notes: myQ.notes || '',
+        remarks: myQ.notes || '',
+        submittedAt: myQ.created_at ? new Date(myQ.created_at).toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : 'Submitted'
+      };
+    }
+
+    const hasSubmitted = !!myQ;
+
+    return {
+      id: item.id,
+      requestCode: item.reference || `GPR-${item.id}`,
+      reference: item.reference || `GPR-${item.id}`,
+      product: item.product_name || 'Spare Part',
+      quantity: Number(item.quantity || 1),
+      requestDate: dateStr,
+      status: hasSubmitted ? 'Quotation Submitted' : 'Quotation Required',
+      rawStatus: item.status || 'quote_received',
+      customerRequirement: item.description || (item.vehicle_category?.name ? `Category: ${item.vehicle_category.name}` : 'Spare part quotation requested.'),
+      vehicleCategory: item.vehicle_category?.name || '',
+      deliveryLocation: item.delivery_location || undefined,
+      myQuotation: myQ,
+      quotation: quotation
+    };
   }
 
   computeKpis(): void {
@@ -420,7 +295,8 @@ export class PurchaseRequestsComponent implements OnInit {
         r.product.toLowerCase().includes(q) ||
         r.requestCode.toLowerCase().includes(q) ||
         r.customerRequirement.toLowerCase().includes(q) ||
-        (r.vehicleModel && r.vehicleModel.toLowerCase().includes(q))
+        (r.vehicleCategory && r.vehicleCategory.toLowerCase().includes(q)) ||
+        (r.deliveryLocation?.city && r.deliveryLocation.city.toLowerCase().includes(q))
       );
     }
 
@@ -443,12 +319,16 @@ export class PurchaseRequestsComponent implements OnInit {
     return unitPrice * qty;
   }
 
+  get quoteGstTax(): number {
+    const pct = Number(this.quoteGstPercent) || 0;
+    return Math.round(((this.productAmount * pct) / 100) * 100) / 100;
+  }
+
   get finalPayable(): number {
     const prodAmt = this.productAmount;
-    const tax = Number(this.quoteGstTax) || 0;
+    const tax = this.quoteGstTax;
     const delivery = Number(this.quoteDeliveryFee) || 0;
-    const convenience = Number(this.quoteConvenienceFee) || 0;
-    return prodAmt + tax + delivery + convenience;
+    return prodAmt + tax + delivery;
   }
 
   openQuoteModal(request: PurchaseRequestItem): void {
@@ -457,17 +337,15 @@ export class PurchaseRequestsComponent implements OnInit {
     if (request.quotation) {
       // Existing quotation review
       this.quoteUnitPrice = request.quotation.unitPrice;
-      this.quoteGstTax = request.quotation.gstTax;
+      this.quoteGstPercent = request.quotation.gstPercent;
       this.quoteDeliveryFee = request.quotation.deliveryFee;
-      this.quoteConvenienceFee = request.quotation.convenienceFee;
-      this.quoteRemarks = request.quotation.remarks || '';
+      this.quoteNotes = request.quotation.notes || request.quotation.remarks || '';
     } else {
-      // New quotation form
+      // New quotation form defaults
       this.quoteUnitPrice = '';
-      this.quoteGstTax = 0;
-      this.quoteDeliveryFee = 250;
-      this.quoteConvenienceFee = 425;
-      this.quoteRemarks = '';
+      this.quoteGstPercent = 18;
+      this.quoteDeliveryFee = 40;
+      this.quoteNotes = '';
     }
 
     this.isQuoteModalOpen = true;
@@ -488,54 +366,42 @@ export class PurchaseRequestsComponent implements OnInit {
       return;
     }
 
+    const gstPct = Number(this.quoteGstPercent);
+    if (isNaN(gstPct) || gstPct < 0 || gstPct > 100) {
+      this.notificationService.show('Please enter a valid GST percentage (0 - 100%).', 'error');
+      return;
+    }
+
+    const delFee = Number(this.quoteDeliveryFee);
+    if (isNaN(delFee) || delFee < 0) {
+      this.notificationService.show('Please enter a valid delivery fee (0 or greater).', 'error');
+      return;
+    }
+
     this.isSubmittingQuote = true;
 
-    // Simulate mock submission delay
-    setTimeout(() => {
-      this.isSubmittingQuote = false;
+    const payload = {
+      unit_price: unitPriceNum,
+      gst_percent: gstPct,
+      delivery_fee: delFee,
+      notes: (this.quoteNotes || '').trim()
+    };
 
-      const newQuotation: PurchaseQuotation = {
-        unitPrice: unitPriceNum,
-        requestedQuantity: this.selectedRequest!.quantity,
-        productAmount: this.productAmount,
-        gstTax: Number(this.quoteGstTax) || 0,
-        deliveryFee: Number(this.quoteDeliveryFee) || 0,
-        convenienceFee: Number(this.quoteConvenienceFee) || 0,
-        finalPayable: this.finalPayable,
-        remarks: this.quoteRemarks.trim(),
-        submittedAt: new Date().toLocaleString('en-IN', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
-      };
+    const requestId = this.selectedRequest.id;
 
-      // Update in-memory and storage
-      this.selectedRequest!.status = 'Quotation Submitted';
-      this.selectedRequest!.quotation = newQuotation;
-
-      const idx = this.requests.findIndex(r => r.id === this.selectedRequest!.id);
-      if (idx !== -1) {
-        this.requests[idx].status = 'Quotation Submitted';
-        this.requests[idx].quotation = newQuotation;
+    this.ecomService.createSellerQuotation(requestId, payload).subscribe({
+      next: (res: any) => {
+        this.isSubmittingQuote = false;
+        const msg = res?.message || 'Quotation submitted successfully!';
+        this.notificationService.show(msg, 'success');
+        this.closeQuoteModal();
+        this.loadRequests(true);
+      },
+      error: (err: any) => {
+        this.isSubmittingQuote = false;
+        const errorMsg = err?.error?.message || err?.message || 'Failed to submit quotation. Please try again.';
+        this.notificationService.show(errorMsg, 'error');
       }
-
-      this.persistRequests();
-      this.computeKpis();
-      this.applyFilter();
-
-      this.notificationService.show('Quotation submitted successfully!', 'success');
-      this.closeQuoteModal();
-    }, 600);
-  }
-
-  resetAllMockData(): void {
-    this.requests = JSON.parse(JSON.stringify(INITIAL_MOCK_DATA));
-    this.persistRequests();
-    this.computeKpis();
-    this.applyFilter(true);
-    this.notificationService.show('Mock data reset to initial state.', 'info');
+    });
   }
 }

@@ -117,6 +117,12 @@ export class SidenavComponent {
           label: 'Vehicle Resale',
           route: '/admin/vehicle-resale',
         },
+        {
+          index: 9,
+          icon: 'price_change',
+          label: 'Commission / Fee',
+          route: '/admin/commission',
+        },
 
         // {
         //   index: 9,

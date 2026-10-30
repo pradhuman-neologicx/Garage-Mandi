@@ -293,6 +293,11 @@ const routes: Routes = [
         loadComponent: () => import('./admin/vehicle-resale/vehicle-resale.component').then(m => m.VehicleResaleComponent),
         canActivate: [AuthGuard],
       },
+      {
+        path: 'commission',
+        loadComponent: () => import('./admin/commission/commission.component').then(m => m.CommissionComponent),
+        canActivate: [AuthGuard],
+      },
     ],
   },
 ];

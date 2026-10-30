@@ -1,0 +1,123 @@
+<div class="container-fluid py-4">
+
+  <!-- Page Header -->
+  <div class="d-md-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <h3 class="fw-bold mb-1 text-dark">Platform Fee & Commission</h3>
+      <p class="text-muted mb-0 small">
+        Configure e-commerce platform convenience fee and commission charges for purchase requests and orders.
+      </p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-secondary px-3 py-2 d-flex align-items-center gap-2 shadow-2xs rounded-3"
+        (click)="getPlatformFee()" [disabled]="isLoading">
+        <i class="fa-solid fa-arrows-rotate" [class.fa-spin]="isLoading"></i>
+        <span>{{ isLoading ? 'Refreshing...' : 'Refresh' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="card border-0 shadow-sm p-5 text-center my-4 rounded-4">
+    <div class="spinner-border text-danger mx-auto mb-3" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <h5 class="text-dark fw-bold mb-1">Loading Configuration</h5>
+    <p class="text-muted small mb-0">Fetching current platform fee settings from server...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+
+
+    <!-- Main Content Grid: Form + Live Simulation -->
+    <div class="row g-4">
+
+      <!-- LEFT: Configure & Update Form -->
+      <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+
+          <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+            <div
+              class="w-11 h-11 rounded-3 bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center">
+              <i class="fa-solid fa-sliders fs-5"></i>
+            </div>
+            <div>
+              <h4 class="fw-bold mb-0 text-dark">Configure Platform Charges</h4>
+              <p class="text-muted small mb-0">Update rate values and save to apply immediately.</p>
+            </div>
+          </div>
+
+          <form [formGroup]="feeForm" (ngSubmit)="updatePlatformFee()">
+
+            <!-- Field 1: Percentage Fee -->
+            <div class="mb-4">
+              <label class="form-label fw-bold text-dark mb-2">
+                Percentage Commission Rate (%) <span class="text-danger">*</span>
+              </label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                  <i class="fa-solid fa-percent"></i>
+                </span>
+                <input type="number" formControlName="percent" step="0.01" min="0" max="100"
+                  class="form-control border-start-0 ps-1"
+                  [class.is-invalid]="feeForm.get('percent')?.invalid && (feeForm.get('percent')?.touched || feeForm.get('percent')?.dirty)"
+                  placeholder="e.g. 5.00" />
+                <span class="input-group-text bg-light text-muted fw-semibold">%</span>
+              </div>
+              <div
+                *ngIf="feeForm.get('percent')?.invalid && (feeForm.get('percent')?.touched || feeForm.get('percent')?.dirty)"
+                class="text-danger small mt-1.5 fw-medium">
+                <i class="fa-solid fa-circle-exclamation me-1"></i> Please enter a valid percentage between 0 and 100.
+              </div>
+            </div>
+
+            <!-- Field 2: Flat Convenience Fee -->
+            <div class="mb-4">
+              <label class="form-label fw-bold text-dark mb-2">
+                Flat Convenience Fee (₹) <span class="text-danger">*</span>
+              </label>
+              <div class="input-group input-group-lg">
+                <span class="input-group-text bg-light border-end-0 text-muted fw-bold">
+                  ₹
+                </span>
+                <input type="number" formControlName="flat" step="0.01" min="0" class="form-control border-start-0 ps-1"
+                  [class.is-invalid]="feeForm.get('flat')?.invalid && (feeForm.get('flat')?.touched || feeForm.get('flat')?.dirty)"
+                  placeholder="e.g. 25.00" />
+                <span class="input-group-text bg-light text-muted fw-semibold">INR</span>
+              </div>
+              <div *ngIf="feeForm.get('flat')?.invalid && (feeForm.get('flat')?.touched || feeForm.get('flat')?.dirty)"
+                class="text-danger small mt-1.5 fw-medium">
+                <i class="fa-solid fa-circle-exclamation me-1"></i> Please enter a valid flat fee (0 or greater).
+              </div>
+
+            </div>
+
+
+
+            <!-- Form Actions -->
+            <div class="d-flex align-items-center justify-content-end gap-3 pt-3 border-top">
+              <button type="button" class="btn btn-outline-secondary px-4 py-2.5 rounded-3 fw-bold"
+                (click)="resetForm()" [disabled]="isSaving">
+                Reset
+              </button>
+
+              <button type="submit"
+                class="btn btn-custom-primary px-5 py-2.5 rounded-3 fw-bold shadow-sm d-flex align-items-center gap-2"
+                [disabled]="isSaving || feeForm.invalid">
+                <i *ngIf="isSaving" class="fa-solid fa-spinner fa-spin"></i>
+                <span>{{ isSaving ? 'Updating...' : 'Save & Update Fee' }}</span>
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+
+
+    </div>
+
+  </div>
+
+</div>
