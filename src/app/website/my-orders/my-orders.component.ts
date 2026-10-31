@@ -4,19 +4,27 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
+import { EcomService } from 'src/app/core/services/ecom.service';
 
 export interface OrderItem {
   id: string;
   orderNumber: string;
   product: string;
+  vehicleCategory: string;
   quantity: number;
   unitPrice: number;
   productAmount: number;
+  gstPercent: number;
   gstTax: number;
+  productTotal: number;
   deliveryFee: number;
   platformFee: number;
   finalAmount: number;
+  currency: string;
   seller: string;
+  sellerBusinessName: string;
+  sellerContactName: string;
+  sellerId: number | string;
   sellerType: string;
   orderDate: string;
   orderTime: string;
@@ -28,8 +36,21 @@ export interface OrderItem {
   requestId: string;
   quotationId: string;
   quotationVersion: number;
+  quotationNotes?: string;
+  validUntil?: string;
+  submittedAt?: string;
   acceptanceTimestamp: string;
   currentStep: number;
+  deliveryAddress?: {
+    name?: string;
+    phone?: string;
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+  };
+  rawItem?: any;
 }
 
 @Component({
@@ -44,6 +65,17 @@ export class MyOrdersComponent implements OnInit {
   activeFilter: string = 'ALL';
   searchQuery: string = '';
 
+  // Loading state
+  isLoadingOrders: boolean = false;
+
+  // Pagination state from API
+  pagination = {
+    currentPage: 1,
+    perPage: 20,
+    total: 0,
+    lastPage: 1
+  };
+
   // Order Details Modal state
   isDetailsModalOpen: boolean = false;
   selectedOrder: OrderItem | null = null;
@@ -53,174 +85,310 @@ export class MyOrdersComponent implements OnInit {
     {
       id: 1,
       title: 'Order Confirmed',
-      description: 'Payment successfully completed and funds held',
+      description: 'Payment successfully completed via Razorpay and funds held in escrow',
       icon: 'fa-receipt'
     },
     {
       id: 2,
       title: 'Ready for Pickup',
-      description: 'Seller has prepared the order',
+      description: 'Seller has packaged the parts and booked delivery pickup',
       icon: 'fa-box-archive'
     },
     {
       id: 3,
       title: 'Shipped',
-      description: 'Shipment confirmed by logistics partner',
+      description: 'Shipment handed over to logistics partner and in transit',
       icon: 'fa-truck-fast'
     },
     {
       id: 4,
       title: 'Out for Delivery',
-      description: 'Order is on the way to delivery address',
+      description: 'Order is out for final delivery to your destination address',
       icon: 'fa-motorcycle'
     },
     {
       id: 5,
       title: 'Delivered - Open Box',
-      description: 'Open-box delivery completed and verified',
+      description: 'Open-box inspection completed and verified by customer',
       icon: 'fa-box-open'
     }
   ];
 
-  // Dummy list of orders matching mobile screenshots
-  orders: OrderItem[] = [
-    {
-      id: '1',
-      orderNumber: 'ORD-1001',
-      product: 'Brake Pad Set',
-      quantity: 2,
-      unitPrice: 4250,
-      productAmount: 8500,
-      gstTax: 1651.50,
-      deliveryFee: 250,
-      platformFee: 425,
-      finalAmount: 10826.50,
-      seller: 'ABC Auto Parts',
-      sellerType: 'Automotive Parts Seller',
-      orderDate: '18 Sep 2026',
-      orderTime: '02:15 PM',
-      status: 'Confirmed',
-      statusMessage: 'Payment was successfully completed and funds are held.',
-      paymentStatus: 'Successful',
-      fundsStatus: 'Held',
-      settlementStatus: 'Funds Held',
-      requestId: 'REQ-1001',
-      quotationId: 'QTN-1001',
-      quotationVersion: 1,
-      acceptanceTimestamp: '18 Sep 2026, 02:15 PM',
-      currentStep: 1
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-1002',
-      product: 'Clutch Plate',
-      quantity: 1,
-      unitPrice: 3200,
-      productAmount: 3200,
-      gstTax: 590,
-      deliveryFee: 150,
-      platformFee: 50,
-      finalAmount: 3990,
-      seller: 'XYZ Automotive',
-      sellerType: 'Certified Parts Provider',
-      orderDate: '16 Sep 2026',
-      orderTime: '11:40 AM',
-      status: 'Ready for Pickup',
-      statusMessage: 'Seller has packaged the clutch plate and booked pickup.',
-      paymentStatus: 'Successful',
-      fundsStatus: 'Held',
-      settlementStatus: 'Funds Held',
-      requestId: 'REQ-1002',
-      quotationId: 'QTN-1002',
-      quotationVersion: 1,
-      acceptanceTimestamp: '16 Sep 2026, 11:40 AM',
-      currentStep: 2
-    },
-    {
-      id: '3',
-      orderNumber: 'ORD-1003',
-      product: 'LED Headlight Assembly',
-      quantity: 2,
-      unitPrice: 5800,
-      productAmount: 11600,
-      gstTax: 1500,
-      deliveryFee: 300,
-      platformFee: 450,
-      finalAmount: 13850,
-      seller: 'Speedline Spares',
-      sellerType: 'OEM Lighting Distributor',
-      orderDate: '14 Sep 2026',
-      orderTime: '04:10 PM',
-      status: 'Shipped',
-      statusMessage: 'In transit via Delhivery Express. Tracking ID: TRK984210.',
-      paymentStatus: 'Successful',
-      fundsStatus: 'Held',
-      settlementStatus: 'Funds Held',
-      requestId: 'REQ-1003',
-      quotationId: 'QTN-1003',
-      quotationVersion: 1,
-      acceptanceTimestamp: '14 Sep 2026, 04:10 PM',
-      currentStep: 3
-    },
-    {
-      id: '4',
-      orderNumber: 'ORD-1004',
-      product: 'Engine Oil & Filter Combo',
-      quantity: 1,
-      unitPrice: 1950,
-      productAmount: 1950,
-      gstTax: 250,
-      deliveryFee: 100,
-      platformFee: 50,
-      finalAmount: 2350,
-      seller: 'Metro Bikers Spares',
-      sellerType: 'Two-Wheeler Specialist',
-      orderDate: '10 Sep 2026',
-      orderTime: '01:20 PM',
-      status: 'Delivered',
-      statusMessage: 'Open-box delivery completed successfully. Verified by customer.',
-      paymentStatus: 'Successful',
-      fundsStatus: 'Settled',
-      settlementStatus: 'Settled to Seller',
-      requestId: 'REQ-1004',
-      quotationId: 'QTN-1004',
-      quotationVersion: 1,
-      acceptanceTimestamp: '10 Sep 2026, 01:20 PM',
-      currentStep: 5
-    },
-    {
-      id: '5',
-      orderNumber: 'ORD-1005',
-      product: 'Front Brake Disc Rotor',
-      quantity: 2,
-      unitPrice: 2800,
-      productAmount: 5600,
-      gstTax: 850,
-      deliveryFee: 200,
-      platformFee: 150,
-      finalAmount: 6800,
-      seller: 'National Auto Agency',
-      sellerType: 'Automotive Disc Specialist',
-      orderDate: '07 Sep 2026',
-      orderTime: '10:05 AM',
-      status: 'Confirmed',
-      statusMessage: 'Payment was successfully completed and funds are held.',
-      paymentStatus: 'Successful',
-      fundsStatus: 'Held',
-      settlementStatus: 'Funds Held',
-      requestId: 'REQ-1005',
-      quotationId: 'QTN-1005',
-      quotationVersion: 1,
-      acceptanceTimestamp: '07 Sep 2026, 10:05 AM',
-      currentStep: 1
-    }
-  ];
+  // Dynamic list of orders loaded from API
+  orders: OrderItem[] = [];
+
+  constructor(private ecomService: EcomService) {}
 
   ngOnInit(): void {
-    // Default select first order if needed
-    if (this.orders.length > 0) {
-      this.selectedOrder = this.orders[0];
+    this.loadOrders();
+  }
+
+  loadOrders(page: number = 1): void {
+    this.isLoadingOrders = true;
+    this.pagination.currentPage = page;
+    this.ecomService.getPurchaseRequests({ page: page, per_page: this.pagination.perPage }).subscribe({
+      next: (res: any) => {
+        this.isLoadingOrders = false;
+        if (res?.data?.pagination) {
+          this.pagination = {
+            currentPage: Number(res.data.pagination.current_page || page),
+            perPage: Number(res.data.pagination.per_page || 20),
+            total: Number(res.data.pagination.total || 0),
+            lastPage: Number(res.data.pagination.last_page || 1)
+          };
+        }
+        const items = res?.data?.items || (Array.isArray(res?.data) ? res.data : (res?.data?.data || []));
+        if (Array.isArray(items)) {
+          // Filter only items that have an order placed (status == 'ordered', order exists, or payment successful)
+          const orderItems = items.filter((item: any) => {
+            const s = (item.status || '').toLowerCase().trim();
+            const ps = (item.payment_status || '').toLowerCase().trim();
+            return !!item.order || s === 'ordered' || s === 'order_confirmed' || s === 'confirmed' || ps === 'successful' || ps === 'paid';
+          });
+
+          this.orders = orderItems.map((item: any) => this.mapApiOrder(item));
+
+          if (this.orders.length > 0) {
+            if (this.selectedOrder) {
+              const fresh = this.orders.find(o => o.id === this.selectedOrder?.id);
+              if (fresh) {
+                this.selectedOrder = fresh;
+              }
+            } else {
+              this.selectedOrder = this.orders[0];
+            }
+          } else {
+            this.selectedOrder = null;
+          }
+        } else {
+          this.orders = [];
+          this.selectedOrder = null;
+        }
+      },
+      error: (err) => {
+        this.isLoadingOrders = false;
+        console.error('Failed to load orders:', err);
+      }
+    });
+  }
+
+  loadPurchaseRequests(): void {
+    this.loadOrders();
+  }
+
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.pagination.lastPage && page !== this.pagination.currentPage) {
+      this.loadOrders(page);
     }
+  }
+
+  get pagesArray(): number[] {
+    const pages: number[] = [];
+    const total = this.pagination.lastPage || 1;
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  private mapOrderStatus(orderStatus: string, itemStatus: string): {
+    status: 'Confirmed' | 'Ready for Pickup' | 'Shipped' | 'Out for Delivery' | 'Delivered';
+    step: number;
+    message: string;
+  } {
+    const os = (orderStatus || '').toLowerCase().trim();
+    const is = (itemStatus || '').toLowerCase().trim();
+
+    if (os === 'delivered' || is === 'delivered' || os === 'completed') {
+      return {
+        status: 'Delivered',
+        step: 5,
+        message: 'Open-box delivery completed and verified by customer.'
+      };
+    }
+    if (os === 'out_for_delivery' || os === 'out-for-delivery') {
+      return {
+        status: 'Out for Delivery',
+        step: 4,
+        message: 'Order is on the way to your delivery address.'
+      };
+    }
+    if (os === 'shipped' || os === 'in_transit' || os === 'dispatched') {
+      return {
+        status: 'Shipped',
+        step: 3,
+        message: 'Shipment handed over to logistics partner and in transit.'
+      };
+    }
+    if (os === 'ready_for_pickup' || os === 'ready' || os === 'packaged' || os === 'packed') {
+      return {
+        status: 'Ready for Pickup',
+        step: 2,
+        message: 'Seller has packaged the order and arranged pickup.'
+      };
+    }
+    // Default for newly placed / confirmed order
+    return {
+      status: 'Confirmed',
+      step: 1,
+      message: 'Payment completed via Razorpay and order is confirmed. Funds are held in escrow.'
+    };
+  }
+
+  private mapApiOrder(item: any): OrderItem {
+    const snap = item.commercial_snapshot || {};
+    const ord = item.order || {};
+    const catName = item.vehicle_category?.name || '';
+
+    // Active/accepted quotation from quotations array if present
+    const quote = (Array.isArray(item.quotations) && item.quotations.length > 0)
+      ? (item.quotations.find((q: any) => q.id === item.accepted_quotation_id) || item.quotations[0])
+      : null;
+
+    // Status mapping
+    const statusMapping = this.mapOrderStatus(ord.status, item.status);
+
+    // Format created date
+    let orderDate = 'Recent';
+    let orderTime = '';
+    const rawDate = ord.created_at || snap.accepted_at || item.accepted_at || item.created_at;
+    if (rawDate) {
+      try {
+        const d = new Date(rawDate);
+        orderDate = d.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+        orderTime = d.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      } catch (_) {
+        orderDate = String(rawDate);
+      }
+    }
+
+    // Format acceptance date
+    let acceptanceTimestamp = orderDate + (orderTime ? (', ' + orderTime) : '');
+    const rawAccepted = snap.accepted_at || item.accepted_at || quote?.accepted_at;
+    if (rawAccepted) {
+      try {
+        const d = new Date(rawAccepted);
+        acceptanceTimestamp = d.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }) + ', ' + d.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      } catch (_) {}
+    }
+
+    // Format validity date
+    let validUntil = '';
+    if (quote?.valid_until) {
+      try {
+        const d = new Date(quote.valid_until);
+        validUntil = d.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }) + ', ' + d.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      } catch (_) {
+        validUntil = quote.valid_until;
+      }
+    }
+
+    // Format submitted date
+    let submittedAt = '';
+    if (quote?.submitted_at) {
+      try {
+        const d = new Date(quote.submitted_at);
+        submittedAt = d.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }) + ', ' + d.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+      } catch (_) {
+        submittedAt = quote.submitted_at;
+      }
+    }
+
+    // Pricing calculations from commercial_snapshot or quotation
+    const unitPrice = Number(snap.unit_price !== undefined ? snap.unit_price : (quote?.unit_price || 0));
+    const quantity = Number(snap.quantity || quote?.quantity || item.quantity || 1);
+    const productAmount = Number(snap.product_amount !== undefined ? snap.product_amount : (quote?.product_amount || (unitPrice * quantity)));
+    const gstPercent = Number(snap.gst_percent !== undefined ? snap.gst_percent : (quote?.gst_percent || 18));
+    const gstTax = Number(snap.gst_amount !== undefined ? snap.gst_amount : (quote?.gst_amount || 0));
+    const productTotal = Number(snap.product_total !== undefined ? snap.product_total : (quote?.product_total || (productAmount + gstTax)));
+    const deliveryFee = Number(snap.delivery_fee !== undefined ? snap.delivery_fee : (quote?.delivery_fee || 0));
+    const platformFee = Number(snap.platform_fee !== undefined ? snap.platform_fee : (quote?.platform_fee || 0));
+    const finalAmount = Number(snap.final_amount !== undefined ? snap.final_amount : (quote?.final_amount || (productTotal + deliveryFee + platformFee)));
+    const currency = snap.currency || quote?.currency || 'INR';
+
+    // Seller Information
+    const sellerBusiness = quote?.seller?.business_name || '';
+    const sellerContact = quote?.seller?.name || '';
+    const sellerId = quote?.seller?.id || snap.seller_id || '';
+    const sellerDisplay = sellerBusiness || sellerContact || (sellerId ? `Seller #${sellerId}` : 'Garage Mandi Partner');
+
+    // Payment & Escrow
+    const isDelivered = statusMapping.status === 'Delivered';
+    const payStatus = (item.payment_status || 'successful').toLowerCase();
+    const paymentStatus: 'Successful' | 'Pending' | 'Failed' =
+      payStatus === 'successful' || payStatus === 'paid' ? 'Successful' :
+      payStatus === 'failed' ? 'Failed' : 'Pending';
+
+    return {
+      id: String(ord.id || item.id),
+      orderNumber: ord.order_number || ('GMO-' + item.id),
+      product: snap.product_name || item.product_name || 'Automotive Spare Part',
+      vehicleCategory: catName || 'Two Wheeler',
+      quantity,
+      unitPrice,
+      productAmount,
+      gstPercent,
+      gstTax,
+      productTotal,
+      deliveryFee,
+      platformFee,
+      finalAmount,
+      currency,
+      seller: sellerDisplay,
+      sellerBusinessName: sellerBusiness,
+      sellerContactName: sellerContact,
+      sellerId,
+      sellerType: catName ? `${catName} Specialist` : 'Automotive Parts Seller',
+      orderDate,
+      orderTime,
+      status: statusMapping.status,
+      statusMessage: statusMapping.message,
+      paymentStatus,
+      fundsStatus: isDelivered ? 'Settled' : 'Held',
+      settlementStatus: isDelivered ? 'Settled to Seller' : 'Funds Held',
+      requestId: item.reference || ('GPR-' + item.id),
+      quotationId: snap.quotation_reference || quote?.reference || (item.accepted_quotation_id ? ('GQT-' + item.accepted_quotation_id) : 'N/A'),
+      quotationVersion: Number(snap.quotation_version || quote?.version || 1),
+      quotationNotes: quote?.notes || '',
+      validUntil,
+      submittedAt,
+      acceptanceTimestamp,
+      currentStep: statusMapping.step,
+      deliveryAddress: item.delivery_address || undefined,
+      rawItem: item
+    };
   }
 
   // Filtered orders getter
@@ -247,21 +415,20 @@ export class MyOrdersComponent implements OnInit {
 
   // Counts
   get totalOrdersCount(): number {
-    return 9; // matching screenshot display (9 total)
+    return this.orders.length;
   }
 
   get completedOrdersCount(): number {
-    return 1; // matching screenshot display (1 completed)
+    return this.orders.filter(o => o.status === 'Delivered').length;
+  }
+
+  get inProgressOrdersCount(): number {
+    return this.orders.filter(o => o.status !== 'Delivered').length;
   }
 
   // Filter changer
   setFilter(filter: string): void {
     this.activeFilter = filter;
-  }
-
-  // Active in-transit orders count
-  get inProgressOrdersCount(): number {
-    return this.orders.filter(o => o.status !== 'Delivered').length;
   }
 
   // Helper for step states
@@ -295,6 +462,26 @@ export class MyOrdersComponent implements OnInit {
   openOrderDetails(order: OrderItem): void {
     this.selectedOrder = order;
     this.isDetailsModalOpen = true;
+
+    // Fetch full request details to enrich seller or quotation details if available
+    const requestId = order.rawItem?.id;
+    if (requestId) {
+      this.ecomService.getPurchaseRequestDetails(requestId).subscribe({
+        next: (res: any) => {
+          if (res?.data) {
+            const updated = this.mapApiOrder(res.data);
+            this.selectedOrder = updated;
+            const idx = this.orders.findIndex(o => o.id === updated.id);
+            if (idx !== -1) {
+              this.orders[idx] = updated;
+            }
+          }
+        },
+        error: (err) => {
+          console.error('Failed to get purchase request details:', err);
+        }
+      });
+    }
   }
 
   closeOrderDetails(): void {

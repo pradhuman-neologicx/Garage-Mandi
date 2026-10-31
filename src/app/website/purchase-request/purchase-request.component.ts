@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
 import { EcomService, CreatePurchaseRequestPayload } from 'src/app/core/services/ecom.service';
+import { RazorpayService, RazorpaySuccessResponse, RazorpayPaymentOptions } from 'src/app/core/services/razorpay.service';
 
 export interface Quotation {
   id: string | number;
@@ -26,6 +27,9 @@ export interface Quotation {
   validity: string;
   validUntil: string;
   notes: string;
+  status?: string;
+  isAccepted?: boolean;
+  acceptedAt?: string;
 }
 
 export interface PurchaseRequest {
@@ -46,6 +50,7 @@ export interface PurchaseRequest {
   paymentStatus?: string;
   commercialSnapshot?: any;
   order?: any;
+  acceptedQuotationId?: number | string | null;
 }
 
 @Component({
@@ -73,6 +78,9 @@ export class PurchaseRequestComponent implements OnInit {
     { id: 6, label: 'Order Confirmed' }
   ];
 
+  // View Mode: 'list' (default grid of requests) or 'detail' (full detail view of selected request)
+  currentView: 'list' | 'detail' = 'list';
+
   // Selected state for detail view
   selectedRequest: PurchaseRequest | null = null;
 
@@ -84,6 +92,8 @@ export class PurchaseRequestComponent implements OnInit {
   finalQuantity: number = 1;
   customerDeclarationAccepted: boolean = false;
   isAcceptingQuote: boolean = false;
+  isCheckingOut: boolean = false;
+  isVerifyingPayment: boolean = false;
 
   // Cancel Request state
   isCancelModalOpen: boolean = false;
@@ -112,7 +122,8 @@ export class PurchaseRequestComponent implements OnInit {
   categoryTouched: boolean = false;
 
   constructor(
-    private ecomService: EcomService
+    private ecomService: EcomService,
+    private razorpayService: RazorpayService
   ) {}
 
   getProductError(): string {
@@ -162,11 +173,17 @@ export class PurchaseRequestComponent implements OnInit {
   isOrderSuccessModalOpen: boolean = false;
   confirmedOrderData: any = null;
 
+  // Pagination state from API
+  pagination = {
+    currentPage: 1,
+    perPage: 20,
+    total: 0,
+    lastPage: 1
+  };
+
   ngOnInit(): void {
-    // Select first request by default for responsive split view or deep inspection
-    if (this.purchaseRequests.length > 0) {
-      this.selectedRequest = this.purchaseRequests[0];
-    }
+    this.currentView = 'list';
+    this.selectedRequest = null;
     this.loadVehicleCategories();
     this.loadPurchaseRequests();
   }
@@ -187,27 +204,31 @@ export class PurchaseRequestComponent implements OnInit {
     });
   }
 
-  loadPurchaseRequests(): void {
+  loadPurchaseRequests(page: number = 1): void {
     this.isLoadingRequests = true;
-    this.ecomService.getPurchaseRequests().subscribe({
+    this.pagination.currentPage = page;
+    this.ecomService.getPurchaseRequests({ page: page, per_page: this.pagination.perPage }).subscribe({
       next: (res: any) => {
         this.isLoadingRequests = false;
+        if (res?.data?.pagination) {
+          this.pagination = {
+            currentPage: Number(res.data.pagination.current_page || page),
+            perPage: Number(res.data.pagination.per_page || 20),
+            total: Number(res.data.pagination.total || 0),
+            lastPage: Number(res.data.pagination.last_page || 1)
+          };
+        }
         const items = res?.data?.items || (Array.isArray(res?.data) ? res.data : (res?.data?.data || []));
         if (Array.isArray(items)) {
           this.purchaseRequests = items.map((item: any) => this.mapApiRequest(item));
-          if (this.purchaseRequests.length > 0) {
-            if (!this.selectedRequest || !this.purchaseRequests.some(r => r.id === this.selectedRequest?.id)) {
-              this.selectRequest(this.purchaseRequests[0]);
-            } else {
-              const current = this.purchaseRequests.find(r => r.id === this.selectedRequest?.id) || this.purchaseRequests[0];
-              this.selectRequest(current);
+          if (this.currentView === 'detail' && this.selectedRequest) {
+            const fresh = this.purchaseRequests.find(r => r.id === this.selectedRequest?.id);
+            if (fresh) {
+              this.selectedRequest = fresh;
             }
-          } else {
-            this.selectedRequest = null;
           }
         } else {
           this.purchaseRequests = [];
-          this.selectedRequest = null;
         }
       },
       error: (err) => {
@@ -217,54 +238,87 @@ export class PurchaseRequestComponent implements OnInit {
     });
   }
 
-  private mapStatus(rawStatus: string): { statusLabel: string; currentStep: number; statusMessage: string } {
+  onPageChange(page: number): void {
+    if (page >= 1 && page <= this.pagination.lastPage && page !== this.pagination.currentPage) {
+      this.loadPurchaseRequests(page);
+    }
+  }
+
+  get pagesArray(): number[] {
+    const pages: number[] = [];
+    const total = this.pagination.lastPage || 1;
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  private mapStatus(rawStatus: string, item?: any): { statusLabel: string; currentStep: number; statusMessage: string } {
     const s = (rawStatus || '').toLowerCase().trim();
-    if (s === 'requested' || s === 'awaiting_quotation' || s === 'pending') {
-      return {
-        statusLabel: 'Awaiting Quotation',
-        currentStep: 2,
-        statusMessage: 'Waiting for seller quotation.'
-      };
-    } else if (s === 'quoted' || s === 'quote_received' || s === 'quotes_received') {
-      return {
-        statusLabel: 'Quote Received',
-        currentStep: 3,
-        statusMessage: 'Seller quotation received. Review the quotation.'
-      };
-    } else if (s === 'accepted' || s === 'awaiting_acceptance') {
-      return {
-        statusLabel: 'Awaiting Acceptance',
-        currentStep: 4,
-        statusMessage: 'Commercial terms accepted. Ready for payment.'
-      };
-    } else if (s === 'awaiting_payment' || s === 'payment_pending') {
-      return {
-        statusLabel: 'Awaiting Payment',
-        currentStep: 5,
-        statusMessage: 'Awaiting payment confirmation.'
-      };
-    } else if (s === 'order_confirmed' || s === 'confirmed' || s === 'completed' || s === 'paid') {
-      return {
-        statusLabel: 'Order Confirmed',
-        currentStep: 6,
-        statusMessage: 'Order confirmed and payment processed successfully.'
-      };
-    } else if (s === 'cancelled' || s === 'rejected') {
+    const payStatus = ((item?.payment_status) || '').toLowerCase().trim();
+    const hasOrder = !!item?.order;
+
+    if (s === 'cancelled' || s === 'rejected') {
       return {
         statusLabel: 'Cancelled',
         currentStep: 1,
         statusMessage: 'This purchase request has been cancelled.'
       };
     }
+
+    // Step 6: Ordered / Confirmed / Payment Successful
+    if (
+      s === 'ordered' ||
+      s === 'order_confirmed' ||
+      s === 'confirmed' ||
+      s === 'completed' ||
+      s === 'paid' ||
+      payStatus === 'successful' ||
+      payStatus === 'paid' ||
+      hasOrder
+    ) {
+      return {
+        statusLabel: 'Order Confirmed',
+        currentStep: 6,
+        statusMessage: 'Order confirmed and payment processed successfully.'
+      };
+    }
+
+    // Step 5: Awaiting Payment / Commercial Terms Accepted
+    if (
+      s === 'accepted' ||
+      s === 'awaiting_payment' ||
+      s === 'payment_pending' ||
+      s === 'awaiting_acceptance' ||
+      !!item?.accepted_quotation_id
+    ) {
+      return {
+        statusLabel: 'Awaiting Payment',
+        currentStep: 5,
+        statusMessage: 'Commercial terms accepted. Ready for payment.'
+      };
+    }
+
+    // Step 3: Quotation Received
+    const quotesCount = Array.isArray(item?.quotations) ? item.quotations.length : Number(item?.quotations_count || 0);
+    if (s === 'quoted' || s === 'quote_received' || s === 'quotes_received' || quotesCount > 0) {
+      return {
+        statusLabel: 'Quote Received',
+        currentStep: 3,
+        statusMessage: 'Seller quotation received. Review the quotation.'
+      };
+    }
+
+    // Step 2: Awaiting Quotation
     return {
-      statusLabel: rawStatus || 'Awaiting Quotation',
+      statusLabel: 'Awaiting Quotation',
       currentStep: 2,
       statusMessage: 'Waiting for seller quotation.'
     };
   }
 
   private mapApiRequest(item: any): PurchaseRequest {
-    const mapped = this.mapStatus(item.status);
+    const mapped = this.mapStatus(item.status, item);
     let dateStr = 'Recent';
     if (item.created_at) {
       try {
@@ -290,6 +344,9 @@ export class PurchaseRequestComponent implements OnInit {
           const platFee = Number(q.platform_fee !== undefined ? q.platform_fee : 0);
           const finalAmt = Number(q.final_amount !== undefined ? q.final_amount : prodTotal + delFee + platFee);
 
+          const isAcceptedQuote = (item.accepted_quotation_id && (Number(item.accepted_quotation_id) === Number(q.id))) ||
+            q.status === 'accepted' || (q.accepted_at != null);
+
           return {
             id: q.reference || q.quotation_code || (q.id ? `GQT-${q.id}` : 'QUO'),
             rawId: q.id,
@@ -309,7 +366,10 @@ export class PurchaseRequestComponent implements OnInit {
             finalAmount: finalAmt,
             validity: q.validity || '24 Hours',
             validUntil: q.valid_until ? new Date(q.valid_until).toLocaleString() : (q.valid_until_at ? new Date(q.valid_until_at).toLocaleString() : '24 Hours'),
-            notes: q.notes || q.description || ''
+            notes: q.notes || q.description || '',
+            status: q.status || '',
+            isAccepted: isAcceptedQuote,
+            acceptedAt: q.accepted_at || null
           };
         })
       : [];
@@ -331,7 +391,8 @@ export class PurchaseRequestComponent implements OnInit {
       deliveryAddress: item.delivery_address || null,
       paymentStatus: item.payment_status || 'not_started',
       commercialSnapshot: item.commercial_snapshot || null,
-      order: item.order || null
+      order: item.order || null,
+      acceptedQuotationId: item.accepted_quotation_id || null
     };
   }
 
@@ -385,9 +446,10 @@ export class PurchaseRequestComponent implements OnInit {
     ).length;
   }
 
-  // Select request
+  // Select request to open detailed view
   selectRequest(req: PurchaseRequest): void {
     this.selectedRequest = req;
+    this.currentView = 'detail';
     if (req.id) {
       this.ecomService.getPurchaseRequestDetails(req.id).subscribe({
         next: (res: any) => {
@@ -407,12 +469,16 @@ export class PurchaseRequestComponent implements OnInit {
       });
     }
 
-    // Scroll to detail on mobile
-    if (window.innerWidth < 1024) {
-      const el = document.getElementById('request-details-panel');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  // Back to full listing cards view
+  backToList(): void {
+    this.currentView = 'list';
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
@@ -500,23 +566,19 @@ export class PurchaseRequestComponent implements OnInit {
         this.isAcceptingQuote = false;
         this.isFinalConfirmationOpen = false;
 
-        this.selectedRequest!.status = 'Order Confirmed';
+        this.selectedRequest!.status = 'Awaiting Payment';
         this.selectedRequest!.rawStatus = 'accepted';
-        this.selectedRequest!.currentStep = 6;
-        this.selectedRequest!.statusMessage = 'Quotation accepted and order terms locked.';
+        this.selectedRequest!.currentStep = 5;
+        this.selectedRequest!.statusMessage = 'Commercial terms accepted. Ready for payment.';
+        this.selectedRequest!.acceptedQuotationId = quotationId;
+        if (this.selectedQuotation) {
+          this.selectedQuotation.isAccepted = true;
+        }
 
-        this.confirmedOrderData = {
-          requestId: this.selectedRequest!.reference || this.selectedRequest!.id,
-          sellerName: this.selectedQuotation!.sellerName,
-          product: this.selectedRequest!.product,
-          quantity: this.finalQuantity,
-          totalAmount: this.finalPayableAmount,
-          orderDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-        };
-
-        this.isOrderSuccessModalOpen = true;
-        this.displayToast(res?.message || 'Quotation accepted successfully! Commercial terms locked.');
-        this.loadPurchaseRequests();
+        this.displayToast(res?.message || 'Quotation accepted! Proceeding to checkout...');
+        
+        // Immediately trigger checkout and payment gateway
+        this.proceedToCheckout(this.selectedRequest);
       },
       error: (err: any) => {
         this.isAcceptingQuote = false;
@@ -526,14 +588,234 @@ export class PurchaseRequestComponent implements OnInit {
     });
   }
 
-  // Cancel Request handling
+  // Check if purchase request is ready for payment checkout
+  canCheckout(req: PurchaseRequest | null): boolean {
+    if (!req) return false;
+    const raw = (req.rawStatus || '').toLowerCase();
+    const payStatus = ((req.paymentStatus) || '').toLowerCase();
+
+    if (
+      raw === 'ordered' ||
+      raw === 'order_confirmed' ||
+      raw === 'confirmed' ||
+      raw === 'paid' ||
+      raw === 'completed' ||
+      payStatus === 'successful' ||
+      payStatus === 'paid' ||
+      req.status === 'Order Confirmed' ||
+      req.currentStep === 6 ||
+      !!req.order
+    ) {
+      return false;
+    }
+    if (raw === 'cancelled' || raw === 'rejected' || req.status === 'Cancelled') {
+      return false;
+    }
+
+    return raw === 'accepted' || req.status === 'Awaiting Payment' || req.currentStep === 5;
+  }
+
+  // Check if request already has commercial terms accepted
+  isRequestAccepted(req: PurchaseRequest | null): boolean {
+    if (!req) return false;
+    const raw = (req.rawStatus || '').toLowerCase();
+    const status = (req.status || '').toLowerCase();
+    const payStatus = ((req.paymentStatus) || '').toLowerCase();
+    return (
+      raw === 'ordered' ||
+      raw === 'accepted' ||
+      raw === 'awaiting_payment' ||
+      raw === 'order_confirmed' ||
+      raw === 'confirmed' ||
+      raw === 'paid' ||
+      raw === 'completed' ||
+      payStatus === 'successful' ||
+      payStatus === 'paid' ||
+      status === 'awaiting payment' ||
+      status === 'order confirmed' ||
+      req.currentStep >= 5 ||
+      !!req.acceptedQuotationId ||
+      !!req.order
+    );
+  }
+
+  // Check if a specific quotation is accepted
+  isQuoteAccepted(quote: Quotation, req: PurchaseRequest | null): boolean {
+    if (!quote || !req) return false;
+    if (quote.isAccepted) return true;
+    if (quote.status === 'accepted') return true;
+    if (req.acceptedQuotationId && (Number(req.acceptedQuotationId) === Number(quote.rawId) || req.acceptedQuotationId === quote.id)) {
+      return true;
+    }
+    if (req.commercialSnapshot?.quotation_id && (Number(req.commercialSnapshot.quotation_id) === Number(quote.rawId) || req.commercialSnapshot?.quotation_reference === quote.reference)) {
+      return true;
+    }
+    const raw = (req.rawStatus || '').toLowerCase();
+    const status = (req.status || '').toLowerCase();
+    if (raw === 'accepted' || raw === 'ordered' || raw === 'confirmed' || raw === 'order_confirmed' || status === 'awaiting payment' || status === 'order confirmed' || req.currentStep >= 5) {
+      if ((this.selectedQuotation && this.selectedQuotation.rawId === quote.rawId) || req.quotations.length === 1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Checkout API + Razorpay Payment Gateway integration
+  proceedToCheckout(request?: PurchaseRequest | null): void {
+    const targetReq = request || this.selectedRequest;
+    if (!targetReq) {
+      this.displayToast('Please select a purchase request first.');
+      return;
+    }
+
+    const requestId = targetReq.id;
+    this.isCheckingOut = true;
+
+    this.ecomService.checkout(requestId).subscribe({
+      next: (res: any) => {
+        this.isCheckingOut = false;
+
+        const data = res?.data || {};
+        const rzpData = data.razorpay || data;
+        const orderId = data.razorpay_order_id || rzpData.razorpay_order_id || rzpData.order_id || rzpData.id;
+        const rzpKey = data.key_id || rzpData.key_id || rzpData.key || data.key || data.razorpay_key;
+        const paymentId = data.payment_id || rzpData.payment_id;
+        const amount = data.amount_paise !== undefined ? data.amount_paise : (rzpData.amount !== undefined ? rzpData.amount : undefined);
+        const currency = data.currency || rzpData.currency || 'INR';
+
+        const prefill = data.prefill || {
+          name: targetReq.deliveryAddress?.name || '',
+          contact: targetReq.deliveryAddress?.phone || '',
+          email: ''
+        };
+
+        if (!rzpKey) {
+          this.displayToast('Razorpay configuration missing in server response.');
+          return;
+        }
+
+        const paymentOptions: RazorpayPaymentOptions = {
+          key: rzpKey,
+          order_id: orderId,
+          amount: amount !== undefined && !isNaN(Number(amount)) ? Number(amount) : undefined,
+          currency: currency,
+          name: 'Garage Mandi',
+          description: `Payment for ${targetReq.product}`,
+          recurring: 0,
+          prefill: {
+            name: prefill.name || targetReq.deliveryAddress?.name || '',
+            contact: prefill.contact || targetReq.deliveryAddress?.phone || '',
+            email: prefill.email || ''
+          },
+          theme: {
+            color: '#db3333'
+          }
+        };
+
+        this.razorpayService.pay(paymentOptions)
+          .then((rzpSuccess: RazorpaySuccessResponse) => {
+            this.verifyPayment(rzpSuccess, orderId, targetReq, paymentId);
+          })
+          .catch((rzpErr: any) => {
+            if (rzpErr && rzpErr.dismissed) {
+              this.displayToast('Payment was cancelled.');
+            } else {
+              const msg = rzpErr?.message || rzpErr?.description || 'Payment failed or cancelled.';
+              this.displayToast(msg);
+            }
+          });
+      },
+      error: (err: any) => {
+        this.isCheckingOut = false;
+        const msg = err?.message || err?.error?.message || (typeof err === 'string' ? err : 'Checkout failed.');
+        this.displayToast(msg);
+      }
+    });
+  }
+
+  // Verify payment API after Razorpay completion
+  verifyPayment(rzpSuccess: RazorpaySuccessResponse, fallbackOrderId: string, targetReq: PurchaseRequest, paymentId?: number | string): void {
+    this.isVerifyingPayment = true;
+
+    const verifyPayload: any = {
+      razorpay_order_id: rzpSuccess.razorpay_order_id || fallbackOrderId,
+      razorpay_payment_id: rzpSuccess.razorpay_payment_id,
+      razorpay_signature: rzpSuccess.razorpay_signature
+    };
+    if (paymentId) {
+      verifyPayload.payment_id = paymentId;
+    }
+
+    this.ecomService.verifyPayment(verifyPayload).subscribe({
+      next: (verifyRes: any) => {
+        this.isVerifyingPayment = false;
+
+        targetReq.status = 'Order Confirmed';
+        targetReq.rawStatus = 'order_confirmed';
+        targetReq.paymentStatus = 'paid';
+        targetReq.currentStep = 6;
+        targetReq.statusMessage = 'Order confirmed and payment verified successfully.';
+
+        const quote = this.selectedQuotation || (targetReq.quotations && targetReq.quotations.length > 0 ? targetReq.quotations[0] : null);
+        const totalAmount = this.finalPayableAmount || quote?.finalAmount || targetReq.commercialSnapshot?.final_amount || 0;
+        const sellerName = quote?.sellerName || 'Authorized Seller';
+
+        this.confirmedOrderData = {
+          requestId: targetReq.reference || targetReq.id,
+          sellerName: sellerName,
+          product: targetReq.product,
+          quantity: targetReq.quantity,
+          totalAmount: totalAmount,
+          orderDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        };
+
+        this.isOrderSuccessModalOpen = true;
+        this.displayToast(verifyRes?.message || 'Payment verified! Order confirmed.');
+        this.loadPurchaseRequests();
+      },
+      error: (verifyErr: any) => {
+        this.isVerifyingPayment = false;
+        const msg = verifyErr?.message || verifyErr?.error?.message || 'Payment verification failed. Payment ID: ' + rzpSuccess.razorpay_payment_id;
+        this.displayToast(msg);
+      }
+    });
+  }
+
+  // Cancel Request handling: After payment / order placement, cancellation is strictly disabled
   canCancelRequest(req: PurchaseRequest | null): boolean {
     if (!req) return false;
     const raw = (req.rawStatus || '').toLowerCase();
-    return raw !== 'cancelled' && raw !== 'rejected' && raw !== 'order_confirmed' && raw !== 'confirmed' && raw !== 'completed' && raw !== 'paid';
+    const payStatus = ((req.paymentStatus) || '').toLowerCase();
+    const status = (req.status || '').toLowerCase();
+
+    // Strictly disable cancellation after payment or once order is placed
+    if (
+      payStatus === 'successful' ||
+      payStatus === 'paid' ||
+      raw === 'ordered' ||
+      raw === 'order_confirmed' ||
+      raw === 'confirmed' ||
+      raw === 'completed' ||
+      raw === 'paid' ||
+      status === 'order confirmed' ||
+      req.currentStep === 6 ||
+      !!req.order
+    ) {
+      return false;
+    }
+
+    if (raw === 'cancelled' || raw === 'rejected' || status === 'cancelled') {
+      return false;
+    }
+
+    return true;
   }
 
   openCancelModal(): void {
+    if (!this.canCancelRequest(this.selectedRequest)) {
+      this.displayToast('Cannot cancel this request as payment has already been completed.');
+      return;
+    }
     this.cancelReason = '';
     this.isCancelModalOpen = true;
   }
@@ -544,7 +826,11 @@ export class PurchaseRequestComponent implements OnInit {
   }
 
   confirmCancelRequest(): void {
-    if (!this.selectedRequest) return;
+    if (!this.selectedRequest || !this.canCancelRequest(this.selectedRequest)) {
+      this.displayToast('Cannot cancel this request as payment has already been completed.');
+      this.closeCancelModal();
+      return;
+    }
     this.isCancelling = true;
     const requestId = this.selectedRequest.id;
 

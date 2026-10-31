@@ -102,19 +102,19 @@ export class EcomService {
   }
 
   /**
-   * POST /api/v1/ecomm/checkout
+   * POST /api/v1/ecom/purchase-requests/:id/checkout
    * Checkout purchase request
    */
-  checkout(payload: any): Observable<any> {
-    return this.apiService.post('ecom/checkout', payload, this.getHeaders());
+  checkout(requestId: string | number, payload: any = {}): Observable<any> {
+    return this.apiService.post(`ecom/purchase-requests/${requestId}/checkout`, payload, this.getHeaders());
   }
 
   /**
-   * POST /api/v1/ecomm/verify-payment
+   * POST /api/v1/ecom/payments/verify
    * Verify razorpay / payment for ecomm order
    */
   verifyPayment(payload: any): Observable<any> {
-    return this.apiService.post('ecom/verify-payment', payload, this.getHeaders());
+    return this.apiService.post('ecom/payments/verify', payload, this.getHeaders());
   }
 
   /**

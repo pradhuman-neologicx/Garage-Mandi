@@ -7,7 +7,7 @@
     <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
       <a routerLink="/request-quote"
         class="text-sm font-semibold text-gray-500 hover:text-[#db3333] transition-colors inline-flex items-center group">
-        <i class="fa-solid fa-arrow-left mr-2 transform group-hover:-translate-x-1 transition-transform"></i> 
+        <i class="fa-solid fa-arrow-left mr-2 transform group-hover:-translate-x-1 transition-transform"></i>
         Back to Options
       </a>
 
@@ -21,18 +21,21 @@
     </div>
 
     <!-- Main Header Banner -->
-    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+    <div
+      class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
       <div class="absolute -top-16 -right-16 w-52 h-52 bg-red-50 rounded-full opacity-60 pointer-events-none"></div>
-      
+
       <div class="relative z-10">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-[#db3333] border border-red-100 mb-3">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-[#db3333] border border-red-100 mb-3">
           <i class="fa-solid fa-bag-shopping"></i> Purchase Orders & Delivery Tracking
         </div>
         <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-          My <span class="text-[#db3333]">Orders</span>
+          My Orders
         </h1>
         <p class="text-gray-500 mt-2 text-base max-w-2xl leading-relaxed">
-          Monitor your automotive spare parts orders, inspect payment escrow status, follow shipment timelines, and view commercial breakdowns.
+          Monitor your automotive spare parts orders, inspect payment escrow status, follow shipment timelines, and view
+          commercial breakdowns.
         </p>
       </div>
 
@@ -48,59 +51,10 @@
       </div>
     </div>
 
-    <!-- KPI Summary Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-      <!-- Total Orders (Matching screenshot 9) -->
-      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Total Orders</span>
-          <div class="w-10 h-10 rounded-xl bg-rose-50 text-[#db3333] border border-rose-100 flex items-center justify-center">
-            <i class="fa-solid fa-bag-shopping text-base"></i>
-          </div>
-        </div>
-        <div class="text-3xl font-extrabold text-gray-900">{{ totalOrdersCount }}</div>
-        <p class="text-xs text-gray-400 mt-1">All purchases placed</p>
-      </div>
-
-      <!-- Completed Orders (Matching screenshot 1) -->
-      <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-emerald-50/30">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Completed</span>
-          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
-            <i class="fa-solid fa-circle-check text-base"></i>
-          </div>
-        </div>
-        <div class="text-3xl font-extrabold text-gray-900">{{ completedOrdersCount }}</div>
-        <p class="text-xs text-emerald-600 mt-1">Delivered & verified</p>
-      </div>
-
-      <!-- In Transit / Active -->
-      <div class="bg-white rounded-2xl p-5 border border-blue-100 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-blue-50/30">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">In Progress</span>
-          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
-            <i class="fa-solid fa-truck-fast text-base"></i>
-          </div>
-        </div>
-        <div class="text-3xl font-extrabold text-gray-900">{{ inProgressOrdersCount }}</div>
-        <p class="text-xs text-blue-600 mt-1">Confirmed / in transit</p>
-      </div>
-
-      <!-- Escrow Protected Guarantee -->
-      <div class="bg-white rounded-2xl p-5 border border-red-100 shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-red-50/40">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-xs font-bold uppercase tracking-wider text-[#db3333]">Escrow Protected</span>
-          <div class="w-10 h-10 rounded-xl bg-red-100 text-[#db3333] flex items-center justify-center">
-            <i class="fa-solid fa-shield-halved text-base"></i>
-          </div>
-        </div>
-        <div class="text-2xl font-extrabold text-gray-900">100% Secure</div>
-        <p class="text-xs text-[#db3333] mt-1 font-medium">Funds held until open-box verification</p>
-      </div>
-    </div>
 
     <!-- Filters & Search Toolbar -->
-    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+    <div
+      class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
       <!-- Filter Tabs -->
       <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
         <button (click)="setFilter('ALL')"
@@ -146,16 +100,27 @@
       </div>
     </div>
 
+    <!-- Loading State -->
+    <div *ngIf="isLoadingOrders"
+      class="bg-white rounded-3xl p-16 text-center border border-gray-100 shadow-sm max-w-lg mx-auto mb-8">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#db3333] border-t-transparent mb-4">
+      </div>
+      <h3 class="text-base font-bold text-gray-900 mb-1">Loading Your Orders...</h3>
+      <p class="text-xs text-gray-400">Fetching live purchase orders and fulfillment tracking</p>
+    </div>
+
     <!-- Orders Grid (Web Responsive Layout) -->
-    <div *ngIf="filteredOrders.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+    <div *ngIf="!isLoadingOrders && filteredOrders.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
       <div *ngFor="let order of filteredOrders"
         class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
-        
+
         <div>
           <!-- Card Top Row: Bag icon, Order Number, Status Badge -->
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 text-[#db3333] flex items-center justify-center text-lg flex-shrink-0 group-hover:bg-[#db3333] group-hover:text-white transition-colors">
+              <div
+                class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 text-[#db3333] flex items-center justify-center text-lg flex-shrink-0 group-hover:bg-[#db3333] group-hover:text-white transition-colors">
                 <i class="fa-solid fa-bag-shopping"></i>
               </div>
               <div>
@@ -177,7 +142,8 @@
           <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 mb-4">
             <!-- Product Label & Title -->
             <div class="flex items-start gap-2.5 mb-3.5">
-              <div class="w-8 h-8 rounded-lg bg-rose-50 text-[#db3333] flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
+              <div
+                class="w-8 h-8 rounded-lg bg-rose-50 text-[#db3333] flex items-center justify-center flex-shrink-0 text-sm mt-0.5">
                 <i class="fa-solid fa-box"></i>
               </div>
               <div class="flex-1">
@@ -196,7 +162,8 @@
             <div class="grid grid-cols-2 gap-4 pt-3 border-t border-slate-200/80">
               <!-- Quantity -->
               <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-gray-600 flex items-center justify-center text-xs flex-shrink-0">
+                <div
+                  class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-gray-600 flex items-center justify-center text-xs flex-shrink-0">
                   <i class="fa-solid fa-list-ol text-[#db3333]"></i>
                 </div>
                 <div>
@@ -207,7 +174,8 @@
 
               <!-- Final Amount -->
               <div class="flex items-center gap-2.5 pl-3 border-l border-slate-200">
-                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-[#db3333] flex items-center justify-center text-xs flex-shrink-0 font-bold">
+                <div
+                  class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-[#db3333] flex items-center justify-center text-xs flex-shrink-0 font-bold">
                   ₹
                 </div>
                 <div>
@@ -224,7 +192,8 @@
         <!-- Card Bottom Row: Payment Status, Order Date, Action Button -->
         <div class="pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-full bg-rose-50 text-[#db3333] flex items-center justify-center text-xs flex-shrink-0">
+            <div
+              class="w-6 h-6 rounded-full bg-rose-50 text-[#db3333] flex items-center justify-center text-xs flex-shrink-0">
               <i class="fa-solid fa-circle-check"></i>
             </div>
             <div>
@@ -248,10 +217,44 @@
       </div>
     </div>
 
+    <!-- Pagination Controls -->
+    <div *ngIf="!isLoadingOrders && filteredOrders.length > 0 && pagination.total > 0"
+      class="mt-8 bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-xs text-gray-500 font-medium">
+        Showing page <span class="font-bold text-gray-900">{{ pagination.currentPage }}</span> of <span
+          class="font-bold text-gray-900">{{ pagination.lastPage }}</span>
+        <span class="text-gray-400 ml-1.5">• Total {{ pagination.total }} items</span>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <!-- Prev Page Button -->
+        <button (click)="onPageChange(pagination.currentPage - 1)" [disabled]="pagination.currentPage <= 1"
+          class="px-3.5 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer">
+          <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+        </button>
+
+        <!-- Page Numbers -->
+        <button *ngFor="let p of pagesArray" (click)="onPageChange(p)"
+          [ngClass]="p === pagination.currentPage ? 'bg-[#db3333] text-white shadow-xs font-extrabold' : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'"
+          class="w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center">
+          {{ p }}
+        </button>
+
+        <!-- Next Page Button -->
+        <button (click)="onPageChange(pagination.currentPage + 1)"
+          [disabled]="pagination.currentPage >= pagination.lastPage"
+          class="px-3.5 py-1.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer">
+          Next <i class="fa-solid fa-chevron-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+
+
     <!-- Empty State -->
-    <div *ngIf="filteredOrders.length === 0"
+    <div *ngIf="!isLoadingOrders && filteredOrders.length === 0"
       class="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm max-w-lg mx-auto">
-      <div class="w-20 h-20 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center text-3xl mx-auto mb-4">
+      <div
+        class="w-20 h-20 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center text-3xl mx-auto mb-4">
         <i class="fa-solid fa-bag-shopping"></i>
       </div>
       <h3 class="text-xl font-bold text-gray-900 mb-2">No Orders Found</h3>
@@ -268,31 +271,40 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- ORDER DETAILS MODAL (Matching mobile screenshots 2, 3 & 4 with web beauty) -->
+<!-- ORDER DETAILS MODAL (Matching API data with 2-column web responsive beauty) -->
 <!-- ========================================================================= -->
 <div *ngIf="isDetailsModalOpen && selectedOrder"
   class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
-  
-  <!-- Backdrop -->
-  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-    (click)="closeOrderDetails()"></div>
 
-  <!-- Modal Container with Max Height Fix (max-h-[86vh], flex-col) -->
-  <div class="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[86vh] flex flex-col overflow-hidden animate-in border border-gray-100 z-10">
-    
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" (click)="closeOrderDetails()"></div>
+
+  <!-- Modal Container -->
+  <div
+    class="relative bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[88vh] flex flex-col overflow-hidden animate-in border border-gray-100 z-10">
+
     <!-- STICKY MODAL HEADER -->
-    <div class="flex-shrink-0 px-6 py-4 sm:py-5 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+    <div
+      class="flex-shrink-0 px-6 py-4 sm:py-5 border-b border-gray-100 flex items-center justify-between bg-white z-10">
       <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-100 text-[#db3333] flex items-center justify-center text-lg flex-shrink-0">
+        <div
+          class="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-100 text-[#db3333] flex items-center justify-center text-lg flex-shrink-0">
           <i class="fa-solid fa-bag-shopping"></i>
         </div>
         <div>
           <h2 class="text-lg sm:text-xl font-extrabold text-gray-900 leading-tight">
             Order Details
           </h2>
-          <span class="text-xs font-bold text-[#db3333] tracking-wide">
-            {{ selectedOrder.orderNumber }}
-          </span>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-xs font-bold text-[#db3333] tracking-wide">
+              {{ selectedOrder.orderNumber }}
+            </span>
+            <span class="text-gray-300">•</span>
+            <span [ngClass]="getStatusBadgeClass(selectedOrder.status)"
+              class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase">
+              {{ selectedOrder.status }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -303,195 +315,280 @@
       </button>
     </div>
 
-    <!-- SCROLLABLE MODAL BODY -->
-    <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar bg-white">
-      
-      <!-- 1. Order Status Card -->
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Order Status</h4>
-        <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-100 flex items-start justify-between gap-3">
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-full bg-rose-100 text-[#db3333] flex items-center justify-center text-base flex-shrink-0 mt-0.5">
+    <!-- SCROLLABLE MODAL BODY (2-Column Grid on large screens) -->
+    <div class="flex-1 overflow-y-auto p-5 sm:p-6 custom-scrollbar bg-white">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        <!-- ==================== LEFT COLUMN ==================== -->
+        <div class="space-y-5">
+
+          <!-- 1. Order Status Banner -->
+          <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-100 flex items-start gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-rose-100 text-[#db3333] flex items-center justify-center text-base flex-shrink-0 mt-0.5">
               <i class="fa-solid fa-receipt"></i>
             </div>
-            <div>
-              <h5 class="text-sm font-bold text-gray-900">
-                Order {{ selectedOrder.status }}
-              </h5>
-              <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">
+            <div class="flex-1">
+              <div class="flex items-center justify-between gap-2">
+                <h5 class="text-sm font-bold text-gray-900">
+                  Order {{ selectedOrder.status }}
+                </h5>
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-[#db3333] border border-rose-200 flex-shrink-0">
+                  {{ selectedOrder.status }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 leading-relaxed">
                 {{ selectedOrder.statusMessage }}
               </p>
+              <div class="mt-2 text-[11px] text-gray-400 font-medium">
+                Placed on: <span class="text-gray-600 font-semibold">{{ selectedOrder.orderDate }} {{
+                  selectedOrder.orderTime }}</span>
+              </div>
             </div>
           </div>
 
-          <span class="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-[#db3333] border border-rose-200 flex-shrink-0">
-            {{ selectedOrder.status }}
-          </span>
-        </div>
-      </div>
-
-      <!-- 2. Product Details Card -->
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Product Details</h4>
-        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
-          <div class="flex items-center justify-between py-2 first:pt-0">
-            <span class="text-gray-500">Product</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.product }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2">
-            <span class="text-gray-500">Quantity</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.quantity }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2">
-            <span class="text-gray-500">Seller</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.seller }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2 last:pb-0">
-            <span class="text-gray-500">Order Date</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.orderDate }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. Final Commercial Snapshot Card -->
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Final Commercial Snapshot</h4>
-        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 text-xs sm:text-sm space-y-2">
-          <div class="flex items-center justify-between text-gray-600">
-            <span>Unit Price</span>
-            <span class="font-semibold text-gray-900">{{ selectedOrder.unitPrice | currency:'INR':'symbol':'1.0-0' }}</span>
-          </div>
-          <div class="flex items-center justify-between text-gray-600">
-            <span>Quantity</span>
-            <span class="font-semibold text-gray-900">{{ selectedOrder.quantity }}</span>
-          </div>
-          <div class="flex items-center justify-between text-gray-600">
-            <span>Product Amount</span>
-            <span class="font-semibold text-gray-900">{{ selectedOrder.productAmount | currency:'INR':'symbol':'1.0-0' }}</span>
-          </div>
-          <div class="flex items-center justify-between text-gray-600">
-            <span>GST / Tax</span>
-            <span class="font-semibold text-gray-900">{{ selectedOrder.gstTax | currency:'INR':'symbol':'1.2-2' }}</span>
-          </div>
-          <div class="flex items-center justify-between text-gray-600">
-            <span>Delivery Fee</span>
-            <span class="font-semibold text-gray-900">{{ selectedOrder.deliveryFee | currency:'INR':'symbol':'1.0-0' }}</span>
-          </div>
-          <div class="flex items-center justify-between text-gray-600">
-            <span>Convenience / Platform Fee</span>
-            <span class="font-semibold text-gray-900">{{ selectedOrder.platformFee | currency:'INR':'symbol':'1.0-0' }}</span>
-          </div>
-
-          <div class="border-t border-slate-200 my-2 pt-2 flex items-center justify-between">
-            <span class="font-bold text-gray-900">Final Payable Amount</span>
-            <span class="font-extrabold text-base sm:text-lg text-[#db3333]">
-              {{ selectedOrder.finalAmount | currency:'INR':'symbol':'1.2-2' }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. Quotation Details Card -->
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Quotation Details</h4>
-        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
-          <div class="flex items-center justify-between py-2 first:pt-0">
-            <span class="text-gray-500">Request ID</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.requestId }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2">
-            <span class="text-gray-500">Quotation ID</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.quotationId }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2">
-            <span class="text-gray-500">Quotation Version</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.quotationVersion }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2 last:pb-0">
-            <span class="text-gray-500">Acceptance Timestamp</span>
-            <span class="font-bold text-gray-900">{{ selectedOrder.acceptanceTimestamp }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5. Payment Details Card -->
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Payment Details</h4>
-        <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
-          <div class="flex items-center justify-between py-2 first:pt-0">
-            <span class="text-gray-500">Payment Status</span>
-            <span class="font-bold text-[#db3333]">{{ selectedOrder.paymentStatus }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2">
-            <span class="text-gray-500">Funds Status</span>
-            <span class="font-bold text-[#db3333]">{{ selectedOrder.fundsStatus }}</span>
-          </div>
-          <div class="flex items-center justify-between py-2 last:pb-0">
-            <span class="text-gray-500">Settlement Status</span>
-            <span class="font-bold text-[#db3333]">{{ selectedOrder.settlementStatus }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 6. Order Progress Stepper (5 Milestones) -->
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Order Progress</h4>
-        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs">
-          <div class="space-y-0">
-            <div *ngFor="let step of orderSteps; let i = index; let isLast = last" class="relative flex items-start gap-3.5 pb-6 last:pb-0">
-              
-              <!-- Vertical connecting line -->
-              <div *ngIf="!isLast"
-                [ngClass]="step.id < selectedOrder.currentStep ? 'bg-[#db3333]' : 'bg-slate-200'"
-                class="absolute left-5 top-10 bottom-0 w-0.5 -ml-[1px]"></div>
-
-              <!-- Step Icon Circle -->
-              <div class="relative z-10 flex-shrink-0">
-                <!-- Completed Step -->
-                <div *ngIf="isStepCompleted(step.id, selectedOrder.currentStep)"
-                  class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm">
-                  <i class="fa-solid fa-check"></i>
-                </div>
-
-                <!-- Current Step -->
-                <div *ngIf="isStepCurrent(step.id, selectedOrder.currentStep)"
-                  class="w-10 h-10 rounded-full bg-[#db3333] text-white flex items-center justify-center text-sm shadow-md ring-4 ring-red-100 animate-pulse">
-                  <i class="fa-solid" [ngClass]="step.icon"></i>
-                </div>
-
-                <!-- Upcoming Step -->
-                <div *ngIf="step.id > selectedOrder.currentStep"
-                  class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 border border-slate-200 flex items-center justify-center text-sm">
-                  <i class="fa-solid" [ngClass]="step.icon"></i>
-                </div>
+          <!-- 2. Product & Seller Details Card -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Product & Seller Info</h4>
+            <div
+              class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
+              <div class="flex items-center justify-between py-2 first:pt-0">
+                <span class="text-gray-500">Product Name</span>
+                <span class="font-bold text-gray-900 text-right">{{ selectedOrder.product }}</span>
               </div>
+              <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.vehicleCategory">
+                <span class="text-gray-500">Vehicle Category</span>
+                <span class="font-bold text-gray-900">{{ selectedOrder.vehicleCategory }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2">
+                <span class="text-gray-500">Ordered Quantity</span>
+                <span class="font-bold text-gray-900">{{ selectedOrder.quantity }} Unit(s)</span>
+              </div>
+              <div class="flex items-center justify-between py-2">
+                <span class="text-gray-500">Garage / Seller</span>
+                <span class="font-bold text-[#db3333]">{{ selectedOrder.sellerBusinessName || selectedOrder.seller
+                  }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.sellerContactName">
+                <span class="text-gray-500">Contact Person</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.sellerContactName }}</span>
+              </div>
+              <!-- <div class="flex items-center justify-between py-2 last:pb-0" *ngIf="selectedOrder.sellerId">
+                <span class="text-gray-500">Seller ID</span>
+                <span class="font-semibold text-gray-700">#{{ selectedOrder.sellerId }}</span>
+              </div> -->
+            </div>
+          </div>
 
-              <!-- Step Description -->
-              <div class="flex-1 pt-1">
-                <div class="flex items-center gap-2">
-                  <h5 [ngClass]="step.id <= selectedOrder.currentStep ? 'text-gray-900 font-bold' : 'text-gray-400 font-medium'"
-                    class="text-sm">
-                    {{ step.title }}
-                  </h5>
-                  <span *ngIf="isStepCurrent(step.id, selectedOrder.currentStep)"
-                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-[#db3333] border border-rose-200">
-                    Current
-                  </span>
+          <!-- 3. Delivery Address Card -->
+          <div *ngIf="selectedOrder.deliveryAddress">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Delivery Address</h4>
+            <div
+              class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 flex items-start gap-3 text-xs sm:text-sm">
+              <div
+                class="w-8 h-8 rounded-lg bg-rose-50 text-[#db3333] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fa-solid fa-location-dot"></i>
+              </div>
+              <div class="flex-1">
+                <div class="font-bold text-gray-900">
+                  {{ selectedOrder.deliveryAddress.name }}
+                  <span *ngIf="selectedOrder.deliveryAddress.phone" class="text-gray-500 font-normal ml-1">({{
+                    selectedOrder.deliveryAddress.phone }})</span>
                 </div>
-                <p class="text-xs text-gray-500 mt-0.5">
-                  {{ step.description }}
+                <p class="text-gray-600 mt-1 leading-relaxed">
+                  {{ selectedOrder.deliveryAddress.line1 }}<span *ngIf="selectedOrder.deliveryAddress.line2">, {{
+                    selectedOrder.deliveryAddress.line2 }}</span>,
+                  {{ selectedOrder.deliveryAddress.city }}, {{ selectedOrder.deliveryAddress.state }} - {{
+                  selectedOrder.deliveryAddress.pincode }}
                 </p>
               </div>
-
             </div>
           </div>
-        </div>
-      </div>
 
+          <!-- 4. Payment Details Card -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Payment & Escrow Details</h4>
+            <div
+              class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
+              <div class="flex items-center justify-between py-2 first:pt-0">
+                <span class="text-gray-500">Payment Status</span>
+                <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  {{ selectedOrder.paymentStatus }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between py-2">
+                <span class="text-gray-500">Payment Gateway</span>
+                <span class="font-semibold text-gray-900">Online (Razorpay)</span>
+              </div>
+              <div class="flex items-center justify-between py-2">
+                <span class="text-gray-500">Funds Status</span>
+                <span class="font-bold text-[#db3333]">{{ selectedOrder.fundsStatus }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2 last:pb-0">
+                <span class="text-gray-500">Settlement Status</span>
+                <span class="font-bold text-slate-700">{{ selectedOrder.settlementStatus }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ==================== RIGHT COLUMN ==================== -->
+        <div class="space-y-5">
+
+          <!-- 5. Commercial Snapshot Card (Exact Decimal Precision 1.2-2) -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Commercial Snapshot</h4>
+            <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 text-xs sm:text-sm space-y-2.5">
+              <div class="flex items-center justify-between text-gray-600">
+                <span>Unit Price</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.unitPrice | currency:'INR':'symbol':'1.2-2'
+                  }}</span>
+              </div>
+              <div class="flex items-center justify-between text-gray-600">
+                <span>Quantity</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.quantity }}</span>
+              </div>
+              <div class="flex items-center justify-between text-gray-600">
+                <span>Product Amount</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.productAmount |
+                  currency:'INR':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="flex items-center justify-between text-gray-600">
+                <span>GST / Tax ({{ selectedOrder.gstPercent }}%)</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.gstTax | currency:'INR':'symbol':'1.2-2'
+                  }}</span>
+              </div>
+              <div class="flex items-center justify-between text-gray-600 pt-1 border-t border-slate-200/60"
+                *ngIf="selectedOrder.productTotal">
+                <span class="font-medium text-gray-700">Product Total (inc. GST)</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.productTotal |
+                  currency:'INR':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="flex items-center justify-between text-gray-600">
+                <span>Delivery Fee</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.deliveryFee | currency:'INR':'symbol':'1.2-2'
+                  }}</span>
+              </div>
+              <div class="flex items-center justify-between text-gray-600">
+                <span>Convenience / Platform Fee</span>
+                <span class="font-semibold text-gray-900">{{ selectedOrder.platformFee | currency:'INR':'symbol':'1.2-2'
+                  }}</span>
+              </div>
+
+              <div class="border-t border-slate-200 my-2 pt-2.5 flex items-center justify-between">
+                <span class="font-bold text-gray-900 text-sm">Final Payable Amount</span>
+                <span class="font-extrabold text-lg sm:text-xl text-[#db3333]">
+                  {{ selectedOrder.finalAmount | currency:'INR':'symbol':'1.2-2' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Quotation Details Card -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Quotation Details</h4>
+            <div
+              class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
+              <div class="flex items-center justify-between py-2 first:pt-0">
+                <span class="text-gray-500">Request ID</span>
+                <span class="font-bold text-gray-900">{{ selectedOrder.requestId }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2">
+                <span class="text-gray-500">Quotation ID</span>
+                <span class="font-bold text-[#db3333]">{{ selectedOrder.quotationId }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2">
+                <span class="text-gray-500">Quotation Version</span>
+                <span class="font-bold text-gray-900">Version {{ selectedOrder.quotationVersion }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.submittedAt">
+                <span class="text-gray-500">Submitted At</span>
+                <span class="font-medium text-gray-800">{{ selectedOrder.submittedAt }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.acceptanceTimestamp">
+                <span class="text-gray-500">Accepted At</span>
+                <span class="font-medium text-gray-800">{{ selectedOrder.acceptanceTimestamp }}</span>
+              </div>
+              <!-- <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.validUntil">
+                <span class="text-gray-500">Quotation Valid Until</span>
+                <span class="font-medium text-gray-800">{{ selectedOrder.validUntil }}</span>
+              </div> -->
+              <div class="py-2.5 last:pb-0" *ngIf="selectedOrder.quotationNotes">
+                <span class="text-gray-500 block mb-1">Seller Notes:</span>
+                <p class="bg-white p-2.5 rounded-xl border border-slate-200 text-xs text-gray-700 italic">
+                  "{{ selectedOrder.quotationNotes }}"
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Order Progress Stepper (5 Milestones) -->
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Order Progress</h4>
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs">
+              <div class="space-y-0">
+                <div *ngFor="let step of orderSteps; let i = index; let isLast = last"
+                  class="relative flex items-start gap-3.5 pb-5 last:pb-0">
+
+                  <!-- Vertical connecting line -->
+                  <div *ngIf="!isLast" [ngClass]="step.id < selectedOrder.currentStep ? 'bg-[#db3333]' : 'bg-slate-200'"
+                    class="absolute left-5 top-10 bottom-0 w-0.5 -ml-[1px]"></div>
+
+                  <!-- Step Icon Circle -->
+                  <div class="relative z-10 flex-shrink-0">
+                    <!-- Completed Step -->
+                    <div *ngIf="isStepCompleted(step.id, selectedOrder.currentStep)"
+                      class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm">
+                      <i class="fa-solid fa-check"></i>
+                    </div>
+
+                    <!-- Current Step -->
+                    <div *ngIf="isStepCurrent(step.id, selectedOrder.currentStep)"
+                      class="w-10 h-10 rounded-full bg-[#db3333] text-white flex items-center justify-center text-sm shadow-md ring-4 ring-red-100 animate-pulse">
+                      <i class="fa-solid" [ngClass]="step.icon"></i>
+                    </div>
+
+                    <!-- Upcoming Step -->
+                    <div *ngIf="step.id > selectedOrder.currentStep"
+                      class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 border border-slate-200 flex items-center justify-center text-sm">
+                      <i class="fa-solid" [ngClass]="step.icon"></i>
+                    </div>
+                  </div>
+
+                  <!-- Step Description -->
+                  <div class="flex-1 pt-1">
+                    <div class="flex items-center gap-2">
+                      <h5
+                        [ngClass]="step.id <= selectedOrder.currentStep ? 'text-gray-900 font-bold' : 'text-gray-400 font-medium'"
+                        class="text-sm">
+                        {{ step.title }}
+                      </h5>
+                      <span *ngIf="isStepCurrent(step.id, selectedOrder.currentStep)"
+                        class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-[#db3333] border border-rose-200">
+                        Current
+                      </span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                      {{ step.description }}
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
     </div>
 
     <!-- STICKY MODAL FOOTER -->
-    <div class="flex-shrink-0 px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between sm:justify-end gap-3 z-10">
+    <div
+      class="flex-shrink-0 px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between sm:justify-end gap-3 z-10">
       <button (click)="closeOrderDetails()"
         class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-sm transition-colors cursor-pointer">
         Close
