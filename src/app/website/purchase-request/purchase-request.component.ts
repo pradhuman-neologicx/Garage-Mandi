@@ -344,8 +344,11 @@ export class PurchaseRequestComponent implements OnInit {
           const platFee = Number(q.platform_fee !== undefined ? q.platform_fee : 0);
           const finalAmt = Number(q.final_amount !== undefined ? q.final_amount : prodTotal + delFee + platFee);
 
-          const isAcceptedQuote = (item.accepted_quotation_id && (Number(item.accepted_quotation_id) === Number(q.id))) ||
-            q.status === 'accepted' || (q.accepted_at != null);
+          const isAcceptedQuote = (q.status !== 'closed' && q.status !== 'rejected') && (
+            (item.accepted_quotation_id && (Number(item.accepted_quotation_id) === Number(q.id))) ||
+            (item.commercial_snapshot?.quotation_id && (Number(item.commercial_snapshot.quotation_id) === Number(q.id))) ||
+            q.status === 'accepted' || (q.accepted_at != null)
+          );
 
           return {
             id: q.reference || q.quotation_code || (q.id ? `GQT-${q.id}` : 'QUO'),
@@ -640,23 +643,54 @@ export class PurchaseRequestComponent implements OnInit {
   }
 
   // Check if a specific quotation is accepted
-  isQuoteAccepted(quote: Quotation, req: PurchaseRequest | null): boolean {
+  isQuoteAccepted(quote: Quotation | null, req: PurchaseRequest | null): boolean {
     if (!quote || !req) return false;
-    if (quote.isAccepted) return true;
-    if (quote.status === 'accepted') return true;
-    if (req.acceptedQuotationId && (Number(req.acceptedQuotationId) === Number(quote.rawId) || req.acceptedQuotationId === quote.id)) {
+
+    // Never consider closed or rejected quotes as accepted
+    if (quote.status === 'closed' || quote.status === 'rejected') {
+      return false;
+    }
+
+    // 1. Direct status or timestamp on the quote
+    if (quote.status === 'accepted' || quote.isAccepted || !!quote.acceptedAt) {
       return true;
     }
-    if (req.commercialSnapshot?.quotation_id && (Number(req.commercialSnapshot.quotation_id) === Number(quote.rawId) || req.commercialSnapshot?.quotation_reference === quote.reference)) {
-      return true;
+
+    const quoteRawId = Number(quote.rawId || 0);
+
+    // 2. Request accepted_quotation_id
+    if (req.acceptedQuotationId) {
+      const acceptedId = Number(req.acceptedQuotationId);
+      if (acceptedId > 0 && quoteRawId > 0 && acceptedId === quoteRawId) {
+        return true;
+      }
+      if (req.acceptedQuotationId === quote.id || req.acceptedQuotationId === quote.reference) {
+        return true;
+      }
+      return false;
     }
-    const raw = (req.rawStatus || '').toLowerCase();
-    const status = (req.status || '').toLowerCase();
-    if (raw === 'accepted' || raw === 'ordered' || raw === 'confirmed' || raw === 'order_confirmed' || status === 'awaiting payment' || status === 'order confirmed' || req.currentStep >= 5) {
-      if ((this.selectedQuotation && this.selectedQuotation.rawId === quote.rawId) || req.quotations.length === 1) {
+
+    // 3. Commercial snapshot quotation_id
+    if (req.commercialSnapshot?.quotation_id || req.commercialSnapshot?.quotation_reference) {
+      const snapQuoteId = Number(req.commercialSnapshot.quotation_id || 0);
+      if (snapQuoteId > 0 && quoteRawId > 0 && snapQuoteId === quoteRawId) {
+        return true;
+      }
+      if (req.commercialSnapshot.quotation_reference && (req.commercialSnapshot.quotation_reference === quote.reference || req.commercialSnapshot.quotation_reference === quote.id)) {
+        return true;
+      }
+      return false;
+    }
+
+    // 4. Fallback ONLY if there is only 1 quote and request is confirmed
+    if (req.quotations && req.quotations.length === 1) {
+      const raw = (req.rawStatus || '').toLowerCase();
+      const status = (req.status || '').toLowerCase();
+      if (raw === 'accepted' || raw === 'ordered' || raw === 'confirmed' || raw === 'order_confirmed' || status === 'order confirmed') {
         return true;
       }
     }
+
     return false;
   }
 

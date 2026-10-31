@@ -601,10 +601,10 @@
                     <i class="fa-solid fa-circle-check text-emerald-600"></i> Accepted
                   </span>
 
-                  <!-- Case 2: Other quote when order is already confirmed / accepted -->
-                  <span *ngIf="!isQuoteAccepted(quote, selectedRequest) && isRequestAccepted(selectedRequest)"
-                    class="px-2.5 py-1 rounded-xl bg-gray-100 text-gray-400 text-xs font-medium">
-                    Not Selected
+                  <!-- Case 2: Other quote when order is already confirmed / accepted or quote is closed -->
+                  <span *ngIf="!isQuoteAccepted(quote, selectedRequest) && (isRequestAccepted(selectedRequest) || quote.status === 'closed')"
+                    class="px-2.5 py-1 rounded-xl bg-gray-100 text-gray-500 border border-gray-200 text-xs font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-lock text-[10px] text-gray-400"></i> Closed
                   </span>
 
                   <!-- View Details button (always available) -->
@@ -804,15 +804,21 @@
       </button>
 
       <!-- Badge if already accepted / confirmed -->
-      <span *ngIf="isQuoteAccepted(selectedQuotation, selectedRequest) || isRequestAccepted(selectedRequest)"
+      <span *ngIf="isQuoteAccepted(selectedQuotation, selectedRequest)"
         class="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs sm:text-sm font-extrabold flex items-center gap-1.5">
         <i class="fa-solid fa-circle-check text-emerald-600"></i>
-        <span *ngIf="selectedRequest?.status === 'Order Confirmed'">Order Confirmed</span>
-        <span *ngIf="selectedRequest?.status !== 'Order Confirmed'">Quotation Accepted</span>
+        <span>Quotation Accepted & Confirmed</span>
+      </span>
+
+      <!-- Badge if another quotation was accepted / this quote closed -->
+      <span *ngIf="!isQuoteAccepted(selectedQuotation, selectedRequest) && (isRequestAccepted(selectedRequest) || selectedQuotation.status === 'closed')"
+        class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 border border-gray-200 text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+        <i class="fa-solid fa-lock text-gray-400"></i>
+        <span>Quotation Closed</span>
       </span>
 
       <!-- Action button only if pending -->
-      <button *ngIf="!isQuoteAccepted(selectedQuotation, selectedRequest) && !isRequestAccepted(selectedRequest) && selectedRequest?.status !== 'Cancelled'"
+      <button *ngIf="!isQuoteAccepted(selectedQuotation, selectedRequest) && !isRequestAccepted(selectedRequest) && selectedQuotation.status !== 'closed' && selectedRequest?.status !== 'Cancelled'"
         (click)="openFinalConfirmation(selectedQuotation)"
         class="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer">
         Review & Accept Quotation
