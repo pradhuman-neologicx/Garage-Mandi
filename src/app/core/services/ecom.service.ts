@@ -158,6 +158,68 @@ export class EcomService {
     return this.apiService.post(`ecom/seller/purchase-requests/${requestId}/quotations`, payload, this.getHeaders());
   }
 
+  /**
+   * GET /api/v1/ecom/seller/quotations
+   * Fetch quotations submitted by seller
+   */
+  getSellerQuotations(params?: any): Observable<any> {
+    let path = 'ecom/seller/quotations';
+    if (params) {
+      const cleanParams: any = {};
+      Object.keys(params).forEach(k => {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+          cleanParams[k] = params[k];
+        }
+      });
+      const query = new URLSearchParams(cleanParams).toString();
+      if (query) {
+        path += `?${query}`;
+      }
+    }
+    return this.apiService.get(path, this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/ecom/seller/quotations/:id
+   * Fetch quotation details for seller by ID
+   */
+  getSellerQuotationDetails(id: string | number): Observable<any> {
+    return this.apiService.get(`ecom/seller/quotations/${id}`, this.getHeaders());
+  }
+
+   /**
+   * GET /api/v1/ecom/seller/orders
+   * Fetch orders submitted by seller
+   */
+  getSellerOrders(params?: any): Observable<any> {
+    let path = 'ecom/seller/orders';
+    if (params) {
+      const cleanParams: any = {};
+      Object.keys(params).forEach(k => {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+          cleanParams[k] = params[k];
+        }
+      });
+      const query = new URLSearchParams(cleanParams).toString();
+      if (query) {
+        path += `?${query}`;
+      }
+    }
+    return this.apiService.get(path, this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/ecom/seller/orders/:id
+   * Fetch orders details for seller by ID
+   */
+  getSellerOrderDetailss(id: string | number): Observable<any> {
+    return this.apiService.get(`ecom/seller/orders/${id}`, this.getHeaders());
+  }
+
+  getSellerOrderDetails(id: string | number): Observable<any> {
+    return this.getSellerOrderDetailss(id);
+  }
+
 
 
 // Admin side Ecom end points

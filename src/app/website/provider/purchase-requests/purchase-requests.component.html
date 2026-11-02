@@ -5,7 +5,7 @@
   <!-- ========================================================== -->
   <!-- HERO HEADER SECTION -->
   <!-- ========================================================== -->
-  <section class="bg-[#131e3d] text-white pt-8 pb-16 relative overflow-hidden">
+  <section class="bg-[#131e3d] text-white py-8 relative overflow-hidden">
     <!-- Decorative Ambient Glow -->
     <div class="absolute inset-0 pointer-events-none opacity-20">
       <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#db3333] blur-3xl"></div>
@@ -234,7 +234,8 @@
               </span>
               <span *ngIf="req.deliveryLocation" class="flex items-center gap-1 text-slate-600">
                 <i class="fa-solid fa-location-dot text-red-500"></i>
-                <span>{{ req.deliveryLocation.city }}<span *ngIf="req.deliveryLocation.state">, {{ req.deliveryLocation.state }}</span> ({{ req.deliveryLocation.pincode }})</span>
+                <span>{{ req.deliveryLocation.city }}<span *ngIf="req.deliveryLocation.state">, {{
+                    req.deliveryLocation.state }}</span> ({{ req.deliveryLocation.pincode }})</span>
               </span>
             </div>
           </div>
@@ -432,8 +433,10 @@
             <!-- Field 4: GST (%) -->
             <div>
               <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-bold text-slate-600">GST / Tax (%) <span class="text-red-500">*</span></label>
-                <span class="text-[11px] font-semibold text-slate-500">Calculated: ₹{{ quoteGstTax | number:'1.2-2' }}</span>
+                <label class="block text-xs font-bold text-slate-600">GST / Tax (%) <span
+                    class="text-red-500">*</span></label>
+                <span class="text-[11px] font-semibold text-slate-500">Calculated: ₹{{ quoteGstTax | number:'1.2-2'
+                  }}</span>
               </div>
               <div class="relative rounded-2xl shadow-xs">
                 <input type="number" [(ngModel)]="quoteGstPercent" min="0" max="100" step="1" placeholder="18"

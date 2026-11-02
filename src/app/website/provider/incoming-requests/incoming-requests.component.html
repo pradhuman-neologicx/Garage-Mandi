@@ -3,7 +3,8 @@
 <main class="min-h-screen bg-slate-50 pt-[58px] pb-16 font-sans">
   <!-- Hidden File & Camera Inputs for Quotation Modal -->
   <input #fileInput type="file" accept="image/*" multiple class="hidden" (change)="onFilesSelected($event)" />
-  <input #cameraInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onFilesSelected($event)" />
+  <input #cameraInput type="file" accept="image/*" capture="environment" class="hidden"
+    (change)="onFilesSelected($event)" />
 
   <!-- HERO HEADER SECTION -->
   <section class="bg-[#131e3d] text-white pt-10 pb-20 relative overflow-hidden">
@@ -27,11 +28,13 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
           <div class="flex items-center gap-3 mb-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
               <span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
               Provider Portal
             </span>
-            <span class="text-xs text-slate-400">Logged in as: <strong class="text-white">{{ providerName }}</strong></span>
+            <span class="text-xs text-slate-400">Logged in as: <strong class="text-white">{{ providerName
+                }}</strong></span>
           </div>
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white">
             Incoming Requests
@@ -64,10 +67,13 @@
     <!-- KPI STATS CARDS RIBBON -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <!-- Total Requests -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
+      <div
+        class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
         <div class="flex items-center justify-between gap-2 mb-2">
-          <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">Total Inquiries</p>
-          <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm sm:text-lg shrink-0">
+          <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">Total Inquiries
+          </p>
+          <div
+            class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm sm:text-lg shrink-0">
             <i class="fa-solid fa-inbox"></i>
           </div>
         </div>
@@ -78,14 +84,19 @@
       </div>
 
       <!-- New Inquiries -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-amber-400/10 rounded-bl-full pointer-events-none"></div>
+      <div
+        class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all relative overflow-hidden">
+        <div
+          class="absolute top-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-amber-400/10 rounded-bl-full pointer-events-none">
+        </div>
         <div class="flex items-center justify-between gap-2 mb-2">
-          <p class="text-[11px] sm:text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5 truncate">
+          <p
+            class="text-[11px] sm:text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5 truncate">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
             New Action
           </p>
-          <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm sm:text-lg shrink-0 border border-amber-100">
+          <div
+            class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm sm:text-lg shrink-0 border border-amber-100">
             <i class="fa-solid fa-bell"></i>
           </div>
         </div>
@@ -96,10 +107,12 @@
       </div>
 
       <!-- Open / In Discussion -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
+      <div
+        class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
         <div class="flex items-center justify-between gap-2 mb-2">
           <p class="text-[11px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider truncate">Open / Review</p>
-          <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm sm:text-lg shrink-0">
+          <div
+            class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm sm:text-lg shrink-0">
             <i class="fa-solid fa-clock-rotate-left"></i>
           </div>
         </div>
@@ -110,10 +123,12 @@
       </div>
 
       <!-- Closed / Fulfilled -->
-      <div class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
+      <div
+        class="bg-white rounded-2xl p-3.5 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
         <div class="flex items-center justify-between gap-2 mb-2">
           <p class="text-[11px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider truncate">Closed</p>
-          <div class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm sm:text-lg shrink-0">
+          <div
+            class="w-8 h-8 sm:w-11 sm:h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm sm:text-lg shrink-0">
             <i class="fa-solid fa-circle-check"></i>
           </div>
         </div>
@@ -124,15 +139,14 @@
       </div>
     </div>
 
-     <!-- CONTROLS & FILTER TOOLBAR (Single Row: Tabs on Left, Search on Right) -->
+    <!-- CONTROLS & FILTER TOOLBAR (Single Row: Tabs on Left, Search on Right) -->
     <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 mb-8">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        
+
         <!-- Status Tabs: All, New, Open, Closed -->
         <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none shrink-0">
           <!-- ALL TAB -->
-          <button (click)="setStatusTab('all')"
-            [ngClass]="activeStatusTab === 'all'
+          <button (click)="setStatusTab('all')" [ngClass]="activeStatusTab === 'all'
               ? 'bg-[#db3333] text-white shadow-md shadow-red-500/30'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'"
             class="px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 shrink-0">
@@ -140,8 +154,7 @@
           </button>
 
           <!-- NEW TAB -->
-          <button (click)="setStatusTab('new')"
-            [ngClass]="activeStatusTab === 'new'
+          <button (click)="setStatusTab('new')" [ngClass]="activeStatusTab === 'new'
               ? 'bg-[#db3333] text-white shadow-md shadow-red-500/30'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'"
             class="px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 shrink-0">
@@ -149,8 +162,7 @@
           </button>
 
           <!-- OPEN TAB -->
-          <button (click)="setStatusTab('open')"
-            [ngClass]="activeStatusTab === 'open'
+          <button (click)="setStatusTab('open')" [ngClass]="activeStatusTab === 'open'
               ? 'bg-[#db3333] text-white shadow-md shadow-red-500/30'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'"
             class="px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 shrink-0">
@@ -158,8 +170,7 @@
           </button>
 
           <!-- CLOSED TAB -->
-          <button (click)="setStatusTab('closed')"
-            [ngClass]="activeStatusTab === 'closed'
+          <button (click)="setStatusTab('closed')" [ngClass]="activeStatusTab === 'closed'
               ? 'bg-[#db3333] text-white shadow-md shadow-red-500/30'
               : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'"
             class="px-6 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 shrink-0">
@@ -185,7 +196,8 @@
 
     <!-- LOADING STATE SKELETONS -->
     <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-      <div *ngFor="let s of [1,2,3,4,5,6]" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm animate-pulse space-y-4">
+      <div *ngFor="let s of [1,2,3,4,5,6]"
+        class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm animate-pulse space-y-4">
         <div class="flex items-center justify-between">
           <div class="w-12 h-12 rounded-2xl bg-slate-200"></div>
           <div class="w-16 h-6 rounded-full bg-slate-200"></div>
@@ -211,7 +223,8 @@
       </div>
       <h3 class="text-xl font-extrabold text-slate-900 mb-2">No Incoming Requests Found</h3>
       <p class="text-slate-500 text-sm leading-relaxed mb-6">
-        There are currently no inquiries matching your active filters. Try resetting your search or switching filter tabs.
+        There are currently no inquiries matching your active filters. Try resetting your search or switching filter
+        tabs.
       </p>
       <button (click)="clearFilters()"
         class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-sm font-bold shadow-md hover:shadow-lg transition-all">
@@ -230,18 +243,22 @@
         class="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-red-200/80 transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
 
         <!-- Top Accent Border on hover -->
-        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#db3333] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div
+          class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#db3333] to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        </div>
 
         <div>
           <!-- Card Top Row: Category Icon + Title + Status Pill (Image 2 Match) -->
           <div class="flex items-start justify-between gap-3 mb-3">
             <div class="flex items-center gap-3 min-w-0">
               <!-- Rounded squarish icon box with soft tint based on request type -->
-              <div [class]="getCategoryBadgeBg(item.type)" class="w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+              <div [class]="getCategoryBadgeBg(item.type)"
+                class="w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
                 <i [class]="getCategoryIconClass(item.type) + ' text-lg'"></i>
               </div>
               <div class="min-w-0">
-                <h3 class="text-lg font-extrabold text-slate-900 tracking-tight truncate group-hover:text-[#db3333] transition-colors"
+                <h3
+                  class="text-lg font-extrabold text-slate-900 tracking-tight truncate group-hover:text-[#db3333] transition-colors"
                   [title]="item.title">
                   {{ item.title }}
                 </h3>
@@ -258,8 +275,10 @@
 
           <!-- Category Label (Image 2 Match) -->
           <div class="mb-3">
-            <span [ngClass]="item.type === 'spare_part_inquiry' ? 'text-amber-600' : 'text-[#db3333]'" class="inline-flex items-center gap-1.5 text-xs font-bold">
-              <i [class]="item.type === 'spare_part_inquiry' ? 'fa-solid fa-gears' : 'fa-solid fa-screwdriver-wrench'" class="text-[10px]"></i>
+            <span [ngClass]="item.type === 'spare_part_inquiry' ? 'text-amber-600' : 'text-[#db3333]'"
+              class="inline-flex items-center gap-1.5 text-xs font-bold">
+              <i [class]="item.type === 'spare_part_inquiry' ? 'fa-solid fa-gears' : 'fa-solid fa-screwdriver-wrench'"
+                class="text-[10px]"></i>
               {{ item.category }}
             </span>
           </div>
@@ -277,7 +296,8 @@
               <span class="text-slate-400 font-medium">Part:</span>
               <span class="font-bold text-slate-900 flex items-center gap-1.5">
                 {{ item.part_name }}
-                <span *ngIf="item.part_condition !== null" class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase"
+                <span *ngIf="item.part_condition !== null"
+                  class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase"
                   [ngClass]="item.part_condition === 1 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'">
                   {{ item.part_condition === 1 ? 'New' : 'Used' }}
                 </span>
@@ -309,8 +329,10 @@
             <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               <div *ngFor="let img of item.images" (click)="openLightbox(img)"
                 class="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 hover:border-[#db3333] cursor-pointer shrink-0 group/img transition-all shadow-xs">
-                <img [src]="img" alt="Request photo" class="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-300" />
-                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                <img [src]="img" alt="Request photo"
+                  class="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-300" />
+                <div
+                  class="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                   <i class="fa-solid fa-expand text-white text-xs"></i>
                 </div>
               </div>
@@ -324,7 +346,8 @@
               <i class="fa-solid fa-circle-check text-emerald-600"></i>
               <div>
                 <p class="text-xs font-bold text-emerald-900">Quote Submitted</p>
-                <p class="text-[11px] text-emerald-700">Price: <strong class="text-emerald-900">₹{{ item.my_quotation.price }}</strong></p>
+                <p class="text-[11px] text-emerald-700">Price: <strong class="text-emerald-900">₹{{
+                    item.my_quotation.price }}</strong></p>
               </div>
             </div>
             <span class="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
@@ -369,12 +392,14 @@
     <!-- PAGINATION CONTROLS (CARDS VIEW) -->
     <div *ngIf="!isLoading && (totalRecords > 0 || requests.length > 0)"
       class="mt-6 mb-12 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-      
+
       <!-- Left: Inquiries Range & Total -->
       <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-600">
         <span class="font-medium">
-          Showing <strong class="text-slate-900 font-bold">{{ pagination.from || ((currentPage - 1) * pageSize + 1) }}</strong>
-          to <strong class="text-slate-900 font-bold">{{ pagination.to || (pagination.from ? (pagination.from + filteredRequests.length - 1) : filteredRequests.length) }}</strong>
+          Showing <strong class="text-slate-900 font-bold">{{ pagination.from || ((currentPage - 1) * pageSize + 1)
+            }}</strong>
+          to <strong class="text-slate-900 font-bold">{{ pagination.to || (pagination.from ? (pagination.from +
+            filteredRequests.length - 1) : filteredRequests.length) }}</strong>
           of <strong class="text-slate-900 font-bold">{{ totalRecords }}</strong> inquiries
         </span>
       </div>
@@ -434,7 +459,8 @@
   <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" (click)="closeQuoteModal()"></div>
 
   <!-- Modal Dialog Container -->
-  <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-xl max-h-[88vh] flex flex-col overflow-hidden z-10 animate-scale-up my-auto">
+  <div
+    class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-xl max-h-[88vh] flex flex-col overflow-hidden z-10 animate-scale-up my-auto">
 
 
 
@@ -443,7 +469,8 @@
       <div>
         <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Submit Quotation</h2>
         <p *ngIf="selectedRequestForQuote" class="text-xs text-slate-500 mt-0.5">
-          Quoting for <strong class="text-slate-800">{{ selectedRequestForQuote.title }}</strong> ({{ selectedRequestForQuote.vehicle_category }})
+          Quoting for <strong class="text-slate-800">{{ selectedRequestForQuote.title }}</strong> ({{
+          selectedRequestForQuote.vehicle_category }})
         </p>
       </div>
       <button (click)="closeQuoteModal()"
@@ -456,13 +483,16 @@
     <div class="p-5 sm:p-6 space-y-4 flex-1 overflow-y-auto min-h-0">
 
       <!-- Request Reference Banner -->
-      <div *ngIf="selectedRequestForQuote" class="bg-slate-50 rounded-2xl p-3 sm:p-3.5 border border-slate-100 flex items-center justify-between">
+      <div *ngIf="selectedRequestForQuote"
+        class="bg-slate-50 rounded-2xl p-3 sm:p-3.5 border border-slate-100 flex items-center justify-between">
         <div class="min-w-0 pr-2">
           <span class="text-[11px] font-mono text-slate-400">{{ selectedRequestForQuote.request_code }}</span>
-          <p class="text-sm font-bold text-slate-900 truncate">{{ selectedRequestForQuote.vehicle_model || selectedRequestForQuote.title }}</p>
+          <p class="text-sm font-bold text-slate-900 truncate">{{ selectedRequestForQuote.vehicle_model ||
+            selectedRequestForQuote.title }}</p>
           <p class="text-xs text-slate-500 line-clamp-1">{{ selectedRequestForQuote.description }}</p>
         </div>
-        <span [class]="getStatusBadgeClass(selectedRequestForQuote.status)" class="text-xs font-bold px-2.5 py-1 rounded-full uppercase shrink-0">
+        <span [class]="getStatusBadgeClass(selectedRequestForQuote.status)"
+          class="text-xs font-bold px-2.5 py-1 rounded-full uppercase shrink-0">
           {{ selectedRequestForQuote.status }}
         </span>
       </div>
@@ -478,7 +508,7 @@
           <p class="text-sm font-semibold text-red-700 mt-0.5 leading-snug break-words">
             {{ quoteErrorMessage }}
           </p>
-         
+
         </div>
         <button type="button" (click)="quoteErrorMessage = null"
           class="text-red-400 hover:text-red-600 transition-colors p-1 -mr-1 -mt-1 rounded-lg hover:bg-red-100">
@@ -493,7 +523,8 @@
         </label>
         <div class="relative rounded-2xl shadow-xs">
           <!-- ₹ Currency Icon Prefix -->
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 text-lg font-bold">
+          <div
+            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 text-lg font-bold">
             ₹
           </div>
           <input type="number" [(ngModel)]="quotePrice" min="1" step="10" placeholder="Quotation Price"
@@ -506,8 +537,7 @@
         <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">
           Description / Notes
         </label>
-        <textarea [(ngModel)]="quoteNotes" rows="3"
-          placeholder="Enter description or work details..."
+        <textarea [(ngModel)]="quoteNotes" rows="3" placeholder="Enter description or work details..."
           class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#db3333]/20 focus:border-[#db3333] transition-all resize-none"></textarea>
       </div>
 
@@ -532,7 +562,8 @@
 
         <!-- Selected Images Preview Gallery -->
         <div *ngIf="quoteImagePreviews.length > 0" class="mt-2.5">
-          <p class="text-xs text-slate-500 font-semibold mb-1.5">Selected attachments ({{ quoteImagePreviews.length }}):</p>
+          <p class="text-xs text-slate-500 font-semibold mb-1.5">Selected attachments ({{ quoteImagePreviews.length }}):
+          </p>
           <div class="grid grid-cols-4 sm:grid-cols-5 gap-2">
             <div *ngFor="let preview of quoteImagePreviews; let idx = index"
               class="relative aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group">
@@ -568,27 +599,32 @@
 <!-- ========================================================== -->
 <!-- VIEW DETAILS DRAWER / MODAL (ELEVATED & PROPERLY CONSTRAINED) -->
 <!-- ========================================================== -->
-<div *ngIf="isDetailsModalOpen && selectedRequestDetails" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+<div *ngIf="isDetailsModalOpen && selectedRequestDetails"
+  class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
   <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" (click)="closeDetailsModal()"></div>
 
-  <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden z-10 animate-scale-up my-auto">
+  <div
+    class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden z-10 animate-scale-up my-auto">
     <!-- Header (Fixed at top) -->
     <div class="px-6 py-4 bg-[#131e3d] text-white flex items-center justify-between shrink-0 border-b border-slate-800">
       <div class="flex items-center gap-3 min-w-0 pr-3">
-        <div class="w-11 h-11 rounded-2xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
+        <div
+          class="w-11 h-11 rounded-2xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
           <i class="fa-solid fa-wrench text-base"></i>
         </div>
         <div class="min-w-0">
           <div class="flex items-center gap-2 mb-0.5">
             <span class="text-xs text-red-400 font-mono font-bold">{{ selectedRequestDetails.request_code }}</span>
-            <span [class]="getStatusBadgeClass(selectedRequestDetails.status)" class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase">
+            <span [class]="getStatusBadgeClass(selectedRequestDetails.status)"
+              class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase">
               {{ selectedRequestDetails.status }}
             </span>
           </div>
           <h3 class="text-base sm:text-lg font-extrabold text-white truncate">{{ selectedRequestDetails.title }}</h3>
         </div>
       </div>
-      <button (click)="closeDetailsModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors shrink-0">
+      <button (click)="closeDetailsModal()"
+        class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors shrink-0">
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
@@ -613,7 +649,8 @@
           <i class="fa-solid fa-circle-info text-blue-500"></i>
           Customer Problem Description
         </h4>
-        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 text-sm text-slate-800 leading-relaxed whitespace-pre-line shadow-xs">
+        <div
+          class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 text-sm text-slate-800 leading-relaxed whitespace-pre-line shadow-xs">
           {{ selectedRequestDetails.description }}
         </div>
       </div>
@@ -672,7 +709,8 @@
           </div>
           <div class="flex items-center justify-between text-xs">
             <span class="text-slate-500">Received Date:</span>
-            <span class="font-semibold text-slate-700">{{ selectedRequestDetails.created_at | date:'mediumDate' }}</span>
+            <span class="font-semibold text-slate-700">{{ selectedRequestDetails.created_at | date:'mediumDate'
+              }}</span>
           </div>
         </div>
       </div>
@@ -686,8 +724,10 @@
         <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
           <div *ngFor="let img of selectedRequestDetails.images" (click)="openLightbox(img)"
             class="relative aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 hover:border-[#db3333] cursor-pointer group shadow-xs">
-            <img [src]="img" alt="Attachment" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-            <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <img [src]="img" alt="Attachment"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <div
+              class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <span class="p-2 rounded-full bg-white/80 text-slate-900 text-xs shadow-md">
                 <i class="fa-solid fa-magnifying-glass-plus"></i>
               </span>
@@ -729,14 +769,16 @@
 <!-- ========================================================== -->
 <!-- IMAGE LIGHTBOX MODAL -->
 <!-- ========================================================== -->
-<div *ngIf="lightboxImageUrl" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
+<div *ngIf="lightboxImageUrl"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
   (click)="closeLightbox()">
   <button (click)="closeLightbox()"
     class="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center text-lg transition-colors z-10">
     <i class="fa-solid fa-xmark"></i>
   </button>
   <div class="max-w-4xl max-h-[85vh] relative" (click)="$event.stopPropagation()">
-    <img [src]="lightboxImageUrl" alt="Enlarged photo" class="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl" />
+    <img [src]="lightboxImageUrl" alt="Enlarged photo"
+      class="max-w-full max-h-[85vh] rounded-2xl object-contain shadow-2xl" />
   </div>
 </div>
 
