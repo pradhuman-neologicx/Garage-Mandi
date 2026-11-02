@@ -351,11 +351,21 @@
 
             <!-- Status pill & Actions -->
             <div class="flex items-center gap-3">
+              <!-- Pay Now Button if awaiting payment -->
+              <button *ngIf="canCheckout(selectedRequest)" (click)="proceedToCheckout(selectedRequest)"
+                [disabled]="isCheckingOut || isVerifyingPayment"
+                class="mt-3.5 px-4 py-2 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
+                <i *ngIf="isCheckingOut || isVerifyingPayment" class="fa-solid fa-spinner fa-spin text-[11px]"></i>
+                <i *ngIf="!isCheckingOut && !isVerifyingPayment" class="fa-solid fa-credit-card text-[11px]"></i>
+                <span>{{ (isCheckingOut || isVerifyingPayment) ? 'Processing...' : 'Pay Now' }}</span>
+              </button>
+
               <div class="text-right">
                 <span class="text-xs font-medium text-gray-400 block">Current Status</span>
                 <span [ngClass]="{
                     'bg-red-50 text-[#db3333] border-red-200': selectedRequest.status === 'Quote Received',
                     'bg-amber-50 text-amber-700 border-amber-200': selectedRequest.status === 'Awaiting Quotation',
+                    'bg-blue-50 text-blue-700 border-blue-200': selectedRequest.status === 'Awaiting Payment',
                     'bg-emerald-50 text-emerald-700 border-emerald-200': selectedRequest.status === 'Order Confirmed',
                     'bg-gray-100 text-gray-600 border-gray-300': selectedRequest.status === 'Cancelled'
                   }" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border inline-block mt-1">
@@ -421,6 +431,34 @@
               </p>
             </div>
           </div>
+        </div>
+
+        <!-- Awaiting Payment Banner (When terms accepted, ready for payment) -->
+        <div *ngIf="canCheckout(selectedRequest)"
+          class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+              <i class="fa-solid fa-credit-card text-xl"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-base sm:text-lg font-black text-amber-950">Quotation Accepted - Payment Pending</h4>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
+                  Ready to Pay
+                </span>
+              </div>
+              <p class="text-xs text-amber-800 mt-1">
+                Commercial terms have been locked. Please complete payment to place and confirm your order.
+              </p>
+            </div>
+          </div>
+          <button (click)="proceedToCheckout(selectedRequest)"
+            [disabled]="isCheckingOut || isVerifyingPayment"
+            class="px-6 py-3 rounded-2xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer disabled:opacity-50">
+            <i *ngIf="isCheckingOut || isVerifyingPayment" class="fa-solid fa-spinner fa-spin text-xs"></i>
+            <i *ngIf="!isCheckingOut && !isVerifyingPayment" class="fa-solid fa-credit-card text-xs"></i>
+            <span>{{ (isCheckingOut || isVerifyingPayment) ? 'Processing...' : 'Pay Now' }}</span>
+          </button>
         </div>
 
         <!-- Order Confirmed Success Banner (If order confirmed) -->
@@ -600,6 +638,16 @@
                     class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
                     <i class="fa-solid fa-circle-check text-emerald-600"></i> Accepted
                   </span>
+
+                  <!-- Pay Now CTA next to accepted quote if payment is pending -->
+                  <button *ngIf="isQuoteAccepted(quote, selectedRequest) && canCheckout(selectedRequest)"
+                    (click)="proceedToCheckout(selectedRequest)"
+                    [disabled]="isCheckingOut || isVerifyingPayment"
+                    class="px-3.5 py-1.5 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
+                    <i *ngIf="isCheckingOut || isVerifyingPayment" class="fa-solid fa-spinner fa-spin text-[10px]"></i>
+                    <i *ngIf="!isCheckingOut && !isVerifyingPayment" class="fa-solid fa-credit-card text-[10px]"></i>
+                    <span>Pay Now</span>
+                  </button>
 
                   <!-- Case 2: Other quote when order is already confirmed / accepted or quote is closed -->
                   <span *ngIf="!isQuoteAccepted(quote, selectedRequest) && (isRequestAccepted(selectedRequest) || quote.status === 'closed')"
@@ -971,7 +1019,7 @@
         [ngClass]="(customerDeclarationAccepted && !isAcceptingQuote) ? 'bg-[#db3333] hover:bg-[#c22b2b] shadow-md hover:shadow-lg cursor-pointer' : 'bg-gray-300 cursor-not-allowed opacity-60'"
         class="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-white text-xs sm:text-sm font-bold transition-all flex items-center gap-2">
         <i *ngIf="isAcceptingQuote" class="fa-solid fa-spinner fa-spin text-xs"></i>
-        <span>{{ isAcceptingQuote ? 'Accepting...' : 'Accept & Proceed to Payment' }}</span>
+        <span>{{ isAcceptingQuote ? 'Accepting...' : 'Confirm & Accept Quotation' }}</span>
       </button>
     </div>
 

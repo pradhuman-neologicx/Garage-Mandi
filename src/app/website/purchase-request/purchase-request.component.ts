@@ -578,10 +578,23 @@ export class PurchaseRequestComponent implements OnInit {
           this.selectedQuotation.isAccepted = true;
         }
 
-        this.displayToast(res?.message || 'Quotation accepted! Proceeding to checkout...');
-        
-        // Immediately trigger checkout and payment gateway
-        this.proceedToCheckout(this.selectedRequest);
+        // Fetch fresh request details from backend
+        this.ecomService.getPurchaseRequestDetails(requestId).subscribe({
+          next: (detailRes: any) => {
+            const detail = detailRes?.data || detailRes;
+            if (detail) {
+              const mapped = this.mapApiRequest(detail);
+              const idx = this.purchaseRequests.findIndex(r => r.id === requestId);
+              if (idx !== -1) {
+                this.purchaseRequests[idx] = mapped;
+              }
+              this.selectedRequest = mapped;
+            }
+          },
+          error: () => {}
+        });
+
+        this.displayToast(res?.message || 'Quotation accepted successfully! Click "Pay Now" to complete payment.');
       },
       error: (err: any) => {
         this.isAcceptingQuote = false;
