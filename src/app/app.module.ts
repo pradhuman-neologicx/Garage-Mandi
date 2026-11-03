@@ -23,7 +23,6 @@ import { SpinnerComponent } from './spinner/spinner.component';
 import { EmployeeService } from './core/services/Employee.service';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { NgSelectModule } from '@ng-select/ng-select';
-
 @NgModule({
   declarations: [
     AppComponent,

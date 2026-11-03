@@ -1,0 +1,1385 @@
+<div class="container-fluid  min-h-screen font-sans">
+
+    <!-- ========================================================== -->
+    <!-- PAGE HEADER & NAVIGATION -->
+    <!-- ========================================================== -->
+    <div
+        class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-slate-500 mb-1.5 font-medium">
+                <a routerLink="/admin/dashboard" class="hover:text-red-600 transition-colors">Admin</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <span class="text-slate-900 font-bold">E-Commerce & Mandi Hub</span>
+            </nav>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span>E-Commerce Operations</span>
+
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+                Manage customer purchase orders, dispatch logistics, order refunds, and process provider payouts
+                securely.
+            </p>
+        </div>
+
+        <!-- Header Action Buttons -->
+        <div class="flex items-center gap-2.5 self-stretch sm:self-auto">
+            <button (click)="loadData(true)" [disabled]="isRefreshing"
+                class="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-bold shadow-xs transition-all active:scale-95 disabled:opacity-50">
+                <i class="fa-solid fa-arrows-rotate" [ngClass]="{ 'fa-spin': isRefreshing }"></i>
+                <span>{{ isRefreshing ? 'Refreshing...' : 'Refresh Data' }}</span>
+            </button>
+
+            <a routerLink="/admin/commission"
+                class="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold shadow-xs transition-all active:scale-95">
+                <i class="fa-solid fa-sliders text-rose-400"></i>
+                <span>Platform Commission</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- TOP KPI METRICS SUMMARY -->
+    <!-- ========================================================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 mb-6">
+
+        <!-- Card 1: Total Orders & GMV -->
+        <div
+            class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Orders</span>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight">{{ totalOrdersCount }} Orders</h3>
+
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+        </div>
+
+        <!-- Card 2: Active Processing / In Transit -->
+        <div
+            class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">In Progress & Dispatch</span>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-slate-900 tracking-tight">{{ activeProcessingOrdersCount }} Active
+                </h3>
+
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+        </div>
+
+        <!-- Card 3: Platform Commission Revenue -->
+        <div
+            class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Platform Earnings</span>
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-percent"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-purple-900 tracking-tight">₹{{ totalPlatformCommission |
+                    number:'1.2-2' }}</h3>
+
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-purple-500"></div>
+        </div>
+
+        <!-- Card 4: Pending Seller Payouts -->
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between cursor-pointer hover:border-emerald-300 transition-all"
+            (click)="setMainTab('settlements')">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Seller Payouts</span>
+                <div
+                    class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-emerald-700 tracking-tight">₹{{ pendingSettlementsAmount |
+                    number:'1.2-2' }}</h3>
+
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MAIN TABS: ORDERS MANAGEMENT vs SELLER SETTLEMENTS -->
+    <!-- ========================================================== -->
+    <div
+        class="bg-white rounded-2xl p-2 border border-slate-200 mb-6 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+            <!-- Tab 1: Orders -->
+            <button (click)="setMainTab('orders')"
+                [ngClass]="activeTab === 'orders' ? 'bg-[#db3333] text-white shadow-sm font-extrabold' : 'text-slate-600 hover:bg-slate-100 font-bold'"
+                class="px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Orders Management</span>
+                <span [ngClass]="activeTab === 'orders' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'"
+                    class="px-2 py-0.5 rounded-full text-xs font-black">
+                    {{ orders.length }}
+                </span>
+            </button>
+
+            <!-- Tab 2: Settlements -->
+            <button (click)="setMainTab('settlements')"
+                [ngClass]="activeTab === 'settlements' ? 'bg-[#db3333] text-white shadow-sm font-extrabold' : 'text-slate-600 hover:bg-slate-100 font-bold'"
+                class="px-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>Seller Settlements & Payouts</span>
+                <span *ngIf="pendingSettlementsCount > 0"
+                    class="px-2 py-0.5 rounded-full text-xs font-black bg-emerald-500 text-white animate-pulse">
+                    {{ pendingSettlementsCount }} Due
+                </span>
+                <span *ngIf="pendingSettlementsCount === 0"
+                    [ngClass]="activeTab === 'settlements' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'"
+                    class="px-2 py-0.5 rounded-full text-xs font-black">
+                    {{ settlements.length }}
+                </span>
+            </button>
+        </div>
+
+        <div class="text-xs text-slate-400 font-medium px-3 hidden sm:block">
+            <span>Auto-synced with Razorpay & Delivery Webhooks</span>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- TAB CONTENT 1: ORDERS MANAGEMENT -->
+    <!-- ========================================================== -->
+    <div *ngIf="activeTab === 'orders'" class="space-y-4">
+
+        <!-- Filters & Search Toolbar -->
+        <div
+            class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+
+            <!-- Status Filter Chips -->
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <button (click)="setOrderStatusFilter('all')"
+                    [ngClass]="orderStatusFilter === 'all' ? 'bg-slate-900 text-white shadow-xs font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    All ({{ orders.length }})
+                </button>
+
+                <button (click)="setOrderStatusFilter('confirmed')"
+                    [ngClass]="orderStatusFilter === 'confirmed' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Confirmed
+                </button>
+
+                <button (click)="setOrderStatusFilter('ready_for_pickup')"
+                    [ngClass]="orderStatusFilter === 'ready_for_pickup' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Ready for Pickup
+                </button>
+
+                <button (click)="setOrderStatusFilter('shipped')"
+                    [ngClass]="orderStatusFilter === 'shipped' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Shipped
+                </button>
+
+                <button (click)="setOrderStatusFilter('delivered')"
+                    [ngClass]="orderStatusFilter === 'delivered' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Delivered
+                </button>
+
+                <button (click)="setOrderStatusFilter('cancelled')"
+                    [ngClass]="orderStatusFilter === 'cancelled' ? 'bg-rose-600 text-white shadow-xs font-bold' : 'bg-rose-50 hover:bg-rose-100 text-rose-700 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Cancelled
+                </button>
+            </div>
+
+            <!-- Search Box -->
+            <div class="relative w-full lg:w-80 shrink-0">
+                <i
+                    class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" [(ngModel)]="orderSearchQuery" (ngModelChange)="applyOrderFilters(true)"
+                    placeholder="Search by Order #, customer, seller, part..."
+                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all" />
+            </div>
+
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="filteredOrders.length === 0"
+            class="bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-xs">
+            <div
+                class="w-14 h-14 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-boxes-packing"></i>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900">No Orders Found</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                No orders matching the active filter or search query.
+            </p>
+            <button *ngIf="orderSearchQuery || orderStatusFilter !== 'all'"
+                (click)="orderSearchQuery = ''; orderStatusFilter = 'all'; applyOrderFilters(true)"
+                class="mt-3 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">
+                Reset Filters
+            </button>
+        </div>
+
+        <!-- Desktop Table View (Hidden on mobile) -->
+        <div *ngIf="filteredOrders.length > 0"
+            class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm text-slate-700">
+                    <thead
+                        class="bg-slate-50/90 text-slate-600 uppercase text-[11px] font-black border-b border-slate-200 tracking-wider">
+                        <tr>
+                            <th class="py-3.5 px-4">Order # & Product</th>
+                            <th class="py-3.5 px-4">Customer Details</th>
+                            <th class="py-3.5 px-4">Workshop / Seller</th>
+                            <th class="py-3.5 px-4 text-right">Order Value</th>
+                            <th class="py-3.5 px-4 text-center">Status</th>
+                            <th class="py-3.5 px-4 text-center">Payment & Escrow</th>
+                            <th class="py-3.5 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr *ngFor="let order of pagedOrders" class="hover:bg-slate-50/70 transition-colors">
+
+                            <!-- Order & Product -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                                    <span>{{ order.orderNumber }}</span>
+                                    <button (click)="copyText(order.orderNumber, 'Order Number')" title="Copy Order #"
+                                        class="text-slate-400 hover:text-slate-600">
+                                        <i class="fa-regular fa-copy text-[10px]"></i>
+                                    </button>
+                                </div>
+                                <div class="text-xs font-semibold text-slate-800 mt-0.5 truncate max-w-[220px]">
+                                    {{ order.productName }}
+                                </div>
+                                <!-- <div class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1.5">
+                                    <span>Qty: {{ order.quantity }}</span>
+                                    <span>&bull;</span>
+                                    <span>{{ order.vehicleCategory }}</span>
+                                    <span>&bull;</span>
+                                    <span>{{ order.createdAt }}</span>
+                                </div> -->
+                            </td>
+
+                            <!-- Customer Details -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">{{ order.customer.name }}</div>
+                                <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                                    <i class="fa-solid fa-phone text-[10px] text-slate-400"></i>
+                                    <span>{{ order.customer.phone }}</span>
+                                </div>
+
+                            </td>
+
+                            <!-- Workshop / Seller -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">{{ order.seller.workshopName }}</div>
+
+                            </td>
+
+                            <!-- Value Breakdown -->
+                            <td class="py-3.5 px-4 align-top text-right">
+                                <div class="text-sm font-black text-slate-900">₹{{ order.finalAmount | number:'1.2-2' }}
+                                </div>
+
+                            </td>
+
+                            <!-- Status -->
+                            <td class="py-3.5 px-4 align-top text-center">
+                                <span [ngClass]="getOrderStatusBadgeClass(order.status)"
+                                    class="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wide inline-block">
+                                    {{ formatStatusLabel(order.status) }}
+                                </span>
+
+                            </td>
+
+                            <!-- Payment & Escrow -->
+                            <td class="py-3.5 px-4 align-top text-center">
+                                <span [ngClass]="getFinancialStatusBadgeClass(order.payment.financialStatus)"
+                                    class="px-2.5 py-1 rounded-full text-xs font-bold inline-block">
+                                    {{ formatFinancialLabel(order.payment.financialStatus) }}
+                                </span>
+
+                            </td>
+
+                            <!-- Actions Group -->
+                            <td class="py-3.5 px-4 align-top text-right whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-1.5">
+
+                                    <!-- View Details -->
+                                    <button (click)="openDetailsModal(order)" title="View Order Details"
+                                        class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors">
+                                        <i class="fa-regular fa-eye text-xs"></i>
+                                    </button>
+
+                                    <!-- Update Status -->
+                                    <button (click)="openStatusModal(order, $event)" title="Update Status"
+                                        class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 flex items-center justify-center transition-colors">
+                                        <i class="fa-solid fa-arrows-spin text-xs"></i>
+                                    </button>
+
+                                    <!-- Add / View Notes -->
+                                    <button (click)="openNotesModal(order, $event)" title="Admin Notes"
+                                        class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 flex items-center justify-center transition-colors relative">
+                                        <i class="fa-regular fa-comment-dots text-xs"></i>
+
+                                    </button>
+
+                                    <!-- Refund Option -->
+                                    <button *ngIf="order.payment.status === 'paid'"
+                                        (click)="openRefundModal(order, $event)" title="Issue Refund"
+                                        class="w-8 h-8 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center transition-colors">
+                                        <i class="fa-solid fa-rotate-left text-xs"></i>
+                                    </button>
+
+                                    <!-- Cancel Order -->
+                                    <button *ngIf="order.status !== 'cancelled' && order.status !== 'delivered'"
+                                        (click)="openCancelModal(order, $event)" title="Cancel Order"
+                                        class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-colors">
+                                        <i class="fa-solid fa-ban text-xs"></i>
+                                    </button>
+
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile Cards View (Visible only on small screens) -->
+        <div *ngIf="filteredOrders.length > 0" class="md:hidden space-y-3.5">
+            <div *ngFor="let order of pagedOrders"
+                class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
+
+                <!-- Header row -->
+                <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                    <div>
+                        <div class="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                            <span>{{ order.orderNumber }}</span>
+                            <button (click)="copyText(order.orderNumber, 'Order Number')" class="text-slate-400">
+                                <i class="fa-regular fa-copy text-[10px]"></i>
+                            </button>
+                        </div>
+                        <div class="text-xs font-semibold text-slate-800 mt-0.5">{{ order.productName }}</div>
+                    </div>
+                    <span [ngClass]="getOrderStatusBadgeClass(order.status)"
+                        class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase">
+                        {{ formatStatusLabel(order.status) }}
+                    </span>
+                </div>
+
+                <!-- Details grid -->
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <span class="text-slate-400 text-[11px] font-medium block">Customer</span>
+                        <span class="font-bold text-slate-800">{{ order.customer.name }}</span>
+                        <span class="text-slate-500 text-[11px] block">{{ order.customer.phone }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 text-[11px] font-medium block">Seller / Workshop</span>
+                        <span class="font-bold text-slate-800">{{ order.seller.workshopName }}</span>
+                        <span class="text-slate-500 text-[11px] block">{{ order.seller.city }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 text-[11px] font-medium block">Total Payable</span>
+                        <span class="font-black text-slate-900 text-sm">₹{{ order.finalAmount | number:'1.2-2' }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 text-[11px] font-medium block">Seller Payout</span>
+                        <span class="font-bold text-emerald-700">₹{{ order.sellerPayoutAmount | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <!-- Financial & Shipment tag row -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                    <span [ngClass]="getFinancialStatusBadgeClass(order.payment.financialStatus)"
+                        class="px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        {{ formatFinancialLabel(order.payment.financialStatus) }}
+                    </span>
+                    <span *ngIf="order.shipment?.awbNumber" class="text-[11px] font-medium text-slate-600">
+                        AWB: {{ order.shipment?.awbNumber }}
+                    </span>
+                </div>
+
+                <!-- Action buttons row -->
+                <div class="grid grid-cols-4 gap-2 pt-2">
+                    <button (click)="openDetailsModal(order)"
+                        class="py-2 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center gap-1 active:scale-95">
+                        <i class="fa-regular fa-eye"></i> View
+                    </button>
+                    <button (click)="openStatusModal(order, $event)"
+                        class="py-2 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs flex items-center justify-center gap-1 active:scale-95">
+                        <i class="fa-solid fa-arrows-spin"></i> Status
+                    </button>
+                    <button (click)="openNotesModal(order, $event)"
+                        class="py-2 rounded-xl bg-amber-50 text-amber-700 font-bold text-xs flex items-center justify-center gap-1 active:scale-95">
+                        <i class="fa-regular fa-comment-dots"></i> Notes
+                    </button>
+                    <button (click)="openRefundModal(order, $event)"
+                        class="py-2 rounded-xl bg-purple-50 text-purple-700 font-bold text-xs flex items-center justify-center gap-1 active:scale-95">
+                        <i class="fa-solid fa-rotate-left"></i> Refund
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Orders Pagination Bar -->
+        <div *ngIf="filteredOrders.length > 0"
+            class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="text-slate-500 font-medium">
+                Showing <strong>{{ (orderCurrentPage - 1) * orderPageSize + 1 }}</strong> to <strong>{{
+                    (orderCurrentPage * orderPageSize) > filteredOrders.length ? filteredOrders.length :
+                    (orderCurrentPage * orderPageSize) }}</strong> of <strong>{{ filteredOrders.length }}</strong>
+                orders
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <button (click)="goToOrderPage(orderCurrentPage - 1)" [disabled]="orderCurrentPage === 1"
+                    class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 font-bold">
+                    Prev
+                </button>
+
+                <ng-container *ngFor="let p of getOrderPageNumbers()">
+                    <span *ngIf="p === '...'" class="px-2 text-slate-400">...</span>
+                    <button *ngIf="p !== '...'" (click)="goToOrderPage(+p)"
+                        [ngClass]="orderCurrentPage === p ? 'bg-[#db3333] text-white font-black shadow-xs' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold'"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center text-xs">
+                        {{ p }}
+                    </button>
+                </ng-container>
+
+                <button (click)="goToOrderPage(orderCurrentPage + 1)" [disabled]="orderCurrentPage >= orderTotalPages"
+                    class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 font-bold">
+                    Next
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- TAB CONTENT 2: SELLER SETTLEMENTS & PAYOUTS -->
+    <!-- ========================================================== -->
+    <div *ngIf="activeTab === 'settlements'" class="space-y-4">
+
+        <!-- Settlements Notice Banner -->
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+            <div
+                class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 text-base">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="text-xs sm:text-sm text-emerald-900 leading-relaxed font-medium">
+                <strong class="font-black text-emerald-950">Escrow Settlement Security Policy:</strong>
+                Customer payments are held in escrow during transit. Payouts become eligible 24 hours after verified
+                delivery.
+                Super Admin can disburse funds directly via IMPS / UPI and record UTR transaction references.
+            </div>
+        </div>
+
+        <!-- Settlement Filters & Search -->
+        <div
+            class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+
+            <!-- Status chips -->
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <button (click)="setSettlementStatusFilter('all')"
+                    [ngClass]="settlementStatusFilter === 'all' ? 'bg-slate-900 text-white shadow-xs font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    All ({{ settlements.length }})
+                </button>
+
+                <button (click)="setSettlementStatusFilter('eligible')"
+                    [ngClass]="settlementStatusFilter === 'eligible' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Eligible for Payout ({{ pendingSettlementsCount }})
+                </button>
+
+                <button (click)="setSettlementStatusFilter('settled')"
+                    [ngClass]="settlementStatusFilter === 'settled' ? 'bg-indigo-600 text-white shadow-xs font-bold' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Settled / Paid
+                </button>
+
+                <button (click)="setSettlementStatusFilter('held')"
+                    [ngClass]="settlementStatusFilter === 'held' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Held in Escrow
+                </button>
+            </div>
+
+            <!-- Search box -->
+            <div class="relative w-full lg:w-80 shrink-0">
+                <i
+                    class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" [(ngModel)]="settlementSearchQuery" (ngModelChange)="applySettlementFilters(true)"
+                    placeholder="Search by SET #, Order #, Workshop..."
+                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
+            </div>
+
+        </div>
+
+        <!-- Settlements Desktop Table -->
+        <div *ngIf="filteredSettlements.length > 0"
+            class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm text-slate-700">
+                    <thead
+                        class="bg-slate-50/90 text-slate-600 uppercase text-[11px] font-black border-b border-slate-200 tracking-wider">
+                        <tr>
+                            <th class="py-3.5 px-4">Settlement & Order #</th>
+                            <th class="py-3.5 px-4">Seller / Workshop</th>
+                            <th class="py-3.5 px-4">Bank & Payout Account</th>
+                            <th class="py-3.5 px-4 text-right">Net Payout</th>
+                            <th class="py-3.5 px-4 text-center">Status</th>
+                            <th class="py-3.5 px-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr *ngFor="let set of pagedSettlements" class="hover:bg-slate-50/70 transition-colors">
+
+                            <!-- Settlement & Order Ref -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                                    <span>{{ set.settlementNumber }}</span>
+                                </div>
+                                <div class="text-xs font-semibold text-slate-800 mt-0.5">Order: {{ set.orderNumber }}
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Part: {{ set.productName }}</div>
+                                <div class="text-[10px] text-slate-400 mt-0.5">Delivered: {{ set.deliveredAt || 'In
+                                    Transit' }}</div>
+                            </td>
+
+                            <!-- Seller / Workshop -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900">{{ set.workshopName }}</div>
+                                <div class="text-xs text-slate-600 mt-0.5">{{ set.sellerName }} (ID: #{{ set.sellerId
+                                    }})</div>
+                                <div class="text-xs text-slate-400 mt-0.5">{{ set.sellerPhone }}</div>
+                            </td>
+
+                            <!-- Bank Account -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-semibold text-slate-800">{{ set.sellerBank.bankName }}</div>
+                                <div class="text-xs text-slate-600 font-mono mt-0.5">A/C: {{
+                                    set.sellerBank.accountNumber }}</div>
+                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">IFSC: {{ set.sellerBank.ifsc }}
+                                </div>
+                                <div *ngIf="set.sellerBank.upiId" class="text-[11px] text-emerald-700 mt-0.5">UPI: {{
+                                    set.sellerBank.upiId }}</div>
+                            </td>
+
+                            <!-- Payout Amount -->
+                            <td class="py-3.5 px-4 align-top text-right">
+                                <div class="text-base font-black text-emerald-700">₹{{ set.payoutAmount | number:'1.2-2'
+                                    }}</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Gross: ₹{{ set.productTotal |
+                                    number:'1.2-2' }}</div>
+                                <div class="text-[10px] text-purple-700 font-semibold mt-0.5">Fee: -₹{{
+                                    set.platformFeeDeducted | number:'1.2-2' }}</div>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="py-3.5 px-4 align-top text-center">
+                                <span [ngClass]="getSettlementStatusBadgeClass(set.status)"
+                                    class="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wide inline-block">
+                                    {{ set.status }}
+                                </span>
+                                <div *ngIf="set.settledAt" class="text-[10px] text-slate-400 mt-1">
+                                    Paid on {{ set.settledAt }}
+                                </div>
+                                <div *ngIf="set.holdReason"
+                                    class="text-[10px] text-amber-700 max-w-[150px] mx-auto mt-1 leading-tight">
+                                    {{ set.holdReason }}
+                                </div>
+                            </td>
+
+                            <!-- Action Button -->
+                            <td class="py-3.5 px-4 align-top text-right whitespace-nowrap">
+                                <!-- Case 1: Eligible for payout -> Payout button -->
+                                <button *ngIf="set.status === 'eligible'" (click)="openPayoutModal(set, $event)"
+                                    class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm shadow-emerald-500/20 active:scale-95 transition-all inline-flex items-center gap-1.5">
+                                    <i class="fa-solid fa-money-bill-transfer"></i>
+                                    <span>Release Payout</span>
+                                </button>
+
+                                <!-- Case 2: Already settled -> View Receipt -->
+                                <button *ngIf="set.status === 'settled'" (click)="openReceiptModal(set, $event)"
+                                    class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs active:scale-95 transition-all inline-flex items-center gap-1.5">
+                                    <i class="fa-solid fa-receipt"></i>
+                                    <span>Receipt</span>
+                                </button>
+
+                                <!-- Case 3: Held -> Details info -->
+                                <span *ngIf="set.status === 'held'" class="text-xs text-slate-400 italic font-medium">
+                                    Holding in Escrow
+                                </span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settlements Mobile Cards -->
+        <div *ngIf="filteredSettlements.length > 0" class="md:hidden space-y-3.5">
+            <div *ngFor="let set of pagedSettlements"
+                class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
+
+                <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                    <div>
+                        <div class="font-black text-slate-900 text-sm">{{ set.settlementNumber }}</div>
+                        <div class="text-xs font-semibold text-slate-600 mt-0.5">Order: {{ set.orderNumber }}</div>
+                    </div>
+                    <span [ngClass]="getSettlementStatusBadgeClass(set.status)"
+                        class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase">
+                        {{ set.status }}
+                    </span>
+                </div>
+
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Seller / Workshop:</span>
+                        <span class="font-bold text-slate-800">{{ set.workshopName }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Bank Details:</span>
+                        <span class="font-mono text-slate-800">{{ set.sellerBank.bankName }} ({{
+                            set.sellerBank.accountNumber }})</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-1 border-t border-slate-100">
+                        <span class="text-slate-500 font-medium">Net Payout Amount:</span>
+                        <span class="text-base font-black text-emerald-700">₹{{ set.payoutAmount | number:'1.2-2'
+                            }}</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <button *ngIf="set.status === 'eligible'" (click)="openPayoutModal(set, $event)"
+                        class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm active:scale-95">
+                        <i class="fa-solid fa-money-bill-transfer"></i> Process Payout Now
+                    </button>
+                    <button *ngIf="set.status === 'settled'" (click)="openReceiptModal(set, $event)"
+                        class="w-full py-2.5 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-receipt"></i> View Payout Receipt
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 1: DETAILED ORDER VIEW -->
+    <!-- ========================================================== -->
+    <div *ngIf="isDetailsModalOpen && selectedOrder"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity" (click)="closeDetailsModal()">
+        </div>
+
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden z-10 my-auto">
+
+            <!-- Modal Header -->
+            <div class="px-6 py-4 flex items-center justify-between border-b border-slate-100 shrink-0 bg-slate-50/50">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{{
+                            selectedOrder.orderNumber }}</h2>
+                        <span [ngClass]="getOrderStatusBadgeClass(selectedOrder.status)"
+                            class="px-2.5 py-0.5 rounded-full text-xs font-black uppercase">
+                            {{ formatStatusLabel(selectedOrder.status) }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        Placed on {{ selectedOrder.createdAt }} &bull; Req: {{ selectedOrder.purchaseRequestRef }}
+                        &bull; Quote: {{ selectedOrder.quotationRef }}
+                    </p>
+                </div>
+
+                <button (click)="closeDetailsModal()"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-6 space-y-6 flex-1 overflow-y-auto min-h-0 text-xs sm:text-sm">
+
+                <!-- Customer & Seller 2-Column Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    <!-- Customer Info Box -->
+                    <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+                        <div class="text-xs font-black uppercase text-slate-500 flex items-center gap-1.5 mb-1">
+                            <i class="fa-regular fa-user text-slate-400"></i>
+                            <span>Customer Information</span>
+                        </div>
+                        <div class="font-bold text-slate-900 text-sm">{{ selectedOrder.customer.name }}</div>
+                        <div class="text-slate-600 flex items-center gap-1.5">
+                            <i class="fa-solid fa-phone text-slate-400 text-xs"></i>
+                            <span>{{ selectedOrder.customer.phone }}</span>
+                        </div>
+                        <div class="text-slate-600 flex items-start gap-1.5 text-xs leading-relaxed">
+                            <i class="fa-solid fa-location-dot text-slate-400 text-xs mt-0.5 shrink-0"></i>
+                            <span>{{ selectedOrder.customer.address }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Seller Info Box -->
+                    <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+                        <div class="text-xs font-black uppercase text-slate-500 flex items-center gap-1.5 mb-1">
+                            <i class="fa-solid fa-store text-slate-400"></i>
+                            <span>Seller / Workshop Details</span>
+                        </div>
+                        <div class="font-bold text-slate-900 text-sm">{{ selectedOrder.seller.workshopName }}</div>
+                        <div class="text-slate-600 flex items-center gap-1.5">
+                            <i class="fa-regular fa-user text-slate-400 text-xs"></i>
+                            <span>Owner: {{ selectedOrder.seller.name }} (ID: #{{ selectedOrder.seller.id }})</span>
+                        </div>
+                        <div class="text-slate-600 flex items-center gap-1.5">
+                            <i class="fa-solid fa-phone text-slate-400 text-xs"></i>
+                            <span>{{ selectedOrder.seller.phone }} &bull; {{ selectedOrder.seller.city }}</span>
+                        </div>
+                        <div
+                            class="text-emerald-700 font-semibold text-xs flex items-center gap-1.5 pt-1 border-t border-slate-200">
+                            <i class="fa-solid fa-building-columns text-emerald-600"></i>
+                            <span>{{ selectedOrder.seller.bankName }} ({{ selectedOrder.seller.accountNumber }})</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Product & Commercial Breakdown -->
+                <div class="bg-slate-50/90 rounded-2xl p-4 sm:p-5 border border-slate-200/80 space-y-3">
+                    <div class="text-xs font-black uppercase text-slate-500 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-box-archive text-slate-400"></i>
+                            <span>Item & Commercial Breakdown</span>
+                        </span>
+                        <span class="text-slate-600">{{ selectedOrder.vehicleCategory }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                        <div>
+                            <div class="font-bold text-slate-900 text-sm sm:text-base">{{ selectedOrder.productName }}
+                            </div>
+                            <div class="text-xs text-slate-500">Unit Price: ₹{{ selectedOrder.unitPrice | number:'1.2-2'
+                                }} &times; {{ selectedOrder.quantity }} Qty</div>
+                        </div>
+                        <div class="text-base font-black text-slate-900">₹{{ selectedOrder.productAmount |
+                            number:'1.2-2' }}</div>
+                    </div>
+
+                    <div class="space-y-1.5 text-xs text-slate-600">
+                        <div class="flex justify-between">
+                            <span>GST / Tax ({{ selectedOrder.gstPercent }}%):</span>
+                            <span class="font-bold text-slate-800">₹{{ selectedOrder.gstAmount | number:'1.2-2'
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Delivery / Shipping Fee:</span>
+                            <span class="font-bold text-slate-800">₹{{ selectedOrder.deliveryFee | number:'1.2-2'
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between text-purple-700 font-semibold">
+                            <span>Platform Service Fee:</span>
+                            <span class="font-bold">+₹{{ selectedOrder.platformFee | number:'1.2-2' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-200 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-slate-500 font-bold uppercase block">Customer Paid Total</span>
+                            <span class="text-lg sm:text-xl font-black text-slate-900">₹{{ selectedOrder.finalAmount |
+                                number:'1.2-2' }}</span>
+                        </div>
+                        <div class="text-right bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5">
+                            <span class="text-[11px] text-emerald-800 font-bold uppercase block">Seller Net
+                                Payout</span>
+                            <span class="text-base sm:text-lg font-black text-emerald-700">₹{{
+                                selectedOrder.sellerPayoutAmount | number:'1.2-2' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment & Gateway Details -->
+                <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+                    <div class="text-xs font-black uppercase text-slate-500 flex items-center gap-1.5 mb-1">
+                        <i class="fa-regular fa-credit-card text-slate-400"></i>
+                        <span>Razorpay Payment Gateway Details</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <span class="text-slate-400 block">Payment ID</span>
+                            <span class="font-mono font-bold text-slate-800">{{ selectedOrder.payment.paymentId
+                                }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Razorpay Order ID</span>
+                            <span class="font-mono font-bold text-slate-800">{{ selectedOrder.payment.orderId }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Paid At</span>
+                            <span class="font-bold text-slate-800">{{ selectedOrder.payment.paidAt }}</span>
+                        </div>
+                    </div>
+
+                    <div *ngIf="selectedOrder.payment.refundAmount"
+                        class="mt-2 pt-2 border-t border-rose-200 bg-rose-50 p-2.5 rounded-xl text-rose-800 text-xs">
+                        <div class="font-black flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Refund of ₹{{ selectedOrder.payment.refundAmount | number:'1.2-2' }} Issued</span>
+                        </div>
+                        <p class="text-[11px] mt-0.5">{{ selectedOrder.payment.refundReason }} &bull; {{
+                            selectedOrder.payment.refundedAt }}</p>
+                    </div>
+                </div>
+
+                <!-- Logistics & Shipment -->
+                <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+                    <div class="text-xs font-black uppercase text-slate-500 flex items-center justify-between mb-1">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-truck text-slate-400"></i>
+                            <span>Logistics & Courier Dispatch</span>
+                        </span>
+                        <span *ngIf="selectedOrder.shipment?.courierPartner" class="text-slate-700 font-bold">
+                            {{ selectedOrder.shipment?.courierPartner }}
+                        </span>
+                    </div>
+
+                    <div *ngIf="selectedOrder.shipment" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div>
+                            <span class="text-slate-400 block">Tracking / AWB #</span>
+                            <span class="font-mono font-bold text-slate-900">{{ selectedOrder.shipment.awbNumber
+                                }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Logistics Status</span>
+                            <span class="font-bold text-indigo-700">{{ selectedOrder.shipment.status }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block">Dispatched Date</span>
+                            <span class="font-bold text-slate-800">{{ selectedOrder.shipment.dispatchedAt || 'Pending'
+                                }}</span>
+                        </div>
+                    </div>
+
+                    <div *ngIf="!selectedOrder.shipment" class="text-xs text-slate-500 italic py-1">
+                        Shipment has not been dispatched yet. Provider needs to prepare the package and logistics will
+                        be assigned upon pickup.
+                    </div>
+                </div>
+
+                <!-- Admin Notes History -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h4
+                            class="text-xs font-black uppercase text-slate-900 tracking-wider flex items-center gap-1.5">
+                            <i class="fa-regular fa-comment-dots text-slate-400"></i>
+                            <span>Internal Admin Notes ({{ selectedOrder.notes.length }})</span>
+                        </h4>
+                        <button (click)="openNotesModal(selectedOrder)"
+                            class="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Add Note
+                        </button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div *ngFor="let n of selectedOrder.notes"
+                            class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-xs">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-slate-800">{{ n.author }} ({{ n.role }})</span>
+                                <span class="text-[10px] text-slate-400">{{ n.createdAt }}</span>
+                            </div>
+                            <p class="text-slate-700 leading-relaxed">{{ n.text }}</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div
+                class="p-4 border-t border-slate-100 shrink-0 bg-white flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2">
+                    <!-- Update Status -->
+                    <button (click)="openStatusModal(selectedOrder)"
+                        class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95">
+                        <i class="fa-solid fa-arrows-spin"></i> Update Status
+                    </button>
+
+                    <!-- Issue Refund -->
+                    <button *ngIf="selectedOrder.payment.status === 'paid'" (click)="openRefundModal(selectedOrder)"
+                        class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95">
+                        <i class="fa-solid fa-rotate-left"></i> Refund
+                    </button>
+
+                    <!-- Cancel Order -->
+                    <button *ngIf="selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered'"
+                        (click)="openCancelModal(selectedOrder)"
+                        class="px-3.5 py-2 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95">
+                        <i class="fa-solid fa-ban"></i> Cancel Order
+                    </button>
+                </div>
+
+                <button (click)="closeDetailsModal()"
+                    class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 2: ADD NOTES MODAL -->
+    <!-- ========================================================== -->
+    <div *ngIf="isNotesModalOpen && orderForNote"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs" (click)="closeNotesModal()"></div>
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md p-6 z-10 my-auto animate-scale-up">
+
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900">Add Internal Note</h3>
+                    <p class="text-xs text-slate-500 font-medium">Order: {{ orderForNote.orderNumber }}</p>
+                </div>
+                <button (click)="closeNotesModal()"
+                    class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 mb-4">
+                <label class="text-xs font-bold text-slate-700 block">Note Content <span
+                        class="text-red-500">*</span></label>
+                <textarea [(ngModel)]="newNoteText" rows="4"
+                    placeholder="Enter operational note, logistics update, or customer call log..."
+                    class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end gap-2">
+                <button (click)="closeNotesModal()"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold">
+                    Cancel
+                </button>
+                <button (click)="saveOrderNote()"
+                    class="px-5 py-2 rounded-xl bg-[#db3333] hover:bg-red-700 text-white font-bold text-xs shadow-xs active:scale-95">
+                    Save Note
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 3: STATUS UPDATE MODAL -->
+    <!-- ========================================================== -->
+    <div *ngIf="isStatusModalOpen && orderForStatus"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs" (click)="closeStatusModal()"></div>
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 z-10 my-auto animate-scale-up">
+
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900">Update Order Status</h3>
+                    <p class="text-xs text-slate-500 font-medium">Order: {{ orderForStatus.orderNumber }} &bull; {{
+                        orderForStatus.productName }}</p>
+                </div>
+                <button (click)="closeStatusModal()"
+                    class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 mb-5 text-xs sm:text-sm">
+
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1.5">Select New Status</label>
+                    <select [(ngModel)]="selectedNewStatus"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                        <option value="confirmed">Confirmed</option>
+                        <option value="ready_for_pickup">Ready for Pickup</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="out_for_delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Conditional Shipment Inputs if Shipped or Out for Delivery -->
+                <div *ngIf="selectedNewStatus === 'shipped' || selectedNewStatus === 'out_for_delivery' || selectedNewStatus === 'delivered'"
+                    class="bg-blue-50/60 border border-blue-200 rounded-2xl p-3.5 space-y-3">
+                    <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-truck"></i> Courier Dispatch Details
+                    </span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[11px] font-semibold text-slate-600 block mb-1">Courier Partner</label>
+                            <input type="text" [(ngModel)]="courierPartnerInput"
+                                placeholder="Delhivery, BlueDart, Shadowfax..."
+                                class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs" />
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-semibold text-slate-600 block mb-1">AWB / Tracking
+                                Number</label>
+                            <input type="text" [(ngModel)]="awbNumberInput" placeholder="e.g. DLV-987214"
+                                class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold" />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Internal Remarks / Reason</label>
+                    <input type="text" [(ngModel)]="statusRemarksInput" placeholder="Optional audit trail note..."
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+                </div>
+
+            </div>
+
+            <div class="flex items-center justify-end gap-2">
+                <button (click)="closeStatusModal()"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold">
+                    Cancel
+                </button>
+                <button (click)="confirmStatusUpdate()"
+                    class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs active:scale-95">
+                    Update Status
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 4: CANCEL ORDER MODAL -->
+    <!-- ========================================================== -->
+    <div *ngIf="isCancelModalOpen && orderToCancel"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs" (click)="closeCancelModal()"></div>
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md p-6 z-10 my-auto animate-scale-up">
+
+            <div
+                class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-xl mx-auto mb-3">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+
+            <h3 class="text-lg font-black text-slate-900 text-center">Cancel Order Confirmation</h3>
+            <p class="text-xs text-slate-500 text-center mt-0.5 mb-4">
+                Are you sure you want to cancel Order <strong>{{ orderToCancel.orderNumber }}</strong> (₹{{
+                orderToCancel.finalAmount | number:'1.2-2' }})?
+            </p>
+
+            <div class="space-y-3 mb-5 text-xs">
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Cancellation Reason <span
+                            class="text-red-500">*</span></label>
+                    <select [(ngModel)]="cancelReasonInput"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
+                        <option value="Customer requested cancellation">Customer requested cancellation</option>
+                        <option value="Item out of stock / seller unable to fulfill">Item out of stock / seller unable
+                            to fulfill</option>
+                        <option value="Logistics unavailable for delivery address">Logistics unavailable for delivery
+                            address</option>
+                        <option value="Suspected fraudulent transaction">Suspected fraudulent transaction</option>
+                        <option value="Other">Other reason</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Remarks</label>
+                    <input type="text" [(ngModel)]="cancelRemarksInput" placeholder="Additional details..."
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+                </div>
+
+                <div
+                    class="bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center gap-2.5 text-xs text-rose-900">
+                    <input type="checkbox" id="autoRefundCheck" [(ngModel)]="autoRefundCustomer"
+                        class="rounded text-rose-600 w-4 h-4 cursor-pointer" />
+                    <label for="autoRefundCheck" class="font-bold cursor-pointer">
+                        Automatically initiate full refund of ₹{{ orderToCancel.finalAmount | number:'1.2-2' }} to
+                        customer
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button (click)="closeCancelModal()"
+                    class="py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs">
+                    Nevermind
+                </button>
+                <button (click)="confirmCancelOrder()"
+                    class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs active:scale-95">
+                    Confirm Cancel
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 5: REFUND OPTION MODAL -->
+    <!-- ========================================================== -->
+    <div *ngIf="isRefundModalOpen && orderToRefund"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs" (click)="closeRefundModal()"></div>
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md p-6 z-10 my-auto animate-scale-up">
+
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900">Issue Customer Refund</h3>
+                    <p class="text-xs text-slate-500 font-medium">Order: {{ orderToRefund.orderNumber }} &bull; Paid:
+                        ₹{{ orderToRefund.finalAmount | number:'1.2-2' }}</p>
+                </div>
+                <button (click)="closeRefundModal()"
+                    class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3.5 mb-5 text-xs sm:text-sm">
+
+                <!-- Full vs Partial -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1.5">Refund Type</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button (click)="refundType = 'full'; onRefundTypeChange()"
+                            [ngClass]="refundType === 'full' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700'"
+                            class="py-2 rounded-xl text-xs transition-all">
+                            Full Refund (₹{{ orderToRefund.finalAmount | number:'1.2-2' }})
+                        </button>
+                        <button (click)="refundType = 'partial'"
+                            [ngClass]="refundType === 'partial' ? 'bg-purple-600 text-white font-bold' : 'bg-slate-100 text-slate-700'"
+                            class="py-2 rounded-xl text-xs transition-all">
+                            Partial Refund
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Refund Amount -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Refund Amount (₹)</label>
+                    <input type="number" [(ngModel)]="refundAmountInput" [disabled]="refundType === 'full'"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-black text-slate-900" />
+                </div>
+
+                <!-- Reason -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Reason for Refund</label>
+                    <input type="text" [(ngModel)]="refundReasonInput"
+                        placeholder="Defective part, customer return, etc."
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+                </div>
+
+                <!-- Gateway Method -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Refund Destination</label>
+                    <select [(ngModel)]="refundMethodInput"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800">
+                        <option value="Razorpay Gateway (Original Source)">Razorpay Gateway (Original Source)</option>
+                        <option value="Manual NEFT / Bank Transfer">Manual NEFT / Bank Transfer</option>
+                        <option value="Store Credit Wallet">Store Credit Wallet</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="flex items-center justify-end gap-2">
+                <button (click)="closeRefundModal()"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold">
+                    Cancel
+                </button>
+                <button (click)="confirmRefund()"
+                    class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs active:scale-95">
+                    Process Refund
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 6: SELLER PAYOUT MODAL -->
+    <!-- ========================================================== -->
+    <div *ngIf="isPayoutModalOpen && settlementToPayout"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs" (click)="closePayoutModal()"></div>
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 z-10 my-auto animate-scale-up">
+
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-lg font-black text-slate-900">Release Seller Payout</h3>
+                    <p class="text-xs text-slate-500 font-medium">{{ settlementToPayout.settlementNumber }} &bull; Order
+                        {{ settlementToPayout.orderNumber }}</p>
+                </div>
+                <button (click)="closePayoutModal()"
+                    class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Seller Bank Summary Card -->
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 mb-4 space-y-2 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-black uppercase text-emerald-900">Beneficiary Details</span>
+                    <span class="font-bold text-slate-800">{{ settlementToPayout.workshopName }}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-slate-700 pt-1">
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">Bank Name</span>
+                        <span class="font-semibold">{{ settlementToPayout.sellerBank.bankName }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">Account Number</span>
+                        <span class="font-mono font-bold">{{ settlementToPayout.sellerBank.accountNumber }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">IFSC Code</span>
+                        <span class="font-mono font-bold">{{ settlementToPayout.sellerBank.ifsc }}</span>
+                    </div>
+                    <div *ngIf="settlementToPayout.sellerBank.upiId">
+                        <span class="text-slate-400 block text-[11px]">UPI ID</span>
+                        <span class="font-semibold text-emerald-800">{{ settlementToPayout.sellerBank.upiId }}</span>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-emerald-200 flex items-center justify-between">
+                    <span class="text-xs font-bold text-emerald-950">Net Payout Amount:</span>
+                    <span class="text-xl font-black text-emerald-700">₹{{ settlementToPayout.payoutAmount |
+                        number:'1.2-2' }}</span>
+                </div>
+            </div>
+
+            <div class="space-y-3.5 mb-5 text-xs">
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Transfer Payment Mode <span
+                            class="text-red-500">*</span></label>
+                    <select [(ngModel)]="payoutModeInput"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800">
+                        <option value="IMPS/NEFT">IMPS / NEFT Direct Bank Transfer</option>
+                        <option value="UPI">UPI Instant Transfer</option>
+                        <option value="Razorpay Route">Razorpay Route Automated Payouts</option>
+                        <option value="Bank Transfer">Offline Cheque / RTGS</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Bank UTR / Transaction Reference Number
+                        <span class="text-red-500">*</span></label>
+                    <input type="text" [(ngModel)]="payoutUtrInput" placeholder="e.g. UTR9823104928"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-900" />
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Internal Notes</label>
+                    <input type="text" [(ngModel)]="payoutNotesInput" placeholder="Audit remarks..."
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2">
+                <button (click)="closePayoutModal()"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold">
+                    Cancel
+                </button>
+                <button (click)="confirmPayoutRelease()"
+                    class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs active:scale-95">
+                    Confirm & Release Payout
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL 7: SETTLEMENT RECEIPT MODAL -->
+    <!-- ========================================================== -->
+    <div *ngIf="isReceiptModalOpen && selectedReceipt"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs" (click)="closeReceiptModal()"></div>
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 sm:p-8 z-10 my-auto animate-scale-up">
+
+            <!-- Receipt Header -->
+            <div class="text-center pb-4 border-b border-slate-200">
+                <div
+                    class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2 text-xl font-black">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Seller Payout Disbursement Slip</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Reference: {{ selectedReceipt.settlementNumber }}</p>
+            </div>
+
+            <!-- Receipt Body -->
+            <div class="py-4 space-y-3 text-xs sm:text-sm">
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-medium">Order Number:</span>
+                    <span class="font-bold text-slate-900">{{ selectedReceipt.orderNumber }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-medium">Beneficiary Workshop:</span>
+                    <span class="font-bold text-slate-900">{{ selectedReceipt.workshopName }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-medium">Bank & Account:</span>
+                    <span class="font-mono text-slate-800">{{ selectedReceipt.sellerBank.bankName }} ({{
+                        selectedReceipt.sellerBank.accountNumber }})</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-medium">Transfer Mode:</span>
+                    <span class="font-bold text-slate-800">{{ selectedReceipt.payoutDetails?.payoutMode || 'IMPS/NEFT'
+                        }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-medium">Bank UTR / Ref #:</span>
+                    <span class="font-mono font-bold text-emerald-700">{{ selectedReceipt.payoutDetails?.utrNumber ||
+                        'UTR9082319451' }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500 font-medium">Processed Date:</span>
+                    <span class="font-bold text-slate-800">{{ selectedReceipt.settledAt || '20 Oct 2026' }}</span>
+                </div>
+
+                <div class="pt-3 border-t border-dashed border-slate-200 flex justify-between items-center text-sm">
+                    <span class="font-bold text-slate-700">Total Transferred:</span>
+                    <span class="text-xl font-black text-emerald-700">₹{{ selectedReceipt.payoutAmount | number:'1.2-2'
+                        }}</span>
+                </div>
+            </div>
+
+            <!-- Receipt Footer -->
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                <button (click)="printReceipt()"
+                    class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> Print Receipt
+                </button>
+                <button (click)="closeReceiptModal()"
+                    class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs">
+                    Done
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>

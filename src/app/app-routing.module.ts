@@ -298,6 +298,11 @@ const routes: Routes = [
         loadComponent: () => import('./admin/commission/commission.component').then(m => m.CommissionComponent),
         canActivate: [AuthGuard],
       },
+      {
+        path: 'ecom',
+        loadComponent: () => import('./admin/ecom/ecom.component').then(m => m.EcomComponent),
+        canActivate: [AuthGuard],
+      },
     ],
   },
 ];

@@ -123,6 +123,12 @@ export class SidenavComponent {
           label: 'Commission / Fee',
           route: '/admin/commission',
         },
+        {
+          index: 10,
+          icon: 'shopping_bag',
+          label: 'E-Commerce',
+          route: '/admin/ecom',
+        },
 
         // {
         //   index: 9,
