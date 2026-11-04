@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NotificationService } from 'src/app/core/services/notificationnew.service';
-
-export type EcomAdminTab = 'orders' | 'settlements';
+import { EcomService } from 'src/app/core/services/ecom.service';
 
 export type OrderStatus =
   | 'confirmed'
@@ -20,6 +19,11 @@ export interface AdminOrderNote {
   role: string;
   text: string;
   createdAt: string;
+  admin?: {
+    id: number;
+    name: string;
+  } | null;
+  note?: string;
 }
 
 export interface AdminOrder {
@@ -74,7 +78,7 @@ export interface AdminOrder {
     orderId: string;
     paidAt: string;
     status: 'paid' | 'pending' | 'failed' | 'refunded' | 'partially_refunded';
-    financialStatus: 'funds_held' | 'released' | 'settled' | 'refunded';
+    financialStatus: 'funds_held' | 'released' | 'settled' | 'refunded' | 'partially_refunded' | string;
     refundAmount?: number;
     refundReason?: string;
     refundedAt?: string;
@@ -95,577 +99,15 @@ export interface AdminOrder {
   } | null;
 
   notes: AdminOrderNote[];
+  rawItem?: any;
+  allowedActions?: string[];
+  refundSummary?: any;
+  refunds?: any[];
+  attentionReason?: string | null;
+  acceptedQuotation?: any;
+  pricing?: any;
+  events?: any[];
 }
-
-export interface SellerSettlement {
-  id: number;
-  settlementNumber: string;
-  orderId: number;
-  orderNumber: string;
-  orderDate: string;
-  deliveredAt?: string;
-  sellerId: number;
-  sellerName: string;
-  workshopName: string;
-  sellerPhone: string;
-  sellerBank: {
-    bankName: string;
-    accountNumber: string;
-    ifsc: string;
-    upiId: string;
-  };
-  productName: string;
-  productTotal: number;
-  platformFeeDeducted: number;
-  payoutAmount: number;
-  status: 'eligible' | 'settled' | 'held' | 'disputed';
-  holdReason?: string;
-  eligibleAt?: string;
-  settledAt?: string;
-  payoutDetails?: {
-    payoutMode: 'IMPS/NEFT' | 'UPI' | 'Razorpay Route' | 'Bank Transfer';
-    utrNumber: string;
-    processedBy: string;
-    notes?: string;
-    processedAt: string;
-  };
-}
-
-const STORAGE_ORDERS_KEY = 'gm_admin_ecom_mock_orders_v1';
-const STORAGE_SETTLEMENTS_KEY = 'gm_admin_ecom_mock_settlements_v1';
-
-const INITIAL_MOCK_ORDERS: AdminOrder[] = [
-  {
-    id: 5,
-    orderNumber: 'GMO-261102-I8DCKE',
-    purchaseRequestId: 10,
-    purchaseRequestRef: 'GPR-261102-L3QT8D',
-    quotationId: 12,
-    quotationRef: 'GQT-261102-VZVGWL',
-    quotationVersion: 1,
-    productName: 'Tail Light (LED Assembly)',
-    vehicleCategory: 'Two Wheeler',
-    vehicleModel: 'Hero Splendor Plus',
-    quantity: 1,
-    unitPrice: 10.0,
-    productAmount: 10.0,
-    gstPercent: 18.0,
-    gstAmount: 1.8,
-    productTotal: 11.8,
-    deliveryFee: 40.0,
-    platformFee: 0.24,
-    finalAmount: 52.04,
-    sellerPayoutAmount: 11.8,
-    customer: {
-      id: 97,
-      name: 'Ashi Sharma',
-      phone: '+91 96325 89653',
-      email: 'ashi.sharma@example.com',
-      city: 'Bharatpur',
-      state: 'Rajasthan',
-      pincode: '456465',
-      address: 'Plot 12, Gandhi Nagar, Near Main Bus Stand, Bharatpur, Rajasthan - 456465'
-    },
-    seller: {
-      id: 135,
-      name: 'Ramesh Sharma',
-      workshopName: 'Sharma Auto Spare Parts',
-      phone: '+91 98290 12345',
-      city: 'Jaipur',
-      state: 'Rajasthan',
-      bankName: 'State Bank of India',
-      accountNumber: 'XXXXXX4512',
-      ifsc: 'SBIN0001420',
-      upiId: 'sharmaauto@sbi'
-    },
-    payment: {
-      method: 'Razorpay UPI',
-      paymentId: 'pay_TvChUtCfrHoD03',
-      orderId: 'order_TvCh1h0ZENUzSN',
-      paidAt: '02 Nov 2026, 11:43 am',
-      status: 'paid',
-      financialStatus: 'funds_held'
-    },
-    status: 'confirmed',
-    createdAt: '02 Nov 2026, 11:41 am',
-    shipment: null,
-    notes: [
-      {
-        id: 1,
-        author: 'System',
-        role: 'Auto',
-        text: 'Payment received via Razorpay. ₹52.04 held in escrow. Provider notified.',
-        createdAt: '02 Nov 2026, 11:43 am'
-      }
-    ]
-  },
-  {
-    id: 6,
-    orderNumber: 'GMO-261031-7CZVHS',
-    purchaseRequestId: 2,
-    purchaseRequestRef: 'GPR-261030-SEWCCO',
-    quotationId: 5,
-    quotationRef: 'GQT-261031-7CZVHS',
-    quotationVersion: 1,
-    productName: 'Front Brake Pad Kit (Ceramic)',
-    vehicleCategory: 'Two Wheeler',
-    vehicleModel: 'Honda Activa 6G',
-    quantity: 2,
-    unitPrice: 200.0,
-    productAmount: 400.0,
-    gstPercent: 18.0,
-    gstAmount: 72.0,
-    productTotal: 472.0,
-    deliveryFee: 40.0,
-    platformFee: 9.44,
-    finalAmount: 521.44,
-    sellerPayoutAmount: 472.0,
-    customer: {
-      id: 104,
-      name: 'Rohit Verma',
-      phone: '+91 98765 43210',
-      email: 'rohit.v@example.com',
-      city: 'Karol Bagh',
-      state: 'Delhi',
-      pincode: '334001',
-      address: 'House 54, Block C, Karol Bagh, New Delhi - 334001'
-    },
-    seller: {
-      id: 142,
-      name: 'Sunil Meena',
-      workshopName: 'Meena Motors & Spares',
-      phone: '+91 97840 98765',
-      city: 'Jaipur',
-      state: 'Rajasthan',
-      bankName: 'HDFC Bank',
-      accountNumber: 'XXXXXX9821',
-      ifsc: 'HDFC0000240',
-      upiId: 'meenamotors@hdfcbank'
-    },
-    payment: {
-      method: 'Razorpay NetBanking',
-      paymentId: 'pay_RuX9082341M',
-      orderId: 'order_RuX11223399',
-      paidAt: '31 Oct 2026, 02:20 pm',
-      status: 'paid',
-      financialStatus: 'funds_held'
-    },
-    status: 'ready_for_pickup',
-    createdAt: '31 Oct 2026, 02:15 pm',
-    shipment: {
-      id: 'SHP-9021',
-      courierPartner: 'Delhivery Surface',
-      awbNumber: 'DLV-9872145',
-      status: 'Ready for Courier Pickup'
-    },
-    notes: [
-      {
-        id: 1,
-        author: 'Sunil Meena',
-        role: 'Provider',
-        text: 'Packed securely in branded bubble wrap box. Awaiting pickup.',
-        createdAt: '31 Oct 2026, 04:30 pm'
-      }
-    ]
-  },
-  {
-    id: 7,
-    orderNumber: 'GMO-261028-KL9871',
-    purchaseRequestId: 15,
-    purchaseRequestRef: 'GPR-261028-A4B7C9',
-    quotationId: 19,
-    quotationRef: 'GQT-261028-U9982X',
-    quotationVersion: 2,
-    productName: 'Radiator Assembly & Cooling Fan',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Maruti Suzuki Swift (2022)',
-    quantity: 1,
-    unitPrice: 6800.0,
-    productAmount: 6800.0,
-    gstPercent: 18.0,
-    gstAmount: 1224.0,
-    productTotal: 8024.0,
-    deliveryFee: 250.0,
-    platformFee: 160.48,
-    finalAmount: 8434.48,
-    sellerPayoutAmount: 8024.0,
-    customer: {
-      id: 88,
-      name: 'Vikram Rathore',
-      phone: '+91 95870 34567',
-      email: 'vikram.r@example.com',
-      city: 'Udaipur',
-      state: 'Rajasthan',
-      pincode: '313001',
-      address: 'Fatehpura Main Road, Near Saheliyon Ki Bari, Udaipur, Rajasthan - 313001'
-    },
-    seller: {
-      id: 110,
-      name: 'Anil Choudhary',
-      workshopName: 'Apex Car Spares Hub',
-      phone: '+91 94140 77889',
-      city: 'Jodhpur',
-      state: 'Rajasthan',
-      bankName: 'ICICI Bank',
-      accountNumber: 'XXXXXX3319',
-      ifsc: 'ICIC0000104',
-      upiId: 'apexspares@icici'
-    },
-    payment: {
-      method: 'Razorpay Card',
-      paymentId: 'pay_Jk8890214Z',
-      orderId: 'order_Jk99112233',
-      paidAt: '28 Oct 2026, 10:15 am',
-      status: 'paid',
-      financialStatus: 'funds_held'
-    },
-    status: 'shipped',
-    createdAt: '28 Oct 2026, 10:10 am',
-    shipment: {
-      id: 'SHP-8812',
-      courierPartner: 'BlueDart Express',
-      awbNumber: 'BD-8821903',
-      status: 'In Transit - Destination Hub',
-      dispatchedAt: '29 Oct 2026, 11:00 am'
-    },
-    notes: [
-      {
-        id: 1,
-        author: 'Admin Support',
-        role: 'Admin',
-        text: 'Logistics dispatched via BlueDart Air cargo.',
-        createdAt: '29 Oct 2026, 11:30 am'
-      }
-    ]
-  },
-  {
-    id: 8,
-    orderNumber: 'GMO-261020-DL5531',
-    purchaseRequestId: 22,
-    purchaseRequestRef: 'GPR-261020-M1N2P3',
-    quotationId: 28,
-    quotationRef: 'GQT-261020-Q4R5S6',
-    quotationVersion: 1,
-    productName: 'Clutch Plate & Pressure Plate Kit',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Hyundai Creta 1.5 Diesel',
-    quantity: 1,
-    unitPrice: 4500.0,
-    productAmount: 4500.0,
-    gstPercent: 18.0,
-    gstAmount: 810.0,
-    productTotal: 5310.0,
-    deliveryFee: 180.0,
-    platformFee: 106.2,
-    finalAmount: 5596.2,
-    sellerPayoutAmount: 5310.0,
-    customer: {
-      id: 76,
-      name: 'Pooja Yadav',
-      phone: '+91 94145 67812',
-      email: 'pooja.y@example.com',
-      city: 'Kota',
-      state: 'Rajasthan',
-      pincode: '324005',
-      address: 'Sector 2, Talwandi, Kota, Rajasthan - 324005'
-    },
-    seller: {
-      id: 155,
-      name: 'Rajendra Solanki',
-      workshopName: 'Royal Garage & Spares',
-      phone: '+91 98291 55443',
-      city: 'Kota',
-      state: 'Rajasthan',
-      bankName: 'HDFC Bank',
-      accountNumber: 'XXXXXX8821',
-      ifsc: 'HDFC0001234',
-      upiId: 'royalspares@okhdfcbank'
-    },
-    payment: {
-      method: 'Razorpay UPI',
-      paymentId: 'pay_Kk4400192Q',
-      orderId: 'order_Kk77112244',
-      paidAt: '20 Oct 2026, 03:40 pm',
-      status: 'paid',
-      financialStatus: 'released'
-    },
-    status: 'delivered',
-    createdAt: '20 Oct 2026, 03:30 pm',
-    deliveredAt: '24 Oct 2026, 01:15 pm',
-    shipment: {
-      id: 'SHP-7721',
-      courierPartner: 'Shadowfax',
-      awbNumber: 'SFX-998812',
-      status: 'Delivered (OTP Verified)'
-    },
-    notes: [
-      {
-        id: 1,
-        author: 'Logistics Webhook',
-        role: 'System',
-        text: 'Delivered successfully with verified recipient OTP.',
-        createdAt: '24 Oct 2026, 01:16 pm'
-      },
-      {
-        id: 2,
-        author: 'System',
-        role: 'Auto',
-        text: '24-hour return hold completed. Funds released and eligible for settlement payout.',
-        createdAt: '25 Oct 2026, 02:00 pm'
-      }
-    ]
-  },
-  {
-    id: 9,
-    orderNumber: 'GMO-261015-ST1190',
-    purchaseRequestId: 31,
-    purchaseRequestRef: 'GPR-261015-X1Y2Z3',
-    quotationId: 35,
-    quotationRef: 'GQT-261015-W4V5U6',
-    quotationVersion: 1,
-    productName: 'Bosch Spark Plugs (Pack of 4)',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Maruti Suzuki Baleno',
-    quantity: 1,
-    unitPrice: 1250.0,
-    productAmount: 1250.0,
-    gstPercent: 18.0,
-    gstAmount: 225.0,
-    productTotal: 1475.0,
-    deliveryFee: 60.0,
-    platformFee: 29.5,
-    finalAmount: 1564.5,
-    sellerPayoutAmount: 1475.0,
-    customer: {
-      id: 61,
-      name: 'Manoj Joshi',
-      phone: '+91 94140 54321',
-      email: 'm.joshi@example.com',
-      city: 'Bikaner',
-      state: 'Rajasthan',
-      pincode: '334003',
-      address: 'B-12, Pawanpuri, Sadul Colony, Bikaner, Rajasthan - 334003'
-    },
-    seller: {
-      id: 135,
-      name: 'Ramesh Sharma',
-      workshopName: 'Sharma Auto Spare Parts',
-      phone: '+91 98290 12345',
-      city: 'Jaipur',
-      state: 'Rajasthan',
-      bankName: 'State Bank of India',
-      accountNumber: 'XXXXXX4512',
-      ifsc: 'SBIN0001420',
-      upiId: 'sharmaauto@sbi'
-    },
-    payment: {
-      method: 'Razorpay UPI',
-      paymentId: 'pay_Bb99112288',
-      orderId: 'order_Bb55443322',
-      paidAt: '15 Oct 2026, 11:15 am',
-      status: 'paid',
-      financialStatus: 'settled'
-    },
-    status: 'delivered',
-    createdAt: '15 Oct 2026, 11:00 am',
-    deliveredAt: '18 Oct 2026, 04:30 pm',
-    shipment: {
-      id: 'SHP-6611',
-      courierPartner: 'Delhivery Surface',
-      awbNumber: 'DLV-5544112',
-      status: 'Delivered (OTP Verified)'
-    },
-    notes: [
-      {
-        id: 1,
-        author: 'Finance Admin',
-        role: 'Admin',
-        text: 'Settlement payout of ₹1,475.00 disbursed via IMPS (UTR: UTR9082319451).',
-        createdAt: '20 Oct 2026, 03:00 pm'
-      }
-    ]
-  },
-  {
-    id: 10,
-    orderNumber: 'GMO-261012-CN7789',
-    purchaseRequestId: 40,
-    purchaseRequestRef: 'GPR-261012-K7L8M9',
-    quotationId: 44,
-    quotationRef: 'GQT-261012-P1O2I3',
-    quotationVersion: 1,
-    productName: 'Alternator Pulley & V-Belt',
-    vehicleCategory: 'Four Wheeler',
-    vehicleModel: 'Tata Nexon Facelift',
-    quantity: 1,
-    unitPrice: 2100.0,
-    productAmount: 2100.0,
-    gstPercent: 18.0,
-    gstAmount: 378.0,
-    productTotal: 2478.0,
-    deliveryFee: 120.0,
-    platformFee: 49.56,
-    finalAmount: 2647.56,
-    sellerPayoutAmount: 2478.0,
-    customer: {
-      id: 52,
-      name: 'Kailash Choudhary',
-      phone: '+91 98290 88776',
-      email: 'kailash.c@example.com',
-      city: 'Ajmer',
-      state: 'Rajasthan',
-      pincode: '305001',
-      address: 'Plot 88, Civil Lines, Near Railway Hospital, Ajmer, Rajasthan - 305001'
-    },
-    seller: {
-      id: 160,
-      name: 'Mukesh Pareek',
-      workshopName: 'Super Car Clinic',
-      phone: '+91 97845 11223',
-      city: 'Jaipur',
-      state: 'Rajasthan',
-      bankName: 'Bank of Baroda',
-      accountNumber: 'XXXXXX7741',
-      ifsc: 'BARB0AJMJAIP',
-      upiId: 'supercar@barodampay'
-    },
-    payment: {
-      method: 'Razorpay UPI',
-      paymentId: 'pay_Zz11994433',
-      orderId: 'order_Zz44332211',
-      paidAt: '12 Oct 2026, 09:20 am',
-      status: 'refunded',
-      financialStatus: 'refunded',
-      refundAmount: 2647.56,
-      refundReason: 'Customer cancelled order before dispatch',
-      refundedAt: '13 Oct 2026, 11:30 am'
-    },
-    status: 'cancelled',
-    createdAt: '12 Oct 2026, 09:15 am',
-    cancelledAt: '13 Oct 2026, 11:25 am',
-    cancelReason: 'Customer requested cancellation due to personal reasons.',
-    shipment: null,
-    notes: [
-      {
-        id: 1,
-        author: 'Mukesh Pareek',
-        role: 'Provider',
-        text: 'Customer notified they no longer need the part.',
-        createdAt: '13 Oct 2026, 10:45 am'
-      },
-      {
-        id: 2,
-        author: 'Finance Admin',
-        role: 'Admin',
-        text: 'Full refund of ₹2,647.56 initiated via Razorpay gateway.',
-        createdAt: '13 Oct 2026, 11:30 am'
-      }
-    ]
-  }
-];
-
-const INITIAL_MOCK_SETTLEMENTS: SellerSettlement[] = [
-  {
-    id: 1,
-    settlementNumber: 'SET-261025-001',
-    orderId: 8,
-    orderNumber: 'GMO-261020-DL5531',
-    orderDate: '20 Oct 2026',
-    deliveredAt: '24 Oct 2026',
-    sellerId: 155,
-    sellerName: 'Rajendra Solanki',
-    workshopName: 'Royal Garage & Spares',
-    sellerPhone: '+91 98291 55443',
-    sellerBank: {
-      bankName: 'HDFC Bank',
-      accountNumber: 'XXXXXX8821',
-      ifsc: 'HDFC0001234',
-      upiId: 'royalspares@okhdfcbank'
-    },
-    productName: 'Clutch Plate & Pressure Plate Kit',
-    productTotal: 5310.0,
-    platformFeeDeducted: 106.2,
-    payoutAmount: 5310.0,
-    status: 'eligible',
-    eligibleAt: '25 Oct 2026, 02:00 pm'
-  },
-  {
-    id: 2,
-    settlementNumber: 'SET-261020-002',
-    orderId: 9,
-    orderNumber: 'GMO-261015-ST1190',
-    orderDate: '15 Oct 2026',
-    deliveredAt: '18 Oct 2026',
-    sellerId: 135,
-    sellerName: 'Ramesh Sharma',
-    workshopName: 'Sharma Auto Spare Parts',
-    sellerPhone: '+91 98290 12345',
-    sellerBank: {
-      bankName: 'State Bank of India',
-      accountNumber: 'XXXXXX4512',
-      ifsc: 'SBIN0001420',
-      upiId: 'sharmaauto@sbi'
-    },
-    productName: 'Bosch Spark Plugs (Pack of 4)',
-    productTotal: 1475.0,
-    platformFeeDeducted: 29.5,
-    payoutAmount: 1475.0,
-    status: 'settled',
-    settledAt: '20 Oct 2026, 03:00 pm',
-    payoutDetails: {
-      payoutMode: 'IMPS/NEFT',
-      utrNumber: 'UTR9082319451',
-      processedBy: 'Super Admin',
-      notes: 'Cleared regular weekly payout batch #41',
-      processedAt: '20 Oct 2026, 03:00 pm'
-    }
-  },
-  {
-    id: 3,
-    settlementNumber: 'SET-261028-003',
-    orderId: 7,
-    orderNumber: 'GMO-261028-KL9871',
-    orderDate: '28 Oct 2026',
-    sellerId: 110,
-    sellerName: 'Anil Choudhary',
-    workshopName: 'Apex Car Spares Hub',
-    sellerPhone: '+91 94140 77889',
-    sellerBank: {
-      bankName: 'ICICI Bank',
-      accountNumber: 'XXXXXX3319',
-      ifsc: 'ICIC0000104',
-      upiId: 'apexspares@icici'
-    },
-    productName: 'Radiator Assembly & Cooling Fan',
-    productTotal: 8024.0,
-    platformFeeDeducted: 160.48,
-    payoutAmount: 8024.0,
-    status: 'held',
-    holdReason: 'Order in transit with BlueDart. Payout releases 24h after delivery.'
-  },
-  {
-    id: 4,
-    settlementNumber: 'SET-261031-004',
-    orderId: 6,
-    orderNumber: 'GMO-261031-7CZVHS',
-    orderDate: '31 Oct 2026',
-    sellerId: 142,
-    sellerName: 'Sunil Meena',
-    workshopName: 'Meena Motors & Spares',
-    sellerPhone: '+91 97840 98765',
-    sellerBank: {
-      bankName: 'HDFC Bank',
-      accountNumber: 'XXXXXX9821',
-      ifsc: 'HDFC0000240',
-      upiId: 'meenamotors@hdfcbank'
-    },
-    productName: 'Front Brake Pad Kit (Ceramic)',
-    productTotal: 472.0,
-    platformFeeDeducted: 9.44,
-    payoutAmount: 472.0,
-    status: 'held',
-    holdReason: 'Order ready for courier pickup. Payout releases 24h after delivery.'
-  }
-];
 
 @Component({
   selector: 'app-ecom',
@@ -675,7 +117,6 @@ const INITIAL_MOCK_SETTLEMENTS: SellerSettlement[] = [
   styleUrl: './ecom.component.scss'
 })
 export class EcomComponent implements OnInit {
-  activeTab: EcomAdminTab = 'orders';
   isLoading = false;
   isRefreshing = false;
 
@@ -688,20 +129,9 @@ export class EcomComponent implements OnInit {
   orderSearchQuery = '';
   orderStatusFilter = 'all';
   orderCurrentPage = 1;
-  orderPageSize = 6;
+  orderPageSize = 10;
   orderTotalPages = 1;
-
-  // ==========================================================
-  // SETTLEMENTS DATA & STATE
-  // ==========================================================
-  settlements: SellerSettlement[] = [];
-  filteredSettlements: SellerSettlement[] = [];
-  pagedSettlements: SellerSettlement[] = [];
-  settlementSearchQuery = '';
-  settlementStatusFilter = 'all';
-  settlementCurrentPage = 1;
-  settlementPageSize = 6;
-  settlementTotalPages = 1;
+  totalOrdersCountFromServer = 0;
 
   // ==========================================================
   // MODALS STATE
@@ -735,98 +165,350 @@ export class EcomComponent implements OnInit {
   orderToRefund: AdminOrder | null = null;
   refundType: 'full' | 'partial' = 'full';
   refundAmountInput: number = 0;
-  refundReasonInput = 'Defective part / Order cancelled';
-  refundMethodInput = 'Razorpay Gateway (Original Source)';
+  refundReasonInput = 'Customer dispute / Defective part';
 
-  // 6. Seller Payout Modal (Settlements)
-  isPayoutModalOpen = false;
-  settlementToPayout: SellerSettlement | null = null;
-  payoutModeInput: 'IMPS/NEFT' | 'UPI' | 'Razorpay Route' | 'Bank Transfer' = 'IMPS/NEFT';
-  payoutUtrInput = '';
-  payoutNotesInput = '';
+  readonly Number = Number;
 
-  // 7. Settlement Receipt Modal
-  isReceiptModalOpen = false;
-  selectedReceipt: SellerSettlement | null = null;
-
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private ecomService: EcomService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.removeItem('gm_admin_ecom_mock_orders_v1');
+        localStorage.removeItem('gm_admin_ecom_mock_orders_v2');
+        localStorage.removeItem('gm_admin_ecom_mock_settlements_v1');
+        localStorage.removeItem('gm_admin_ecom_mock_settlements_v2');
+      } catch (_) {}
+    }
     this.loadData();
   }
 
-  setMainTab(tab: EcomAdminTab): void {
-    this.activeTab = tab;
-  }
-
   // ==========================================================
-  // DATA PERSISTENCE & LOADING
+  // DATA LOADING (LIVE ORDERS API)
   // ==========================================================
   loadData(isRefresh = false): void {
+    this.loadAdminOrders(isRefresh);
+  }
+
+  loadAdminOrders(isRefresh = false): void {
     if (isRefresh) {
       this.isRefreshing = true;
     } else {
       this.isLoading = true;
     }
 
-    setTimeout(() => {
-      this.isLoading = false;
-      this.isRefreshing = false;
-
-      // Load Orders
-      let storedOrders: AdminOrder[] | null = null;
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          const raw = localStorage.getItem(STORAGE_ORDERS_KEY);
-          if (raw) storedOrders = JSON.parse(raw);
-        } catch (_) {}
-      }
-      this.orders = storedOrders && storedOrders.length > 0
-        ? storedOrders
-        : JSON.parse(JSON.stringify(INITIAL_MOCK_ORDERS));
-
-      // Load Settlements
-      let storedSettlements: SellerSettlement[] | null = null;
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          const raw = localStorage.getItem(STORAGE_SETTLEMENTS_KEY);
-          if (raw) storedSettlements = JSON.parse(raw);
-        } catch (_) {}
-      }
-      this.settlements = storedSettlements && storedSettlements.length > 0
-        ? storedSettlements
-        : JSON.parse(JSON.stringify(INITIAL_MOCK_SETTLEMENTS));
-
-      this.applyOrderFilters(true);
-      this.applySettlementFilters(true);
-
-      if (isRefresh) {
-        this.notificationService.show('Orders and Settlements data refreshed successfully.', 'info');
-      }
-    }, isRefresh ? 400 : 150);
-  }
-
-  private persistOrders(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        localStorage.setItem(STORAGE_ORDERS_KEY, JSON.stringify(this.orders));
-      } catch (_) {}
+    const params: any = {
+      page: this.orderCurrentPage,
+      limit: this.orderPageSize
+    };
+    if (this.orderStatusFilter && this.orderStatusFilter !== 'all') {
+      params.status = this.orderStatusFilter;
     }
+    if (this.orderSearchQuery && this.orderSearchQuery.trim()) {
+      params.search = this.orderSearchQuery.trim();
+    }
+
+    console.log('[AdminEcom] Loading admin orders with params:', params);
+
+    this.ecomService.getAdminOrders(params).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
+        console.log('[AdminEcom] Admin orders live response:', res);
+
+        const items = res?.data?.items || (Array.isArray(res?.data) ? res.data : []);
+        if (Array.isArray(items)) {
+          this.orders = items.map((item: any) => this.mapApiOrder(item));
+        } else {
+          this.orders = [];
+        }
+
+        // Handle pagination metadata from server
+        const pagination = res?.data?.pagination;
+        if (pagination) {
+          this.totalOrdersCountFromServer = Number(pagination.total !== undefined ? pagination.total : this.orders.length);
+          this.orderCurrentPage = Number(pagination.current_page || this.orderCurrentPage);
+          this.orderTotalPages = Number(pagination.last_page || Math.max(1, Math.ceil(this.totalOrdersCountFromServer / this.orderPageSize)));
+        } else {
+          this.totalOrdersCountFromServer = this.orders.length;
+          this.orderTotalPages = Math.max(1, Math.ceil(this.totalOrdersCountFromServer / this.orderPageSize));
+        }
+
+        this.applyOrderFilters();
+        if (isRefresh) {
+          this.notificationService.show('Orders data refreshed from server.', 'info');
+        }
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
+        console.error('[AdminEcom] Error loading admin orders from API:', err);
+        const msg = err?.error?.message || err?.message || 'Failed to load orders from server.';
+        this.notificationService.show(msg, 'error');
+        this.orders = [];
+        this.totalOrdersCountFromServer = 0;
+        this.orderTotalPages = 1;
+        this.applyOrderFilters();
+      }
+    });
   }
 
-  private persistSettlements(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        localStorage.setItem(STORAGE_SETTLEMENTS_KEY, JSON.stringify(this.settlements));
-      } catch (_) {}
+  // ==========================================================
+  // API DATA MAPPER
+  // ==========================================================
+  private mapApiOrder(item: any): AdminOrder {
+    const snapshot = item.snapshot || {};
+    const deliveryAddress = item.delivery_address || {};
+    const customer = item.customer || {};
+    const seller = item.seller || {};
+    const firstPayment = Array.isArray(item.payments) && item.payments.length > 0 ? item.payments[0] : null;
+    const shipment = item.shipment || null;
+
+    // Numerical amounts
+    const quantity = Number(snapshot.quantity ?? item.quantity ?? 1);
+    const unitPrice = Number(snapshot.unit_price ?? item.unit_price ?? 0);
+    const productAmount = Number(snapshot.product_amount ?? item.product_amount ?? (unitPrice * quantity));
+    const gstPercent = Number(snapshot.gst_percent ?? 18);
+    const gstAmount = Number(snapshot.gst_amount ?? item.gst_amount ?? 0);
+    const productTotal = Number(snapshot.product_total ?? item.product_total ?? (productAmount + gstAmount));
+    const deliveryFee = Number(snapshot.delivery_fee ?? item.delivery_fee ?? 0);
+    const platformFee = Number(snapshot.platform_fee ?? item.platform_fee ?? 0);
+    const finalAmount = Number(item.final_amount ?? snapshot.final_amount ?? (productTotal + deliveryFee + platformFee));
+    const sellerPayoutAmount = Number(item.seller_payout_amount ?? productTotal);
+
+    // Customer
+    const customerPhone = customer.phone_number || deliveryAddress.phone || '—';
+    const customerName = customer.name || deliveryAddress.name || 'Customer';
+    const customerAddress = [
+      deliveryAddress.line1,
+      deliveryAddress.line2,
+      deliveryAddress.city,
+      deliveryAddress.state,
+      deliveryAddress.pincode
+    ].filter(Boolean).join(', ') || '—';
+
+    // Seller
+    const sellerName = seller.name || 'Seller';
+    const workshopName = seller.business_name || seller.name || 'Workshop';
+    const sellerPhone = seller.phone_number || '—';
+
+    // Payment details
+    const method = firstPayment?.method || 'Online';
+    const paymentId = firstPayment?.razorpay_payment_id || snapshot.razorpay_payment_id || '—';
+    const orderId = firstPayment?.razorpay_order_id || snapshot.razorpay_order_id || '—';
+    const paidAt = this.formatDateTime(firstPayment?.paid_at || snapshot.paid_at || firstPayment?.captured_at);
+    const isPaymentSuccess = firstPayment?.status === 'captured' ||
+                            firstPayment?.status === 'successful' ||
+                            firstPayment?.status === 'paid' ||
+                            Boolean(snapshot.paid_at) ||
+                            Boolean(firstPayment?.captured_at) ||
+                            item.financial_status === 'funds_held' ||
+                            item.financial_status === 'settled';
+
+    // Refund & Financial status
+    const finStatus = item.financial_status || 'funds_held';
+    const isRefunded = finStatus === 'refunded' ||
+                       Boolean(item.refunded_at) ||
+                       item.refund_summary?.can_refund === false ||
+                       firstPayment?.refund_status === 'full';
+    const isPartiallyRefunded = finStatus === 'partially_refunded' ||
+                                firstPayment?.refund_status === 'partial' ||
+                                (Number(firstPayment?.amount_refunded || 0) > 0 && Number(firstPayment?.amount_refunded || 0) < finalAmount);
+
+    let pStatus: 'paid' | 'pending' | 'failed' | 'refunded' | 'partially_refunded' = 'pending';
+    if (isRefunded) {
+      pStatus = 'refunded';
+    } else if (isPartiallyRefunded) {
+      pStatus = 'partially_refunded';
+    } else if (isPaymentSuccess) {
+      pStatus = 'paid';
     }
+
+    const refundAmount = Number(
+      item.refund_summary?.refunded_amount ??
+      firstPayment?.amount_refunded ??
+      (item.refunded_at ? finalAmount : 0)
+    );
+
+    // Shipment details
+    let shipmentObj: any = null;
+    if (shipment) {
+      shipmentObj = {
+        id: shipment.id || shipment.shipment_number || 'SHP',
+        courierPartner: shipment.courier_partner || shipment.carrier || 'Courier Logistics',
+        awbNumber: shipment.awb_number || shipment.tracking_number || '—',
+        status: shipment.status || 'In Transit',
+        dispatchedAt: shipment.dispatched_at ? this.formatDateTime(shipment.dispatched_at) : undefined
+      };
+    }
+
+    // Notes mapping (exact match with byId response)
+    const notes: AdminOrderNote[] = Array.isArray(item.notes)
+      ? item.notes.map((n: any, idx: number) => {
+          const author = n.admin?.name || n.author || n.created_by_name || 'Super Admin';
+          const text = n.note || n.text || '';
+          return {
+            id: n.id || idx + 1,
+            author,
+            role: n.role || (n.admin ? 'Super Admin' : 'Admin'),
+            text,
+            note: text,
+            createdAt: this.formatDateTime(n.created_at),
+            admin: n.admin || (n.author ? { id: 0, name: n.author } : null)
+          };
+        })
+      : [];
+
+    return {
+      id: item.id,
+      orderNumber: item.order_number || `GMO-${item.id}`,
+      purchaseRequestId: item.purchase_request_id || 0,
+      purchaseRequestRef: item.purchase_request?.reference || `GPR-${item.purchase_request_id}`,
+      quotationId: item.quotation_id || 0,
+      quotationRef: snapshot.quotation_reference || `GQT-${item.quotation_id}`,
+      quotationVersion: snapshot.quotation_version || 1,
+      productName: snapshot.product_name || 'Spare Part',
+      vehicleCategory: snapshot.vehicle_category_name || (snapshot.vehicle_category_id === 1 ? 'Two Wheeler' : 'Automobile'),
+      vehicleModel: snapshot.vehicle_model || '',
+      quantity,
+      unitPrice,
+      productAmount,
+      gstPercent,
+      gstAmount,
+      productTotal,
+      deliveryFee,
+      platformFee,
+      finalAmount,
+      sellerPayoutAmount,
+      customer: {
+        id: customer.id || 0,
+        name: customerName,
+        phone: customerPhone,
+        email: customer.email || '',
+        city: deliveryAddress.city || '',
+        state: deliveryAddress.state || '',
+        pincode: deliveryAddress.pincode || '',
+        address: customerAddress
+      },
+      seller: {
+        id: seller.id || snapshot.seller_id || 0,
+        name: sellerName,
+        workshopName,
+        phone: sellerPhone,
+        city: seller.city || '',
+        state: seller.state || '',
+        bankName: seller.bank_name || 'Registered Bank',
+        accountNumber: seller.account_number || 'XXXXXX',
+        ifsc: seller.ifsc || '',
+        upiId: seller.upi_id || ''
+      },
+      payment: {
+        method,
+        paymentId,
+        orderId,
+        paidAt,
+        status: pStatus,
+        financialStatus: finStatus,
+        refundAmount,
+        refundReason: item.cancel_reason,
+        refundedAt: item.refunded_at ? this.formatDateTime(item.refunded_at) : undefined
+      },
+      status: (item.status || 'confirmed') as OrderStatus,
+      createdAt: this.formatDateTime(item.created_at),
+      deliveredAt: item.delivered_at ? this.formatDateTime(item.delivered_at) : undefined,
+      cancelledAt: item.cancelled_at ? this.formatDateTime(item.cancelled_at) : undefined,
+      cancelReason: item.cancel_reason,
+      shipment: shipmentObj,
+      notes,
+      rawItem: item,
+      allowedActions: item.allowed_actions || [],
+      refundSummary: item.refund_summary || null,
+      refunds: item.refunds || [],
+      attentionReason: item.attention_reason || null,
+      acceptedQuotation: item.accepted_quotation || null,
+      pricing: item.pricing || null,
+      events: item.events || []
+    };
   }
+
+  canRefund(order: AdminOrder | null | undefined): boolean {
+    if (!order) return false;
+
+    // Explicit can_refund flag if returned directly by API
+    if ((order as any).can_refund === false || order.rawItem?.can_refund === false) {
+      return false;
+    }
+
+    // 1. If financial or payment status is refunded
+    if (order.payment?.financialStatus === 'refunded' || order.payment?.status === 'refunded') {
+      return false;
+    }
+
+    // 2. If allowedActions array is explicitly provided and non-empty (e.g. from API details)
+    if (order.allowedActions && Array.isArray(order.allowedActions) && order.allowedActions.length > 0) {
+      if (!order.allowedActions.includes('record_refund')) {
+        return false;
+      }
+    }
+
+    // 3. If refundSummary has can_refund explicitly set to false
+    if (order.refundSummary) {
+      if (order.refundSummary.can_refund === false) {
+        return false;
+      }
+      if (order.refundSummary.remaining_refundable_amount !== undefined && Number(order.refundSummary.remaining_refundable_amount) <= 0) {
+        return false;
+      }
+    }
+
+    // 4. Raw API item checks (from listing or details)
+    const raw = order.rawItem;
+    if (raw) {
+      if (raw.financial_status === 'refunded' || Boolean(raw.refunded_at)) {
+        return false;
+      }
+      const p = Array.isArray(raw.payments) && raw.payments.length > 0 ? raw.payments[0] : null;
+      if (p?.refund_status === 'full') {
+        return false;
+      }
+      if (p?.amount_refunded && Number(p.amount_refunded) >= Number(raw.final_amount || order.finalAmount) && order.finalAmount > 0) {
+        return false;
+      }
+    }
+
+    // 5. Total refunded amount equal or exceeds final amount
+    if ((order.payment?.refundAmount || 0) >= order.finalAmount && order.finalAmount > 0) {
+      return false;
+    }
+
+    // 6. Only paid or partially_refunded orders can be refunded
+    return order.payment?.status === 'paid' || order.payment?.status === 'partially_refunded';
+  }
+
+  isOrderRefunded(order: AdminOrder | null | undefined): boolean {
+    if (!order) return false;
+    return (
+      order.payment?.financialStatus === 'refunded' ||
+      order.payment?.status === 'refunded' ||
+      order.refundSummary?.financial_status === 'refunded' ||
+      order.refundSummary?.refund_status === 'refunded' ||
+      Boolean(order.rawItem?.refunded_at) ||
+      order.rawItem?.financial_status === 'refunded' ||
+      (Array.isArray(order.refunds) && order.refunds.length > 0)
+    );
+  }
+  
+  
+  
 
   // ==========================================================
   // METRICS & STATS
   // ==========================================================
   get totalOrdersCount(): number {
-    return this.orders.length;
+    return this.totalOrdersCountFromServer || this.orders.length;
   }
 
   get totalOrdersValue(): number {
@@ -845,28 +527,19 @@ export class EcomComponent implements OnInit {
     return this.orders.reduce((acc, o) => acc + (o.platformFee || 0), 0);
   }
 
-  get pendingSettlementsCount(): number {
-    return this.settlements.filter(s => s.status === 'eligible').length;
-  }
-
-  get pendingSettlementsAmount(): number {
-    return this.settlements
-      .filter(s => s.status === 'eligible')
-      .reduce((acc, s) => acc + (s.payoutAmount || 0), 0);
-  }
-
-  get settledPayoutsAmount(): number {
-    return this.settlements
-      .filter(s => s.status === 'settled')
-      .reduce((acc, s) => acc + (s.payoutAmount || 0), 0);
-  }
-
   // ==========================================================
   // ORDERS FILTERING & PAGINATION
   // ==========================================================
   setOrderStatusFilter(status: string): void {
+    if (this.orderStatusFilter === status) return;
     this.orderStatusFilter = status;
-    this.applyOrderFilters(true);
+    this.orderCurrentPage = 1;
+    this.loadAdminOrders();
+  }
+
+  onOrderSearchChange(): void {
+    this.orderCurrentPage = 1;
+    this.applyOrderFilters();
   }
 
   applyOrderFilters(resetPage = false): void {
@@ -907,8 +580,7 @@ export class EcomComponent implements OnInit {
   goToOrderPage(page: number): void {
     if (page < 1 || page > this.orderTotalPages || page === this.orderCurrentPage) return;
     this.orderCurrentPage = page;
-    const start = (this.orderCurrentPage - 1) * this.orderPageSize;
-    this.pagedOrders = this.filteredOrders.slice(start, start + this.orderPageSize);
+    this.loadAdminOrders();
   }
 
   getOrderPageNumbers(): (number | string)[] {
@@ -931,59 +603,24 @@ export class EcomComponent implements OnInit {
   }
 
   // ==========================================================
-  // SETTLEMENTS FILTERING & PAGINATION
-  // ==========================================================
-  setSettlementStatusFilter(status: string): void {
-    this.settlementStatusFilter = status;
-    this.applySettlementFilters(true);
-  }
-
-  applySettlementFilters(resetPage = false): void {
-    if (resetPage) {
-      this.settlementCurrentPage = 1;
-    }
-
-    let result = [...this.settlements];
-
-    if (this.settlementStatusFilter !== 'all') {
-      result = result.filter(s => s.status === this.settlementStatusFilter);
-    }
-
-    if (this.settlementSearchQuery && this.settlementSearchQuery.trim()) {
-      const q = this.settlementSearchQuery.trim().toLowerCase();
-      result = result.filter(s =>
-        s.settlementNumber.toLowerCase().includes(q) ||
-        s.orderNumber.toLowerCase().includes(q) ||
-        s.sellerName.toLowerCase().includes(q) ||
-        s.workshopName.toLowerCase().includes(q) ||
-        s.sellerPhone.includes(q) ||
-        s.productName.toLowerCase().includes(q)
-      );
-    }
-
-    this.filteredSettlements = result;
-    this.settlementTotalPages = Math.max(1, Math.ceil(this.filteredSettlements.length / this.settlementPageSize));
-    if (this.settlementCurrentPage > this.settlementTotalPages) {
-      this.settlementCurrentPage = this.settlementTotalPages;
-    }
-
-    const start = (this.settlementCurrentPage - 1) * this.settlementPageSize;
-    this.pagedSettlements = this.filteredSettlements.slice(start, start + this.settlementPageSize);
-  }
-
-  goToSettlementPage(page: number): void {
-    if (page < 1 || page > this.settlementTotalPages || page === this.settlementCurrentPage) return;
-    this.settlementCurrentPage = page;
-    const start = (this.settlementCurrentPage - 1) * this.settlementPageSize;
-    this.pagedSettlements = this.filteredSettlements.slice(start, start + this.settlementPageSize);
-  }
-
-  // ==========================================================
   // MODAL ACTIONS: 1. VIEW DETAILED ORDER
   // ==========================================================
   openDetailsModal(order: AdminOrder): void {
     this.selectedOrder = order;
     this.isDetailsModalOpen = true;
+
+    // Fetch live details if available: GET /api/v1/ecom/admin/orders/:id
+    this.ecomService.getAdminOrderDetails(order.id).subscribe({
+      next: (res: any) => {
+        const item = res?.data?.item || res?.data || res;
+        if (item && typeof item === 'object') {
+          this.selectedOrder = this.mapApiOrder(item);
+        }
+      },
+      error: () => {
+        // Fallback gracefully to listing data already set
+      }
+    });
   }
 
   closeDetailsModal(): void {
@@ -1013,27 +650,60 @@ export class EcomComponent implements OnInit {
       return;
     }
 
-    const newNote: AdminOrderNote = {
-      id: Date.now(),
-      author: 'Admin Support',
-      role: 'Admin',
-      text: this.newNoteText.trim(),
-      createdAt: this.formatCurrentDateTime()
-    };
+    const orderId = this.orderForNote.id;
+    const text = this.newNoteText.trim();
 
-    this.orderForNote.notes.unshift(newNote);
+    this.ecomService.addAdminOrderNote(orderId, { note: text }).subscribe({
+      next: (res: any) => {
+        const successMsg = res?.message || 'Note added.';
+        this.notificationService.show(successMsg, 'success');
+        this.closeNotesModal();
 
-    // Update in list
-    const idx = this.orders.findIndex(o => o.id === this.orderForNote!.id);
-    if (idx !== -1) {
-      this.orders[idx] = this.orderForNote;
-    }
-
-    this.persistOrders();
-    this.applyOrderFilters();
-
-    this.notificationService.show(`Note added to Order ${this.orderForNote.orderNumber}!`, 'success');
-    this.closeNotesModal();
+        // Call byId API to refresh detailed order and its notes
+        this.ecomService.getAdminOrderDetails(orderId).subscribe({
+          next: (detailRes: any) => {
+            const item = detailRes?.data?.item || detailRes?.data || detailRes;
+            if (item && typeof item === 'object') {
+              const updatedOrder = this.mapApiOrder(item);
+              if (this.selectedOrder && this.selectedOrder.id === orderId) {
+                this.selectedOrder = updatedOrder;
+              }
+              const idx = this.orders.findIndex(o => o.id === orderId);
+              if (idx !== -1) {
+                this.orders[idx] = updatedOrder;
+                this.applyOrderFilters();
+              }
+            }
+          },
+          error: (detailErr: any) => {
+            console.warn('[AdminEcom] Could not refresh order details by ID:', detailErr);
+            // If response returned notes array directly, sync it
+            if (Array.isArray(res?.data)) {
+              const mappedNotes: AdminOrderNote[] = res.data.map((n: any, idx: number) => ({
+                id: n.id || idx + 1,
+                author: n.admin?.name || n.author || 'Super Admin',
+                role: n.role || (n.admin ? 'Super Admin' : 'Admin'),
+                text: n.note || n.text || '',
+                note: n.note || n.text || '',
+                createdAt: this.formatDateTime(n.created_at),
+                admin: n.admin || null
+              }));
+              if (this.selectedOrder && this.selectedOrder.id === orderId) {
+                this.selectedOrder.notes = mappedNotes;
+              }
+              const idx = this.orders.findIndex(o => o.id === orderId);
+              if (idx !== -1) {
+                this.orders[idx].notes = mappedNotes;
+              }
+            }
+          }
+        });
+      },
+      error: (err: any) => {
+        const errMsg = err?.error?.message || err?.message || 'Failed to add note.';
+        // this.notificationService.show(errMsg, 'error');
+      }
+    });
   }
 
   // ==========================================================
@@ -1076,36 +746,6 @@ export class EcomComponent implements OnInit {
     if (newStatus === 'delivered' && !this.orderForStatus.deliveredAt) {
       this.orderForStatus.deliveredAt = this.formatCurrentDateTime();
       this.orderForStatus.payment.financialStatus = 'released';
-
-      // Check if settlement entry exists, or create new eligible settlement!
-      const existingSet = this.settlements.find(s => s.orderId === this.orderForStatus!.id);
-      if (existingSet) {
-        existingSet.status = 'eligible';
-        existingSet.eligibleAt = this.formatCurrentDateTime();
-      } else {
-        const newSet: SellerSettlement = {
-          id: Date.now(),
-          settlementNumber: `SET-${this.formatDateCode()}-${Math.floor(100 + Math.random() * 900)}`,
-          orderId: this.orderForStatus.id,
-          orderNumber: this.orderForStatus.orderNumber,
-          orderDate: this.orderForStatus.createdAt,
-          deliveredAt: this.orderForStatus.deliveredAt,
-          sellerId: this.orderForStatus.seller.id,
-          sellerName: this.orderForStatus.seller.name,
-          workshopName: this.orderForStatus.seller.workshopName,
-          sellerPhone: this.orderForStatus.seller.phone,
-          sellerBank: { ...this.orderForStatus.seller },
-          productName: this.orderForStatus.productName,
-          productTotal: this.orderForStatus.productTotal,
-          platformFeeDeducted: this.orderForStatus.platformFee,
-          payoutAmount: this.orderForStatus.sellerPayoutAmount,
-          status: 'eligible',
-          eligibleAt: this.formatCurrentDateTime()
-        };
-        this.settlements.unshift(newSet);
-        this.persistSettlements();
-        this.applySettlementFilters();
-      }
     }
 
     // Add note
@@ -1123,7 +763,6 @@ export class EcomComponent implements OnInit {
       this.orders[idx] = this.orderForStatus;
     }
 
-    this.persistOrders();
     this.applyOrderFilters();
 
     this.notificationService.show(
@@ -1155,64 +794,73 @@ export class EcomComponent implements OnInit {
     if (!this.orderToCancel) return;
 
     const order = this.orderToCancel;
+    const orderId = order.id;
     const nowStr = this.formatCurrentDateTime();
 
-    order.status = 'cancelled';
-    order.cancelledAt = nowStr;
-    order.cancelReason = this.cancelRemarksInput.trim()
-      ? `${this.cancelReasonInput} - ${this.cancelRemarksInput.trim()}`
-      : this.cancelReasonInput;
+    const payload = {
+      reason: this.cancelReasonInput,
+      remarks: this.cancelRemarksInput,
+      auto_refund: this.autoRefundCustomer
+    };
 
-    if (this.autoRefundCustomer) {
-      order.payment.status = 'refunded';
-      order.payment.financialStatus = 'refunded';
-      order.payment.refundAmount = order.finalAmount;
-      order.payment.refundReason = `Auto-refund on cancellation: ${order.cancelReason}`;
-      order.payment.refundedAt = nowStr;
-    }
+    this.ecomService.cancelAdminOrder(orderId, payload).subscribe({
+      next: () => {
+        this.notificationService.show(`Order ${order.orderNumber} cancelled successfully!`, 'success');
+        this.closeCancelModal();
+        this.loadAdminOrders();
+      },
+      error: () => {
+        // Fallback local cancellation
+        order.status = 'cancelled';
+        order.cancelledAt = nowStr;
+        order.cancelReason = this.cancelRemarksInput.trim()
+          ? `${this.cancelReasonInput} - ${this.cancelRemarksInput.trim()}`
+          : this.cancelReasonInput;
 
-    order.notes.unshift({
-      id: Date.now(),
-      author: 'Super Admin',
-      role: 'Admin',
-      text: `Order Cancelled. Reason: ${order.cancelReason}.${this.autoRefundCustomer ? ` Full refund of ₹${order.finalAmount.toFixed(2)} initiated.` : ''}`,
-      createdAt: nowStr
+        if (this.autoRefundCustomer) {
+          order.payment.status = 'refunded';
+          order.payment.financialStatus = 'refunded';
+          order.payment.refundAmount = order.finalAmount;
+          order.payment.refundReason = `Auto-refund on cancellation: ${order.cancelReason}`;
+          order.payment.refundedAt = nowStr;
+        }
+
+        const idx = this.orders.findIndex(o => o.id === order.id);
+        if (idx !== -1) {
+          this.orders[idx] = order;
+        }
+
+        this.applyOrderFilters();
+
+        this.notificationService.show(
+          `Order ${order.orderNumber} cancelled! ${this.autoRefundCustomer ? 'Refund processed.' : ''}`,
+          'success'
+        );
+
+        this.closeCancelModal();
+      }
     });
-
-    // If settlement was pending, cancel it too
-    const sIdx = this.settlements.findIndex(s => s.orderId === order.id);
-    if (sIdx !== -1) {
-      this.settlements.splice(sIdx, 1);
-      this.persistSettlements();
-      this.applySettlementFilters();
-    }
-
-    const idx = this.orders.findIndex(o => o.id === order.id);
-    if (idx !== -1) {
-      this.orders[idx] = order;
-    }
-
-    this.persistOrders();
-    this.applyOrderFilters();
-
-    this.notificationService.show(
-      `Order ${order.orderNumber} successfully cancelled! ${this.autoRefundCustomer ? 'Refund processed.' : ''}`,
-      'success'
-    );
-
-    this.closeCancelModal();
   }
 
   // ==========================================================
   // MODAL ACTIONS: 5. REFUND OPTION
   // ==========================================================
+  get maxRefundableAmount(): number {
+    if (!this.orderToRefund) return 0;
+    const rem = this.orderToRefund.refundSummary?.remaining_refundable_amount;
+    if (rem !== undefined && rem !== null && rem !== '') {
+      const num = Number(rem);
+      if (!isNaN(num)) return num;
+    }
+    return this.orderToRefund.finalAmount || 0;
+  }
+
   openRefundModal(order: AdminOrder, event?: Event): void {
     if (event) event.stopPropagation();
     this.orderToRefund = order;
     this.refundType = 'full';
-    this.refundAmountInput = order.finalAmount;
+    this.refundAmountInput = this.maxRefundableAmount;
     this.refundReasonInput = 'Customer dispute / Defective part';
-    this.refundMethodInput = 'Razorpay Gateway (Original Source)';
     this.isRefundModalOpen = true;
   }
 
@@ -1221,143 +869,66 @@ export class EcomComponent implements OnInit {
     this.orderToRefund = null;
   }
 
-  onRefundTypeChange(): void {
-    if (!this.orderToRefund) return;
-    if (this.refundType === 'full') {
-      this.refundAmountInput = this.orderToRefund.finalAmount;
+  setRefundType(type: 'full' | 'partial'): void {
+    this.refundType = type;
+    if (type === 'full') {
+      this.refundAmountInput = this.maxRefundableAmount;
+    } else {
+      if (this.refundAmountInput >= this.maxRefundableAmount) {
+        this.refundAmountInput = 0;
+      }
     }
+  }
+
+  onRefundTypeChange(): void {
+    this.setRefundType(this.refundType);
   }
 
   confirmRefund(): void {
     if (!this.orderToRefund) return;
 
-    const amount = Number(this.refundAmountInput);
-    if (isNaN(amount) || amount <= 0 || amount > this.orderToRefund.finalAmount) {
-      this.notificationService.show(`Refund amount must be between ₹1 and ₹${this.orderToRefund.finalAmount.toFixed(2)}`, 'error');
-      return;
-    }
-
     const order = this.orderToRefund;
-    const nowStr = this.formatCurrentDateTime();
+    const orderId = order.id;
 
-    const isFull = amount >= order.finalAmount;
-    order.payment.status = isFull ? 'refunded' : 'partially_refunded';
-    order.payment.financialStatus = 'refunded';
-    order.payment.refundAmount = amount;
-    order.payment.refundReason = this.refundReasonInput;
-    order.payment.refundedAt = nowStr;
-
-    order.notes.unshift({
-      id: Date.now(),
-      author: 'Super Admin',
-      role: 'Admin',
-      text: `${isFull ? 'Full' : 'Partial'} refund of ₹${amount.toFixed(2)} processed via ${this.refundMethodInput}. Reason: ${this.refundReasonInput}`,
-      createdAt: nowStr
-    });
-
-    const idx = this.orders.findIndex(o => o.id === order.id);
-    if (idx !== -1) {
-      this.orders[idx] = order;
-    }
-
-    this.persistOrders();
-    this.applyOrderFilters();
-
-    this.notificationService.show(
-      `Refund of ₹${amount.toFixed(2)} successfully issued for ${order.orderNumber}!`,
-      'success'
-    );
-
-    this.closeRefundModal();
-  }
-
-  // ==========================================================
-  // MODAL ACTIONS: 6. SELLER SETTLEMENT PAYOUT
-  // ==========================================================
-  openPayoutModal(settlement: SellerSettlement, event?: Event): void {
-    if (event) event.stopPropagation();
-    this.settlementToPayout = settlement;
-    this.payoutModeInput = 'IMPS/NEFT';
-    this.payoutUtrInput = `UTR${Date.now().toString().slice(-8)}`;
-    this.payoutNotesInput = 'Batch Payout via Banking API';
-    this.isPayoutModalOpen = true;
-  }
-
-  closePayoutModal(): void {
-    this.isPayoutModalOpen = false;
-    this.settlementToPayout = null;
-  }
-
-  confirmPayoutRelease(): void {
-    if (!this.settlementToPayout) return;
-
-    if (!this.payoutUtrInput.trim()) {
-      this.notificationService.show('Please provide a UTR or Transaction reference number.', 'error');
-      return;
-    }
-
-    const settlement = this.settlementToPayout;
-    const nowStr = this.formatCurrentDateTime();
-
-    settlement.status = 'settled';
-    settlement.settledAt = nowStr;
-    settlement.payoutDetails = {
-      payoutMode: this.payoutModeInput,
-      utrNumber: this.payoutUtrInput.trim(),
-      processedBy: 'Super Admin',
-      notes: this.payoutNotesInput.trim(),
-      processedAt: nowStr
+    const payload: any = {
+      refund_type: this.refundType,
+      remarks: this.refundReasonInput?.trim() || 'Customer dispute / Defective part'
     };
 
-    // Also update order financial status to settled
-    const order = this.orders.find(o => o.id === settlement.orderId);
-    if (order) {
-      order.payment.financialStatus = 'settled';
-      order.notes.unshift({
-        id: Date.now(),
-        author: 'Finance Admin',
-        role: 'Admin',
-        text: `Seller Payout of ₹${settlement.payoutAmount.toFixed(2)} disbursed to ${settlement.workshopName} via ${this.payoutModeInput} (UTR: ${this.payoutUtrInput}).`,
-        createdAt: nowStr
-      });
-      this.persistOrders();
-      this.applyOrderFilters();
+    if (this.refundType === 'partial') {
+      const maxRefundable = this.maxRefundableAmount;
+      const amount = Number(this.refundAmountInput);
+      if (isNaN(amount) || amount <= 0 || amount > maxRefundable) {
+        this.notificationService.show(`Refund amount must be between ₹1 and ₹${maxRefundable.toFixed(2)}`, 'error');
+        return;
+      }
+      payload.amount = amount;
     }
 
-    const idx = this.settlements.findIndex(s => s.id === settlement.id);
-    if (idx !== -1) {
-      this.settlements[idx] = settlement;
-    }
+    this.ecomService.refundAdminOrder(orderId, payload).subscribe({
+      next: (res: any) => {
+        const msg = res?.message || 'Refund processed successfully!';
+        this.notificationService.show(msg, 'success');
+        this.closeRefundModal();
+        this.loadAdminOrders();
 
-    this.persistSettlements();
-    this.applySettlementFilters();
-
-    this.notificationService.show(
-      `Payout of ₹${settlement.payoutAmount.toFixed(2)} transferred to ${settlement.workshopName}! UTR: ${this.payoutUtrInput}`,
-      'success'
-    );
-
-    this.closePayoutModal();
-  }
-
-  // ==========================================================
-  // MODAL ACTIONS: 7. SETTLEMENT RECEIPT
-  // ==========================================================
-  openReceiptModal(settlement: SellerSettlement, event?: Event): void {
-    if (event) event.stopPropagation();
-    this.selectedReceipt = settlement;
-    this.isReceiptModalOpen = true;
-  }
-
-  closeReceiptModal(): void {
-    this.isReceiptModalOpen = false;
-    this.selectedReceipt = null;
-  }
-
-  printReceipt(): void {
-    if (typeof window !== 'undefined') {
-      window.print();
-    }
+        // Also refresh detailed order if details modal is open
+        if (this.selectedOrder && this.selectedOrder.id === orderId) {
+          this.ecomService.getAdminOrderDetails(orderId).subscribe({
+            next: (detailRes: any) => {
+              const item = detailRes?.data?.item || detailRes?.data || detailRes;
+              if (item && typeof item === 'object') {
+                this.selectedOrder = this.mapApiOrder(item);
+              }
+            }
+          });
+        }
+      },
+      error: (err: any) => {
+        const errMsg = err?.error?.message || err?.message || 'Failed to process refund.';
+        this.notificationService.show(errMsg, 'error');
+      }
+    });
   }
 
   // ==========================================================
@@ -1394,21 +965,6 @@ export class EcomComponent implements OnInit {
         return 'bg-rose-50 text-rose-700 border border-rose-200';
       default:
         return 'bg-slate-50 text-slate-700 border border-slate-200';
-    }
-  }
-
-  getSettlementStatusBadgeClass(status: string): string {
-    switch (status) {
-      case 'eligible':
-        return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
-      case 'settled':
-        return 'bg-indigo-100 text-indigo-800 border border-indigo-200';
-      case 'held':
-        return 'bg-amber-100 text-amber-800 border border-amber-200';
-      case 'disputed':
-        return 'bg-rose-100 text-rose-800 border border-rose-200';
-      default:
-        return 'bg-slate-100 text-slate-700 border border-slate-200';
     }
   }
 
@@ -1449,6 +1005,23 @@ export class EcomComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  formatDateTime(dateStr?: string): string {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateStr;
+    }
   }
 
   private formatDateCode(): string {

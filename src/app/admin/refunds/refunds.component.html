@@ -1,0 +1,504 @@
+<div class="container-fluid min-h-screen font-sans">
+
+    <!-- ========================================================== -->
+    <!-- PAGE HEADER & NAVIGATION -->
+    <!-- ========================================================== -->
+    <div
+        class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
+        <div>
+            <nav class="flex items-center gap-2 text-xs text-slate-500 mb-1.5 font-medium">
+                <a routerLink="/admin/dashboard" class="hover:text-red-600 transition-colors">Admin</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <a routerLink="/admin/ecom" class="hover:text-red-600 transition-colors">E-Commerce</a>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                <span class="text-slate-900 font-bold">Customer Refunds</span>
+            </nav>
+            <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-rotate-left text-purple-600"></i>
+                <span>Customer Refunds & Gateway Sync</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+                Track full & partial order refunds, inspect Razorpay settlement statuses, and trigger real-time bank
+                gateway reconciliation.
+            </p>
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================================== -->
+    <!-- FILTERS & SEARCH TOOLBAR -->
+    <!-- ========================================================== -->
+    <div class="space-y-4">
+        <div
+            class="bg-white rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+
+            <!-- Status chips -->
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <button (click)="setStatusFilter('all')"
+                    [ngClass]="statusFilter === 'all' ? 'bg-slate-900 text-white shadow-xs font-bold' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    All ({{ totalRecords }})
+                </button>
+
+                <button (click)="setStatusFilter('processed')"
+                    [ngClass]="statusFilter === 'processed' ? 'bg-emerald-600 text-white shadow-xs font-bold' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Processed ({{ processedCount }})
+                </button>
+
+                <button (click)="setStatusFilter('pending')"
+                    [ngClass]="statusFilter === 'pending' ? 'bg-amber-600 text-white shadow-xs font-bold' : 'bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Pending ({{ pendingCount }})
+                </button>
+
+                <button *ngIf="failedCount > 0" (click)="setStatusFilter('failed')"
+                    [ngClass]="statusFilter === 'failed' ? 'bg-rose-600 text-white shadow-xs font-bold' : 'bg-rose-50 hover:bg-rose-100 text-rose-800 font-medium'"
+                    class="px-3 py-1.5 rounded-lg text-xs transition-all active:scale-95">
+                    Failed ({{ failedCount }})
+                </button>
+            </div>
+
+            <!-- Search box -->
+            <div class="relative w-full lg:w-80 shrink-0">
+                <i
+                    class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()"
+                    placeholder="Search by Refund ID, Order #, Razorpay ID, ARN..."
+                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all" />
+            </div>
+
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- LOADING SKELETON -->
+        <!-- ========================================================== -->
+        <div *ngIf="isLoading" class="bg-white rounded-2xl border border-slate-200 p-8 space-y-4 animate-pulse">
+            <div class="h-6 bg-slate-200 rounded-lg w-1/4"></div>
+            <div class="h-10 bg-slate-100 rounded-xl w-full"></div>
+            <div class="h-10 bg-slate-100 rounded-xl w-full"></div>
+            <div class="h-10 bg-slate-100 rounded-xl w-full"></div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- EMPTY STATE -->
+        <!-- ========================================================== -->
+        <div *ngIf="!isLoading && filteredRefunds.length === 0"
+            class="bg-white rounded-2xl p-12 border border-slate-200 text-center shadow-xs">
+            <div
+                class="w-16 h-16 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-rotate-left"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-800">No refunds found</h4>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                No customer refund transactions match your current status filter or search query.
+            </p>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- DESKTOP REFUNDS TABLE -->
+        <!-- ========================================================== -->
+        <div *ngIf="!isLoading && filteredRefunds.length > 0"
+            class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm text-slate-700">
+                    <thead
+                        class="bg-slate-50/90 text-slate-600 uppercase text-[11px] font-black border-b border-slate-200 tracking-wider">
+                        <tr>
+                            <th class="py-3.5 px-4">Refund ID</th>
+                            <th class="py-3.5 px-4">Order & Payment</th>
+                            <th class="py-3.5 px-4 text-right">Refund Amount</th>
+                            <th class="py-3.5 px-4 text-center">Status</th>
+                            <th class="py-3.5 px-4">Initiated By / Reason</th>
+                            <th class="py-3.5 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr *ngFor="let ref of filteredRefunds" class="hover:bg-slate-50/70 transition-colors">
+
+                            <!-- Refund & Gateway Ref -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-black text-slate-900 text-sm flex items-center gap-1.5">
+                                    <span>#{{ ref.id }}</span>
+                                    <span class="text-slate-400 font-normal">&bull;</span>
+                                    <span class="font-mono text-purple-700 font-bold text-xs">{{ ref.razorpay_refund_id
+                                        }}</span>
+                                    <button (click)="copyText(ref.razorpay_refund_id, 'Refund ID')"
+                                        class="text-slate-400 hover:text-slate-700 p-0.5 text-[11px]"
+                                        title="Copy Refund ID">
+                                        <i class="fa-solid fa-copy"></i>
+                                    </button>
+                                </div>
+
+                            </td>
+
+                            <!-- Order & Payment -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                                    <span>{{ ref.order.order_number }}</span>
+                                    <button (click)="copyText(ref.order.order_number, 'Order #')"
+                                        class="text-slate-400 hover:text-slate-700 p-0.5 text-[11px]"
+                                        title="Copy Order Number">
+                                        <i class="fa-solid fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div class="text-xs text-slate-600 font-mono mt-0.5 flex items-center gap-1">
+                                    <span>{{ ref.payment.razorpay_payment_id }}</span>
+                                    <button (click)="copyText(ref.payment.razorpay_payment_id, 'Payment ID')"
+                                        class="text-slate-400 hover:text-slate-700 p-0.5 text-[10px]"
+                                        title="Copy Payment ID">
+                                        <i class="fa-solid fa-copy"></i>
+                                    </button>
+                                </div>
+
+                            </td>
+
+                            <!-- Refund Amount -->
+                            <td class="py-3.5 px-4 align-top text-right">
+                                <div class="text-base font-black text-purple-700">₹{{ ref.amount | number:'1.2-2' }}
+                                </div>
+
+                            </td>
+
+                            <!-- Status & ARN -->
+                            <td class="py-3.5 px-4 align-top text-center">
+                                <span [ngClass]="getStatusBadgeClass(ref.status)"
+                                    class="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wide inline-flex items-center gap-1">
+                                    <i class="fa-solid text-[10px]" [ngClass]="getStatusIcon(ref.status)"></i>
+                                    <span>{{ ref.status }}</span>
+                                </span>
+
+                            </td>
+
+                            <!-- Initiator / Reason -->
+                            <td class="py-3.5 px-4 align-top">
+                                <div class="font-semibold text-slate-800 text-xs">{{ ref.initiated_by.name }}</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5 font-medium truncate max-w-[200px]"
+                                    [title]="ref.remarks">
+                                    {{ ref.remarks || ref.reason_label }}
+                                </div>
+
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="py-3.5 px-4 align-top text-right whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1.5">
+                                    <!-- Sync Button -->
+                                    <button (click)="syncRefund(ref, $event)" [disabled]="syncingRefundId === ref.id"
+                                        class="px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs shadow-xs active:scale-95 transition-all inline-flex items-center gap-1.5 disabled:opacity-60"
+                                        title="Re-sync Status from Razorpay Gateway">
+                                        <i class="fa-solid fa-rotate text-[11px]"
+                                            [ngClass]="{'fa-spin': syncingRefundId === ref.id}"></i>
+                                        <span>{{ syncingRefundId === ref.id ? 'Syncing...' : 'Sync' }}</span>
+                                    </button>
+
+                                    <!-- View Details Button -->
+                                    <button (click)="openDetailsModal(ref)"
+                                        class="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-xs active:scale-95 transition-all inline-flex items-center gap-1"
+                                        title="View Full Audit Details">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- MOBILE REFUNDS CARDS -->
+        <!-- ========================================================== -->
+        <div *ngIf="!isLoading && filteredRefunds.length > 0" class="md:hidden space-y-3.5">
+            <div *ngFor="let ref of filteredRefunds"
+                class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
+
+                <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2.5">
+                    <div>
+                        <div class="font-black text-slate-900 text-sm">#{{ ref.id }} &bull; {{ ref.order.order_number }}
+                        </div>
+                        <div class="text-xs font-mono text-purple-700 font-bold mt-0.5">{{ ref.razorpay_refund_id }}
+                        </div>
+                    </div>
+                    <span [ngClass]="getStatusBadgeClass(ref.status)"
+                        class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase inline-flex items-center gap-1">
+                        <i class="fa-solid text-[9px]" [ngClass]="getStatusIcon(ref.status)"></i>
+                        <span>{{ ref.status }}</span>
+                    </span>
+                </div>
+
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Payment ID:</span>
+                        <span class="font-mono text-slate-800">{{ ref.payment.razorpay_payment_id }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Bank ARN / Ref:</span>
+                        <span class="font-mono text-slate-800">{{ ref.reference }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Initiated By:</span>
+                        <span class="font-medium text-slate-800">{{ ref.initiated_by.name }}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-1 border-t border-slate-100">
+                        <span class="text-slate-500 font-medium">Refund Amount:</span>
+                        <span class="text-base font-black text-purple-700">₹{{ ref.amount | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
+                    <button (click)="syncRefund(ref, $event)" [disabled]="syncingRefundId === ref.id"
+                        class="flex-1 py-2.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 font-extrabold text-xs flex items-center justify-center gap-1.5 active:scale-95 disabled:opacity-50">
+                        <i class="fa-solid fa-rotate text-xs" [ngClass]="{'fa-spin': syncingRefundId === ref.id}"></i>
+                        <span>{{ syncingRefundId === ref.id ? 'Syncing...' : 'Sync Gateway' }}</span>
+                    </button>
+                    <button (click)="openDetailsModal(ref)"
+                        class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center gap-1.5 active:scale-95">
+                        <i class="fa-solid fa-eye"></i> Details
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- PAGINATION BAR -->
+        <!-- ========================================================== -->
+        <div *ngIf="totalPages > 1"
+            class="bg-white rounded-2xl p-3 border border-slate-200 shadow-xs flex items-center justify-between text-xs">
+            <span class="text-slate-500">
+                Page <strong class="text-slate-800">{{ currentPage }}</strong> of <strong class="text-slate-800">{{
+                    totalPages }}</strong>
+                ({{ totalRecords }} total)
+            </span>
+            <div class="flex items-center gap-1">
+                <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+                    class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 font-bold">
+                    Prev
+                </button>
+                <ng-container *ngFor="let p of getPageNumbers()">
+                    <span *ngIf="p === '...'" class="px-2 text-slate-400">...</span>
+                    <button *ngIf="p !== '...'" (click)="goToPage(+p)"
+                        [ngClass]="currentPage === p ? 'bg-purple-600 text-white font-black shadow-xs' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold'"
+                        class="w-8 h-8 rounded-xl flex items-center justify-center text-xs">
+                        {{ p }}
+                    </button>
+                </ng-container>
+                <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages"
+                    class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 font-bold">
+                    Next
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- MODAL: DETAILED REFUND AUDIT MODAL -->
+    <!-- ========================================================== -->
+    <div *ngIf="isDetailsModalOpen && selectedRefund"
+        class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+        <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity" (click)="closeDetailsModal()">
+        </div>
+        <div
+            class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden z-10 my-auto">
+
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-black text-slate-900">Refund Transaction #{{
+                            selectedRefund.id }}</h3>
+                        <p class="text-xs text-slate-500 font-mono font-bold">{{ selectedRefund.razorpay_refund_id }}
+                        </p>
+                    </div>
+                </div>
+                <button (click)="closeDetailsModal()"
+                    class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Scrollable) -->
+            <div class="p-6 overflow-y-auto space-y-5 text-xs sm:text-sm">
+
+                <!-- Amount & Status Highlight Banner -->
+                <div
+                    class="bg-gradient-to-r from-purple-50/80 to-indigo-50/80 border border-purple-200/80 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Refund
+                            Amount</span>
+                        <div class="text-2xl sm:text-3xl font-black text-purple-700">₹{{ selectedRefund.amount |
+                            number:'1.2-2' }}</div>
+                        <span class="text-[11px] text-slate-500">Speed: <strong class="capitalize text-slate-700">{{
+                                selectedRefund.speed_processed }}</strong></span>
+                    </div>
+                    <div class="text-right">
+                        <span
+                            class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Status</span>
+                        <span [ngClass]="getStatusBadgeClass(selectedRefund.status)"
+                            class="px-3 py-1 rounded-full text-xs font-black uppercase inline-flex items-center gap-1.5">
+                            <i class="fa-solid text-[10px]" [ngClass]="getStatusIcon(selectedRefund.status)"></i>
+                            <span>{{ selectedRefund.status }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Reference Identifiers Grid -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-2.5">Identifiers & Gateway
+                        Refs</h4>
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-slate-50 rounded-2xl p-4 border border-slate-100 text-xs">
+                        <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-100">
+                            <span class="text-slate-400">Order Ref:</span>
+                            <div class="flex items-center gap-1 font-bold text-slate-900">
+                                <span>{{ selectedRefund.order.order_number }}</span>
+                                <button (click)="copyText(selectedRefund.order.order_number, 'Order #')"
+                                    class="text-slate-400 hover:text-slate-700">
+                                    <i class="fa-solid fa-copy text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-100">
+                            <span class="text-slate-400">Payment ID:</span>
+                            <div class="flex items-center gap-1 font-mono font-bold text-slate-900">
+                                <span class="truncate max-w-[140px]">{{ selectedRefund.payment.razorpay_payment_id
+                                    }}</span>
+                                <button (click)="copyText(selectedRefund.payment.razorpay_payment_id, 'Payment ID')"
+                                    class="text-slate-400 hover:text-slate-700">
+                                    <i class="fa-solid fa-copy text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-100">
+                            <span class="text-slate-400">Gateway Refund ID:</span>
+                            <div class="flex items-center gap-1 font-mono font-bold text-purple-700">
+                                <span class="truncate max-w-[140px]">{{ selectedRefund.razorpay_refund_id }}</span>
+                                <button (click)="copyText(selectedRefund.razorpay_refund_id, 'Refund ID')"
+                                    class="text-slate-400 hover:text-slate-700">
+                                    <i class="fa-solid fa-copy text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-100">
+                            <span class="text-slate-400">Bank ARN / Ref:</span>
+                            <div class="flex items-center gap-1 font-mono font-bold text-slate-900">
+                                <span>{{ selectedRefund.reference }}</span>
+                                <button *ngIf="selectedRefund.reference !== '—'"
+                                    (click)="copyText(selectedRefund.reference, 'ARN')"
+                                    class="text-slate-400 hover:text-slate-700">
+                                    <i class="fa-solid fa-copy text-[10px]"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reason & Remarks -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-2.5">Reason & Internal
+                        Remarks</h4>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Reason Type:</span>
+                            <span class="font-bold text-slate-800">{{ selectedRefund.reason_label }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Remarks:</span>
+                            <span class="font-semibold text-slate-800">{{ selectedRefund.remarks || 'No remarks
+                                provided.' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Initiated By Details -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-2.5">Initiator Information
+                    </h4>
+                    <div
+                        class="bg-slate-50 rounded-2xl p-4 border border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                        <div>
+                            <span class="text-slate-400 block text-[11px]">Admin User</span>
+                            <span class="font-bold text-slate-800">{{ selectedRefund.initiated_by.name }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[11px]">Contact Email</span>
+                            <span class="font-semibold text-slate-800">{{ selectedRefund.initiated_by.email }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[11px]">Phone Number</span>
+                            <span class="font-semibold text-slate-800">{{ selectedRefund.initiated_by.phone_number
+                                }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline & Sync Audit -->
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-900 mb-2.5">Audit & Gateway
+                        Timeline</h4>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Refund Created:</span>
+                            <span class="font-bold text-slate-800">{{ formatDateTime(selectedRefund.created_at)
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Gateway Attempted:</span>
+                            <span class="font-bold text-slate-800">{{ formatDateTime(selectedRefund.attempted_at)
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Gateway Processed:</span>
+                            <span class="font-bold text-slate-800">{{ formatDateTime(selectedRefund.processed_at)
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400 font-medium">Last Reconciled / Synced:</span>
+                            <span class="font-bold text-purple-700">{{ formatDateTime(selectedRefund.last_synced_at)
+                                }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failure details if any -->
+                <div *ngIf="selectedRefund.failure_reason"
+                    class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs text-rose-800">
+                    <strong class="font-black block mb-1">Gateway Failure Notice:</strong>
+                    <p>{{ selectedRefund.failure_reason }}</p>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div
+                class="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-3 shrink-0 bg-slate-50/50">
+                <button (click)="syncRefund(selectedRefund)" [disabled]="syncingRefundId === selectedRefund.id"
+                    class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs active:scale-95 transition-all inline-flex items-center gap-2 disabled:opacity-60">
+                    <i class="fa-solid fa-rotate text-xs"
+                        [ngClass]="{'fa-spin': syncingRefundId === selectedRefund.id}"></i>
+                    <span>{{ syncingRefundId === selectedRefund.id ? 'Reconciling with Gateway...' : 'Re-sync Status
+                        Now' }}</span>
+                </button>
+                <button (click)="closeDetailsModal()"
+                    class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs active:scale-95 transition-all">
+                    Done
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>

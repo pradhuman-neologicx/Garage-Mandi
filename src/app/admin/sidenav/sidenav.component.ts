@@ -120,14 +120,26 @@ export class SidenavComponent {
         {
           index: 9,
           icon: 'price_change',
-          label: 'Commission / Fee',
-          route: '/admin/commission',
+          label: 'Configuration',
+          route: '/admin/configuration',
         },
         {
           index: 10,
           icon: 'shopping_bag',
           label: 'E-Commerce',
           route: '/admin/ecom',
+        },
+        {
+          index: 11,
+          icon: 'account_balance_wallet',
+          label: 'Settlements',
+          route: '/admin/settlements',
+        },
+        {
+          index: 12,
+          icon: 'currency_exchange',
+          label: 'Refunds',
+          route: '/admin/refunds',
         },
 
         // {

@@ -223,6 +223,7 @@ export class EcomService {
 
 
 // Admin side Ecom end points
+
   private getAdminHeaders(): HttpHeaders {
     let token = this.jwtService.getToken() as string;
     if (!token && typeof window !== 'undefined' && window.localStorage) {
@@ -238,6 +239,96 @@ export class EcomService {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
     return headers;
+  }
+
+  /**
+   * GET /api/v1/ecom/admin/orders
+   * Fetch all orders for admin
+   */
+  getAdminOrders(params?: any): Observable<any> {
+    let path = 'ecom/admin/orders';
+    if (params) {
+      const cleanParams: any = {};
+      Object.keys(params).forEach(k => {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+          cleanParams[k] = params[k];
+        }
+      });
+      const query = new URLSearchParams(cleanParams).toString();
+      if (query) {
+        path += `?${query}`;
+      }
+    }
+    return this.apiService.get(path, this.getAdminHeaders());
+  }
+
+  /**
+   * GET /api/v1/ecom/admin/orders/:id
+   * Fetch order details by ID for admin
+   */
+  getAdminOrderDetails(id: string | number): Observable<any> {
+    return this.apiService.get(`ecom/admin/orders/${id}`, this.getAdminHeaders());
+  }
+
+  /**
+   * GET /api/v1/ecom/admin/orders/:id/notes
+   * Fetch order notes for admin
+   */
+  getAdminOrderNotes(orderId: string | number): Observable<any> {
+    return this.apiService.get(`ecom/admin/orders/${orderId}/notes`, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/orders/:id/notes
+   * Add note to an order
+   */
+  addAdminOrderNote(orderId: string | number, payload: any): Observable<any> {
+    return this.apiService.post(`ecom/admin/orders/${orderId}/notes`, payload, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/orders/:id/cancel
+   * Cancel order for admin
+   */
+  cancelAdminOrder(orderId: string | number, payload: any): Observable<any> {
+    return this.apiService.post(`ecom/admin/orders/${orderId}/cancel`, payload, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/orders/:id/refund
+   * Issue refund for order
+   */
+  refundAdminOrder(orderId: string | number, payload: any): Observable<any> {
+    return this.apiService.post(`ecom/admin/orders/${orderId}/refunds`, payload, this.getAdminHeaders());
+  }
+
+  /**
+   * GET /api/v1/ecom/admin/refunds
+   * Fetch all customer refunds for admin
+   */
+  getAdminRefunds(params?: any): Observable<any> {
+    let path = 'ecom/admin/refunds';
+    if (params) {
+      const cleanParams: any = {};
+      Object.keys(params).forEach(k => {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+          cleanParams[k] = params[k];
+        }
+      });
+      const query = new URLSearchParams(cleanParams).toString();
+      if (query) {
+        path += `?${query}`;
+      }
+    }
+    return this.apiService.get(path, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/refunds/:id/sync
+   * Re-sync refund status from Razorpay gateway
+   */
+  syncAdminRefund(id: string | number): Observable<any> {
+    return this.apiService.post(`ecom/admin/refunds/${id}/sync`, {}, this.getAdminHeaders());
   }
 
   GetPlatformFee(): Observable<any> {

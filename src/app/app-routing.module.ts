@@ -294,13 +294,23 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
-        path: 'commission',
+        path: 'configuration',
         loadComponent: () => import('./admin/commission/commission.component').then(m => m.CommissionComponent),
         canActivate: [AuthGuard],
       },
       {
         path: 'ecom',
         loadComponent: () => import('./admin/ecom/ecom.component').then(m => m.EcomComponent),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'settlements',
+        loadComponent: () => import('./admin/settlements/settlements.component').then(m => m.SettlementsComponent),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'refunds',
+        loadComponent: () => import('./admin/refunds/refunds.component').then(m => m.RefundsComponent),
         canActivate: [AuthGuard],
       },
     ],
