@@ -5,6 +5,46 @@ import { RouterModule } from '@angular/router';
 import { EcomService } from 'src/app/core/services/ecom.service';
 import { NotificationService } from 'src/app/core/services/notificationnew.service';
 
+export interface RefundGatewayData {
+  amount?: number;
+  batch_id?: string | null;
+  created_at?: number;
+  currency?: string;
+  id?: string;
+  notes?: Record<string, string>;
+  payment_id?: string;
+  receipt?: string;
+  speed_processed?: string;
+  speed_requested?: string;
+  status?: string;
+  acquirer_data?: {
+    arn?: string;
+  };
+}
+
+export interface RefundHistoryEvent {
+  id: number;
+  subject_type: string;
+  subject_id: number;
+  event: string;
+  from_status?: string | null;
+  to_status?: string | null;
+  actor?: {
+    id: number;
+    name: string;
+  } | null;
+  actor_role: string;
+  meta?: {
+    refund_id?: number;
+    amount?: string | number;
+    refund_type?: string;
+    remarks?: string;
+    reference?: string;
+    razorpay_refund_id?: string;
+  };
+  created_at: string;
+}
+
 export interface AdminRefundItem {
   id: number;
   order: {
@@ -41,6 +81,8 @@ export interface AdminRefundItem {
   last_synced_at?: string | null;
   created_at: string;
   updated_at: string;
+  gateway?: RefundGatewayData;
+  history?: RefundHistoryEvent[];
 }
 
 @Component({
@@ -61,6 +103,8 @@ export class RefundsComponent implements OnInit {
 
   // Search & Filters
   searchQuery = '';
+  appliedSearchQuery = '';
+  isSearchApplied = false;
   statusFilter = 'all';
 
   // Pagination State
@@ -71,6 +115,7 @@ export class RefundsComponent implements OnInit {
 
   // Detailed Modal
   isDetailsModalOpen = false;
+  isLoadingDetails = false;
   selectedRefund: AdminRefundItem | null = null;
 
   constructor(
@@ -101,8 +146,8 @@ export class RefundsComponent implements OnInit {
       params.status = this.statusFilter;
     }
 
-    if (this.searchQuery && this.searchQuery.trim()) {
-      params.search = this.searchQuery.trim();
+    if (this.appliedSearchQuery && this.appliedSearchQuery.trim()) {
+      params.search = this.appliedSearchQuery.trim();
     }
 
     this.ecomService.getAdminRefunds(params).subscribe({
@@ -177,7 +222,9 @@ export class RefundsComponent implements OnInit {
       attempted_at: item.attempted_at || null,
       last_synced_at: item.last_synced_at || null,
       created_at: item.created_at || '',
-      updated_at: item.updated_at || ''
+      updated_at: item.updated_at || '',
+      gateway: item.gateway || undefined,
+      history: Array.isArray(item.history) ? item.history : []
     };
   }
 
@@ -249,27 +296,52 @@ export class RefundsComponent implements OnInit {
     this.loadRefunds();
   }
 
-  onSearchChange(): void {
+  onSearch(): void {
+    this.appliedSearchQuery = this.searchQuery ? this.searchQuery.trim() : '';
+    this.isSearchApplied = !!this.appliedSearchQuery;
+    this.currentPage = 1;
+    this.loadRefunds();
+  }
+
+  onResetSearch(): void {
+    this.searchQuery = '';
+    this.appliedSearchQuery = '';
+    this.isSearchApplied = false;
     this.currentPage = 1;
     this.loadRefunds();
   }
 
   private applyLocalSearchFallback(): void {
-    if (!this.searchQuery || !this.searchQuery.trim()) {
+    if (!this.appliedSearchQuery || !this.appliedSearchQuery.trim()) {
       this.filteredRefunds = [...this.refunds];
       return;
     }
-    const q = this.searchQuery.trim().toLowerCase();
+    const q = this.appliedSearchQuery.trim().toLowerCase();
     this.filteredRefunds = this.refunds.filter(r =>
       r.id.toString().includes(q) ||
-      r.order.order_number.toLowerCase().includes(q) ||
-      r.razorpay_refund_id.toLowerCase().includes(q) ||
-      r.payment.razorpay_payment_id.toLowerCase().includes(q) ||
-      r.reference.toLowerCase().includes(q) ||
-      r.receipt.toLowerCase().includes(q) ||
-      r.initiated_by.name.toLowerCase().includes(q) ||
-      r.remarks.toLowerCase().includes(q)
+      (r.order?.order_number && r.order.order_number.toLowerCase().includes(q)) ||
+      (r.razorpay_refund_id && r.razorpay_refund_id.toLowerCase().includes(q)) ||
+      (r.payment?.razorpay_payment_id && r.payment.razorpay_payment_id.toLowerCase().includes(q)) ||
+      (r.reference && r.reference.toLowerCase().includes(q)) ||
+      (r.receipt && r.receipt.toLowerCase().includes(q)) ||
+      (r.initiated_by?.name && r.initiated_by.name.toLowerCase().includes(q)) ||
+      (r.remarks && r.remarks.toLowerCase().includes(q))
     );
+  }
+
+  get paginationFrom(): number {
+    if (this.totalRecords === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get paginationTo(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalRecords);
+  }
+
+  onPageSizeChange(newSize: any): void {
+    this.pageSize = Number(newSize);
+    this.currentPage = 1;
+    this.loadRefunds();
   }
 
   goToPage(page: number): void {
@@ -302,11 +374,32 @@ export class RefundsComponent implements OnInit {
   }
 
   // ==========================================================
-  // DETAILS MODAL
+  // DETAILS MODAL (FETCH BY ID: GET /api/v1/ecom/admin/refunds/:id)
   // ==========================================================
   openDetailsModal(refund: AdminRefundItem): void {
     this.selectedRefund = refund;
     this.isDetailsModalOpen = true;
+    this.isLoadingDetails = true;
+
+    this.ecomService.getAdminRefundDetails(refund.id).subscribe({
+      next: (res: any) => {
+        this.isLoadingDetails = false;
+        const item = res?.data?.item || res?.data || res;
+        if (item && typeof item === 'object') {
+          const mapped = this.mapApiRefund(item);
+          this.selectedRefund = mapped;
+          const idx = this.refunds.findIndex(r => r.id === refund.id);
+          if (idx !== -1) {
+            this.refunds[idx] = mapped;
+          }
+          this.applyLocalSearchFallback();
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingDetails = false;
+        console.warn('Could not fetch latest details by ID, using listing data.', err);
+      }
+    });
   }
 
   closeDetailsModal(): void {
@@ -347,6 +440,27 @@ export class RefundsComponent implements OnInit {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(text);
       this.notificationService.show(`${label} to clipboard!`, 'success');
+    }
+  }
+
+  formatEventName(event: string): string {
+    switch (event) {
+      case 'refund_initiated': return 'Refund Initiated';
+      case 'refund_status_changed': return 'Status Changed';
+      default: return event ? event.replace(/_/g, ' ') : 'Event';
+    }
+  }
+
+  getEventBadgeClass(toStatus?: string | null): string {
+    switch (toStatus) {
+      case 'processed':
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+      case 'pending':
+        return 'bg-amber-50 text-amber-700 border border-amber-200';
+      case 'failed':
+        return 'bg-rose-50 text-rose-700 border border-rose-200';
+      default:
+        return 'bg-purple-50 text-purple-700 border border-purple-200';
     }
   }
 

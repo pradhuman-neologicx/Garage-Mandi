@@ -11,7 +11,15 @@ export type OrderStatus =
   | 'shipped'
   | 'out_for_delivery'
   | 'delivered'
+  | 'delivered_open_box'
+  | 'settlement_hold'
+  | 'settled'
   | 'cancelled';
+
+export interface CancelReasonOption {
+  key: string;
+  label: string;
+}
 
 export interface AdminOrderNote {
   id: number;
@@ -85,15 +93,21 @@ export interface AdminOrder {
   };
 
   status: OrderStatus;
+  deliveryStatus?: string;
+  settlementStatus?: string;
+  financialStatus?: string;
   createdAt: string;
   deliveredAt?: string;
   cancelledAt?: string;
   cancelReason?: string;
+  settlementEligibleAt?: string;
+  settledAt?: string;
 
   shipment?: {
     id: string;
     courierPartner: string;
     awbNumber: string;
+    trackingUrl?: string;
     status: string;
     dispatchedAt?: string;
   } | null;
@@ -107,6 +121,7 @@ export interface AdminOrder {
   acceptedQuotation?: any;
   pricing?: any;
   events?: any[];
+  statusHistory?: any[];
 }
 
 @Component({
@@ -119,6 +134,7 @@ export interface AdminOrder {
 export class EcomComponent implements OnInit {
   isLoading = false;
   isRefreshing = false;
+  isLoadingDetails = false;
 
   // ==========================================================
   // ORDERS DATA & STATE
@@ -127,6 +143,8 @@ export class EcomComponent implements OnInit {
   filteredOrders: AdminOrder[] = [];
   pagedOrders: AdminOrder[] = [];
   orderSearchQuery = '';
+  appliedOrderSearchQuery = '';
+  isOrderSearchApplied = false;
   orderStatusFilter = 'all';
   orderCurrentPage = 1;
   orderPageSize = 10;
@@ -156,7 +174,8 @@ export class EcomComponent implements OnInit {
   // 4. Cancel Order Modal
   isCancelModalOpen = false;
   orderToCancel: AdminOrder | null = null;
-  cancelReasonInput = 'Customer requested cancellation';
+  cancelReasons: CancelReasonOption[] = [];
+  cancelReasonInput = '';
   cancelRemarksInput = '';
   autoRefundCustomer = true;
 
@@ -184,6 +203,32 @@ export class EcomComponent implements OnInit {
       } catch (_) {}
     }
     this.loadData();
+    this.loadCancelReasons();
+  }
+
+  loadCancelReasons(): void {
+    this.ecomService.getCancelReasons().subscribe({
+      next: (res: any) => {
+        const orderReasons = res?.data?.order;
+        if (Array.isArray(orderReasons) && orderReasons.length > 0) {
+          this.cancelReasons = orderReasons.map((r: any) => ({
+            key: r.key || r.code || r.id || r.label,
+            label: r.label || r.name || r.key
+          }));
+          if (!this.cancelReasonInput || !this.cancelReasons.some(r => r.key === this.cancelReasonInput)) {
+            this.cancelReasonInput = this.cancelReasons[0].key;
+          }
+        }
+      },
+      error: (err: any) => {
+        console.warn('[AdminEcom] Failed to load cancel reasons from server, using defaults:', err);
+      }
+    });
+  }
+
+  getCancelReasonLabel(key: string): string {
+    const found = this.cancelReasons.find(r => r.key === key);
+    return found ? found.label : key;
   }
 
   // ==========================================================
@@ -207,8 +252,8 @@ export class EcomComponent implements OnInit {
     if (this.orderStatusFilter && this.orderStatusFilter !== 'all') {
       params.status = this.orderStatusFilter;
     }
-    if (this.orderSearchQuery && this.orderSearchQuery.trim()) {
-      params.search = this.orderSearchQuery.trim();
+    if (this.appliedOrderSearchQuery && this.appliedOrderSearchQuery.trim()) {
+      params.search = this.appliedOrderSearchQuery.trim();
     }
 
     console.log('[AdminEcom] Loading admin orders with params:', params);
@@ -335,13 +380,15 @@ export class EcomComponent implements OnInit {
 
     // Shipment details
     let shipmentObj: any = null;
-    if (shipment) {
+    const shipmentData = shipment || (Array.isArray(item.shipments) && item.shipments.length > 0 ? item.shipments[0] : null);
+    if (shipmentData) {
       shipmentObj = {
-        id: shipment.id || shipment.shipment_number || 'SHP',
-        courierPartner: shipment.courier_partner || shipment.carrier || 'Courier Logistics',
-        awbNumber: shipment.awb_number || shipment.tracking_number || '—',
-        status: shipment.status || 'In Transit',
-        dispatchedAt: shipment.dispatched_at ? this.formatDateTime(shipment.dispatched_at) : undefined
+        id: shipmentData.id || shipmentData.shipment_number || 'SHP',
+        courierPartner: shipmentData.logistics_partner || shipmentData.courier_partner || shipmentData.carrier || '',
+        awbNumber: shipmentData.awb_number || shipmentData.tracking_number || '',
+        trackingUrl: shipmentData.tracking_url || '',
+        status: shipmentData.status || '',
+        dispatchedAt: shipmentData.dispatched_at ? this.formatDateTime(shipmentData.dispatched_at) : (shipmentData.created_at ? this.formatDateTime(shipmentData.created_at) : undefined)
       };
     }
 
@@ -400,8 +447,8 @@ export class EcomComponent implements OnInit {
         phone: sellerPhone,
         city: seller.city || '',
         state: seller.state || '',
-        bankName: seller.bank_name || 'Registered Bank',
-        accountNumber: seller.account_number || 'XXXXXX',
+        bankName: seller.bank_name || '',
+        accountNumber: seller.account_number || '',
         ifsc: seller.ifsc || '',
         upiId: seller.upi_id || ''
       },
@@ -417,10 +464,15 @@ export class EcomComponent implements OnInit {
         refundedAt: item.refunded_at ? this.formatDateTime(item.refunded_at) : undefined
       },
       status: (item.status || 'confirmed') as OrderStatus,
+      deliveryStatus: item.delivery_status || item.status || 'confirmed',
+      settlementStatus: item.settlement_status || null,
+      financialStatus: finStatus,
       createdAt: this.formatDateTime(item.created_at),
       deliveredAt: item.delivered_at ? this.formatDateTime(item.delivered_at) : undefined,
       cancelledAt: item.cancelled_at ? this.formatDateTime(item.cancelled_at) : undefined,
       cancelReason: item.cancel_reason,
+      settlementEligibleAt: item.settlement_eligible_at ? this.formatDateTime(item.settlement_eligible_at) : undefined,
+      settledAt: item.settled_at ? this.formatDateTime(item.settled_at) : undefined,
       shipment: shipmentObj,
       notes,
       rawItem: item,
@@ -430,7 +482,8 @@ export class EcomComponent implements OnInit {
       attentionReason: item.attention_reason || null,
       acceptedQuotation: item.accepted_quotation || null,
       pricing: item.pricing || null,
-      events: item.events || []
+      events: item.events || [],
+      statusHistory: Array.isArray(item.status_history) ? item.status_history : []
     };
   }
 
@@ -537,9 +590,19 @@ export class EcomComponent implements OnInit {
     this.loadAdminOrders();
   }
 
-  onOrderSearchChange(): void {
+  onOrderSearch(): void {
+    this.appliedOrderSearchQuery = this.orderSearchQuery ? this.orderSearchQuery.trim() : '';
+    this.isOrderSearchApplied = !!this.appliedOrderSearchQuery;
     this.orderCurrentPage = 1;
-    this.applyOrderFilters();
+    this.loadData();
+  }
+
+  onResetOrderSearch(): void {
+    this.orderSearchQuery = '';
+    this.appliedOrderSearchQuery = '';
+    this.isOrderSearchApplied = false;
+    this.orderCurrentPage = 1;
+    this.loadData();
   }
 
   applyOrderFilters(resetPage = false): void {
@@ -550,11 +613,11 @@ export class EcomComponent implements OnInit {
     let result = [...this.orders];
 
     if (this.orderStatusFilter !== 'all') {
-      result = result.filter(o => o.status === this.orderStatusFilter);
+      result = result.filter(o => (o.deliveryStatus || o.status) === this.orderStatusFilter);
     }
 
-    if (this.orderSearchQuery && this.orderSearchQuery.trim()) {
-      const q = this.orderSearchQuery.trim().toLowerCase();
+    if (this.appliedOrderSearchQuery && this.appliedOrderSearchQuery.trim()) {
+      const q = this.appliedOrderSearchQuery.trim().toLowerCase();
       result = result.filter(o =>
         o.orderNumber.toLowerCase().includes(q) ||
         o.quotationRef.toLowerCase().includes(q) ||
@@ -608,19 +671,39 @@ export class EcomComponent implements OnInit {
   openDetailsModal(order: AdminOrder): void {
     this.selectedOrder = order;
     this.isDetailsModalOpen = true;
+    this.isLoadingDetails = true;
 
-    // Fetch live details if available: GET /api/v1/ecom/admin/orders/:id
+    // Fetch live details: GET /api/v1/ecom/admin/orders/:id
     this.ecomService.getAdminOrderDetails(order.id).subscribe({
       next: (res: any) => {
+        this.isLoadingDetails = false;
         const item = res?.data?.item || res?.data || res;
         if (item && typeof item === 'object') {
-          this.selectedOrder = this.mapApiOrder(item);
+          const mapped = this.mapApiOrder(item);
+          this.selectedOrder = mapped;
+          const idx = this.orders.findIndex(o => o.id === order.id);
+          if (idx !== -1) {
+            this.orders[idx] = mapped;
+          }
         }
       },
-      error: () => {
-        // Fallback gracefully to listing data already set
+      error: (err: any) => {
+        this.isLoadingDetails = false;
+        console.warn('[AdminEcom] Could not fetch live order details by ID:', err);
       }
     });
+  }
+
+  canCancelOrder(order: AdminOrder | null | undefined): boolean {
+    if (!order) return false;
+    if (order.allowedActions && Array.isArray(order.allowedActions)) {
+      return order.allowedActions.includes('cancel_order');
+    }
+    return order.status !== 'cancelled' &&
+           order.status !== 'delivered' &&
+           order.status !== 'delivered_open_box' &&
+           order.status !== 'settlement_hold' &&
+           order.status !== 'settled';
   }
 
   closeDetailsModal(): void {
@@ -779,7 +862,10 @@ export class EcomComponent implements OnInit {
   openCancelModal(order: AdminOrder, event?: Event): void {
     if (event) event.stopPropagation();
     this.orderToCancel = order;
-    this.cancelReasonInput = 'Customer requested cancellation';
+    if (this.cancelReasons.length === 0) {
+      this.loadCancelReasons();
+    }
+    this.cancelReasonInput = this.cancelReasons[0]?.key || '';
     this.cancelRemarksInput = '';
     this.autoRefundCustomer = true;
     this.isCancelModalOpen = true;
@@ -811,11 +897,12 @@ export class EcomComponent implements OnInit {
       },
       error: () => {
         // Fallback local cancellation
+        const reasonLabel = this.getCancelReasonLabel(this.cancelReasonInput);
         order.status = 'cancelled';
         order.cancelledAt = nowStr;
         order.cancelReason = this.cancelRemarksInput.trim()
-          ? `${this.cancelReasonInput} - ${this.cancelRemarksInput.trim()}`
-          : this.cancelReasonInput;
+          ? `${reasonLabel} - ${this.cancelRemarksInput.trim()}`
+          : reasonLabel;
 
         if (this.autoRefundCustomer) {
           order.payment.status = 'refunded';
@@ -946,6 +1033,12 @@ export class EcomComponent implements OnInit {
         return 'bg-purple-100 text-purple-800 border border-purple-200';
       case 'delivered':
         return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+      case 'delivered_open_box':
+        return 'bg-teal-100 text-teal-800 border border-teal-200';
+      case 'settlement_hold':
+        return 'bg-amber-100 text-amber-800 border border-amber-200';
+      case 'settled':
+        return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
       case 'cancelled':
         return 'bg-rose-100 text-rose-800 border border-rose-200';
       default:
@@ -963,6 +1056,8 @@ export class EcomComponent implements OnInit {
         return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
       case 'refunded':
         return 'bg-rose-50 text-rose-700 border border-rose-200';
+      case 'partially_refunded':
+        return 'bg-purple-50 text-purple-700 border border-purple-200';
       default:
         return 'bg-slate-50 text-slate-700 border border-slate-200';
     }
@@ -975,8 +1070,11 @@ export class EcomComponent implements OnInit {
       case 'shipped': return 'Shipped';
       case 'out_for_delivery': return 'Out for Delivery';
       case 'delivered': return 'Delivered';
+      case 'delivered_open_box': return 'Delivered (Open Box)';
+      case 'settlement_hold': return 'Settlement Hold';
+      case 'settled': return 'Settled';
       case 'cancelled': return 'Cancelled';
-      default: return status;
+      default: return status ? status.replace(/_/g, ' ') : '—';
     }
   }
 
@@ -986,7 +1084,8 @@ export class EcomComponent implements OnInit {
       case 'released': return 'Eligible for Payout';
       case 'settled': return 'Settled to Seller';
       case 'refunded': return 'Refunded to Customer';
-      default: return status;
+      case 'partially_refunded': return 'Partially Refunded';
+      default: return status ? status.replace(/_/g, ' ') : '—';
     }
   }
 

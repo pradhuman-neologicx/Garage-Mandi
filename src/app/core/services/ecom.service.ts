@@ -290,6 +290,9 @@ export class EcomService {
    * POST /api/v1/ecom/admin/orders/:id/cancel
    * Cancel order for admin
    */
+  getCancelReasons(): Observable<any> {
+    return this.apiService.get('ecom/admin/cancel-reasons', this.getAdminHeaders());
+  }
   cancelAdminOrder(orderId: string | number, payload: any): Observable<any> {
     return this.apiService.post(`ecom/admin/orders/${orderId}/cancel`, payload, this.getAdminHeaders());
   }
@@ -321,6 +324,14 @@ export class EcomService {
       }
     }
     return this.apiService.get(path, this.getAdminHeaders());
+  }
+
+  /**
+   * GET /api/v1/ecom/admin/refunds/:id
+   * Fetch refund details by ID for admin
+   */
+  getAdminRefundDetails(id: string | number): Observable<any> {
+    return this.apiService.get(`ecom/admin/refunds/${id}`, this.getAdminHeaders());
   }
 
   /**
