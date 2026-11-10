@@ -222,6 +222,14 @@ export class EcomService {
     return this.getSellerOrderDetailss(id);
   }
 
+  /**
+   * POST /api/v1/ecom/seller/orders/:id/ready-for-pickup
+   * Mark a confirmed seller order as Ready for Pickup
+   */
+  markSellerOrderReadyForPickup(orderId: string | number, payload: any = {}): Observable<any> {
+    return this.apiService.post(`ecom/seller/orders/${orderId}/ready-for-pickup`, payload, this.getHeaders());
+  }
+
 
 
 // Admin side Ecom end points

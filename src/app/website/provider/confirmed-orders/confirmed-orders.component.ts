@@ -106,6 +106,7 @@ export class ConfirmedOrdersComponent implements OnInit {
 
   // Pickup Confirmation Modal State
   isConfirmPickupModalOpen = false;
+  isMarkingReadyForPickup = false;
   orderToPickup: ConfirmedOrderItem | null = null;
 
   readonly timelineSteps = ORDER_TIMELINE_STEPS;
@@ -520,7 +521,6 @@ export class ConfirmedOrdersComponent implements OnInit {
 
   // ==========================================
   // READY FOR PICKUP CONFIRMATION MODAL LOGIC
-  // (API integration to follow as per request)
   // ==========================================
 
   openConfirmPickupModal(order: ConfirmedOrderItem, event?: Event): void {
@@ -532,51 +532,88 @@ export class ConfirmedOrdersComponent implements OnInit {
   }
 
   cancelConfirmPickup(): void {
+    if (this.isMarkingReadyForPickup) return;
     this.isConfirmPickupModalOpen = false;
     this.orderToPickup = null;
   }
 
   confirmReadyForPickup(): void {
-    if (!this.orderToPickup) return;
+    if (!this.orderToPickup || this.isMarkingReadyForPickup) return;
 
     const order = this.orderToPickup;
-    const nowStr = new Date().toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    this.isMarkingReadyForPickup = true;
+
+    this.ecomService.markSellerOrderReadyForPickup(order.id).subscribe({
+      next: (res: any) => {
+        this.isMarkingReadyForPickup = false;
+        const data = res?.data?.item || res?.data || res;
+
+        if (data && typeof data === 'object' && (data.id || data.status || data.order_number)) {
+          const updatedOrder = this.mapApiItem(data);
+          const idx = this.orders.findIndex(o => o.id === order.id);
+          if (idx !== -1) {
+            this.orders[idx] = updatedOrder;
+          }
+          if (this.selectedOrder && this.selectedOrder.id === order.id) {
+            this.selectedOrder = updatedOrder;
+          }
+        } else {
+          const nowStr = new Date().toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          order.status = 'Ready for Pickup';
+          order.readyForPickupAt = nowStr;
+          order.shipmentStatus = 'Ready for Courier Pickup';
+          order.providerNotice = 'Order is marked Ready for Pickup. Courier logistics will arrive for pickup soon.';
+
+          const idx = this.orders.findIndex(o => o.id === order.id);
+          if (idx !== -1) {
+            this.orders[idx].status = 'Ready for Pickup';
+            this.orders[idx].readyForPickupAt = nowStr;
+            this.orders[idx].shipmentStatus = 'Ready for Courier Pickup';
+            this.orders[idx].providerNotice = order.providerNotice;
+          }
+
+          if (this.selectedOrder && this.selectedOrder.id === order.id) {
+            this.selectedOrder.status = 'Ready for Pickup';
+            this.selectedOrder.readyForPickupAt = nowStr;
+            this.selectedOrder.shipmentStatus = 'Ready for Courier Pickup';
+            this.selectedOrder.providerNotice = order.providerNotice;
+          }
+        }
+
+        this.applyFilter();
+
+        const msg = res?.message || `Order ${order.orderCode} marked as Ready for Pickup! Courier notified.`;
+        this.notificationService.show(msg, 'success');
+
+        this.isConfirmPickupModalOpen = false;
+        this.orderToPickup = null;
+
+        this.loadOrders(true);
+        if (this.isDetailsModalOpen && this.selectedOrder?.id === order.id) {
+          this.ecomService.getSellerOrderDetailss(order.id).subscribe({
+            next: (detailRes: any) => {
+              const detailData = detailRes?.data?.item || detailRes?.data || detailRes;
+              if (detailData && typeof detailData === 'object') {
+                this.selectedOrder = this.mapApiItem(detailData);
+              }
+            }
+          });
+        }
+      },
+      error: (err: any) => {
+        this.isMarkingReadyForPickup = false;
+        console.error('[ConfirmedOrders] Error marking ready for pickup:', err);
+        const errMsg = err?.message || err?.error?.message || 'Failed to mark order as Ready for Pickup.';
+        // this.notificationService.show(errMsg, 'error');
+      }
     });
-
-    order.status = 'Ready for Pickup';
-    order.readyForPickupAt = nowStr;
-    order.shipmentStatus = 'Ready for Courier Pickup';
-    order.providerNotice = 'Order is marked Ready for Pickup. Courier logistics will arrive for pickup soon.';
-
-    const idx = this.orders.findIndex(o => o.id === order.id);
-    if (idx !== -1) {
-      this.orders[idx].status = 'Ready for Pickup';
-      this.orders[idx].readyForPickupAt = nowStr;
-      this.orders[idx].shipmentStatus = 'Ready for Courier Pickup';
-      this.orders[idx].providerNotice = 'Order is marked Ready for Pickup. Courier logistics will arrive for pickup soon.';
-    }
-
-    if (this.selectedOrder && this.selectedOrder.id === order.id) {
-      this.selectedOrder.status = 'Ready for Pickup';
-      this.selectedOrder.readyForPickupAt = nowStr;
-      this.selectedOrder.shipmentStatus = 'Ready for Courier Pickup';
-      this.selectedOrder.providerNotice = order.providerNotice;
-    }
-
-    this.applyFilter();
-
-    this.notificationService.show(
-      `Order ${order.orderCode} marked as Ready for Pickup! Courier notified.`,
-      'success'
-    );
-
-    this.isConfirmPickupModalOpen = false;
-    this.orderToPickup = null;
   }
 
   // Status Badge CSS Classes
