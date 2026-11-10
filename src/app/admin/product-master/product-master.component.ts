@@ -62,7 +62,8 @@ export class ProductMasterComponent implements OnInit {
 
   // Pagination
   currentPage: number = 1;
-  perPage: number = 20;
+  perPage: number = 10;
+  pageSizeOptions: number[] = [10, 20, 50, 100];
   totalItems: number = 0;
   lastPage: number = 1;
 
@@ -208,10 +209,10 @@ export class ProductMasterComponent implements OnInit {
 
         const pagination = data?.pagination || data?.meta;
         if (pagination) {
-          this.totalItems = pagination.total ?? this.products.length;
-          this.currentPage = pagination.current_page ?? this.currentPage;
-          this.perPage = pagination.per_page ?? this.perPage;
-          this.lastPage = pagination.last_page ?? (Math.ceil(this.totalItems / this.perPage) || 1);
+          this.totalItems = Number(pagination.total ?? this.products.length);
+          this.currentPage = Number(pagination.current_page ?? this.currentPage);
+          this.perPage = Number(pagination.per_page ?? this.perPage);
+          this.lastPage = Number(pagination.last_page ?? (Math.ceil(this.totalItems / this.perPage) || 1));
         } else {
           this.totalItems = this.products.length;
           this.lastPage = 1;
@@ -318,6 +319,12 @@ export class ProductMasterComponent implements OnInit {
   goToPage(page: number): void {
     if (page < 1 || page > this.lastPage || page === this.currentPage) return;
     this.currentPage = page;
+    this.loadProducts();
+  }
+
+  onLimitChange(): void {
+    this.perPage = Number(this.perPage) || 10;
+    this.currentPage = 1;
     this.loadProducts();
   }
 

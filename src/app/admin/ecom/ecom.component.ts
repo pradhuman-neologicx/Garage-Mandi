@@ -250,7 +250,7 @@ export class EcomComponent implements OnInit {
 
     const params: any = {
       page: this.orderCurrentPage,
-      limit: this.orderPageSize
+      per_page: this.orderPageSize
     };
     if (this.orderStatusFilter && this.orderStatusFilter !== 'all') {
       params.status = this.orderStatusFilter;
@@ -279,6 +279,7 @@ export class EcomComponent implements OnInit {
         if (pagination) {
           this.totalOrdersCountFromServer = Number(pagination.total !== undefined ? pagination.total : this.orders.length);
           this.orderCurrentPage = Number(pagination.current_page || this.orderCurrentPage);
+          this.orderPageSize = Number(pagination.per_page || this.orderPageSize);
           this.orderTotalPages = Number(pagination.last_page || Math.max(1, Math.ceil(this.totalOrdersCountFromServer / this.orderPageSize)));
         } else {
           this.totalOrdersCountFromServer = this.orders.length;

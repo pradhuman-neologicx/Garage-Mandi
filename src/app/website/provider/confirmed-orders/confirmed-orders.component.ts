@@ -95,7 +95,7 @@ export class ConfirmedOrdersComponent implements OnInit {
 
   // Server Pagination State
   currentPage = 1;
-  pageSize = 6;
+  pageSize = 10;
   totalPages = 1;
   totalRecordsCount = 0;
 
@@ -134,8 +134,9 @@ export class ConfirmedOrdersComponent implements OnInit {
       }
     }
 
-    if (qParams['limit']) {
-      const l = Number(qParams['limit']);
+    const perPageParam = qParams['per_page'] || qParams['limit'];
+    if (perPageParam) {
+      const l = Number(perPageParam);
       if (!isNaN(l) && l > 0) {
         this.pageSize = l;
       }
@@ -232,10 +233,10 @@ export class ConfirmedOrdersComponent implements OnInit {
       this.isLoading = true;
     }
 
-    // Pass page and limit along with status
+    // Pass page and per_page along with status
     const params: any = {
       page: this.currentPage,
-      limit: this.pageSize
+      per_page: this.pageSize
     };
     if (this.activeTab && this.activeTab !== 'all') {
       params.status = this.activeTab;
@@ -261,6 +262,7 @@ export class ConfirmedOrdersComponent implements OnInit {
         if (pagination) {
           this.totalRecordsCount = Number(pagination.total !== undefined ? pagination.total : this.orders.length);
           this.currentPage = Number(pagination.current_page || this.currentPage);
+          this.pageSize = Number(pagination.per_page || this.pageSize);
           this.totalPages = Number(pagination.last_page || Math.max(1, Math.ceil(this.totalRecordsCount / this.pageSize)));
         } else {
           this.totalRecordsCount = this.orders.length;
