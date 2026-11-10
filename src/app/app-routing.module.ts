@@ -313,6 +313,11 @@ const routes: Routes = [
         loadComponent: () => import('./admin/refunds/refunds.component').then(m => m.RefundsComponent),
         canActivate: [AuthGuard],
       },
+      {
+        path: 'product-master',
+        loadComponent: () => import('./admin/product-master/product-master.component').then(m => m.ProductMasterComponent),
+        canActivate: [AuthGuard],
+      },
     ],
   },
 ];

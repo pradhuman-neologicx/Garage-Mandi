@@ -96,7 +96,16 @@
                 {{ brand.name.charAt(0) | uppercase }}
               </div>
               <h5 class="card-title fw-bold text-dark mb-1 text-truncate" [title]="brand.name">{{ brand.name }}</h5>
-              <p class="text-muted small mb-3">ID: #{{ brand.id }}</p>
+              <p class="text-muted small mb-2">ID: #{{ brand.id }}</p>
+
+              <!-- Vehicle Categories -->
+              <div class="d-flex flex-wrap justify-content-center gap-1 mb-3" *ngIf="getBrandCategoryNames(brand).length > 0">
+                <span *ngFor="let catName of getBrandCategoryNames(brand)"
+                  class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1 fw-medium"
+                  style="font-size: 11px;">
+                  {{ catName }}
+                </span>
+              </div>
               
               <div class="mb-4">
                 <span
@@ -179,6 +188,29 @@
               <p class="fw-light text-danger m-0" *ngIf="createBrandForm.controls['Name'].errors['required']">Brand Name is required</p>
             </div>
           </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Vehicle Categories</label>
+            <ng-select
+              [items]="vehicleCategories"
+              bindLabel="name"
+              bindValue="id"
+              formControlName="vehicle_category_id"
+              [multiple]="true"
+              [closeOnSelect]="false"
+              [searchable]="true"
+              [clearable]="true"
+              [loading]="isLoadingCategories"
+              appendTo="body"
+              placeholder="Select vehicle categories">
+              <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                <div class="d-flex align-items-center gap-2">
+                  <input id="add-cat-{{index}}" type="checkbox" [checked]="item$.selected" style="pointer-events: none;" />
+                  <span>{{ item.name }}</span>
+                </div>
+              </ng-template>
+            </ng-select>
+          </div>
         </div>
         <div class="modal-footer text-end">
           <button class="btn btn-secondary main-btnfs px-4 py-2 me-3 text-white" type="button" (click)="closeModal()">Cancel</button>
@@ -208,6 +240,29 @@
               <p class="fw-light text-danger m-0" *ngIf="updateBrandForm.controls['Name'].errors['required']">Brand Name is required</p>
             </div>
           </div>
+
+          <div class="mb-3">
+            <label class="d-block text-capitalize form-label form-lable-custom">Vehicle Categories</label>
+            <ng-select
+              [items]="vehicleCategories"
+              bindLabel="name"
+              bindValue="id"
+              formControlName="vehicle_category_id"
+              [multiple]="true"
+              [closeOnSelect]="false"
+              [searchable]="true"
+              [clearable]="true"
+              [loading]="isLoadingCategories"
+              appendTo="body"
+              placeholder="Select vehicle categories">
+              <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                <div class="d-flex align-items-center gap-2">
+                  <input id="edit-cat-{{index}}" type="checkbox" [checked]="item$.selected" style="pointer-events: none;" />
+                  <span>{{ item.name }}</span>
+                </div>
+              </ng-template>
+            </ng-select>
+          </div>
         </div>
         <div class="modal-footer text-end">
           <button class="btn btn-secondary main-btnfs px-4 py-2 me-3 text-white" type="button" (click)="closeModal()">Cancel</button>
@@ -233,6 +288,23 @@
           <div class="mb-3">
             <label class="d-block text-capitalize form-label form-lable-custom">Brand Name</label>
             <input type="text" formControlName="Name" readonly class="form-control form-input-custom bg-light" />
+          </div>
+
+          <div class="mb-3" *ngIf="selectedViewBrand">
+            <label class="d-block text-capitalize form-label form-lable-custom">Vehicle Categories</label>
+            <div class="d-flex flex-wrap gap-2 mt-1"
+              *ngIf="getBrandCategoryNames(selectedViewBrand).length > 0; else noBrandCategories">
+              <span *ngFor="let catName of getBrandCategoryNames(selectedViewBrand)"
+                class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2 fw-medium">
+                <i class="fa-solid fa-car me-1"></i>
+                {{ catName }}
+              </span>
+            </div>
+            <ng-template #noBrandCategories>
+              <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 py-2 fw-medium">
+                No Categories Assigned
+              </span>
+            </ng-template>
           </div>
         </div>
       </div>

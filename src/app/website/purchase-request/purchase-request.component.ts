@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
 import { EcomService, CreatePurchaseRequestPayload } from 'src/app/core/services/ecom.service';
@@ -37,6 +38,7 @@ export interface PurchaseRequest {
   reference: string;
   product: string;
   category: string;
+  brand?: string;
   quantity: number;
   requestDate: string;
   status: string;
@@ -56,7 +58,7 @@ export interface PurchaseRequest {
 @Component({
   selector: 'app-purchase-request',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, RouterModule, NavbarComponent, FooterComponent, NgSelectModule],
   templateUrl: './purchase-request.component.html',
   styleUrl: './purchase-request.component.scss'
 })
@@ -105,15 +107,21 @@ export class PurchaseRequestComponent implements OnInit {
   isLoadingRequests: boolean = false;
 
   vehicleCategories: any[] = [];
+  productsList: any[] = [];
+  isLoadingProducts: boolean = false;
 
   newRequest: {
     product: string;
+    product_id: number | null;
     quantity: number;
     vehicle_category_id: number | null;
+    description: string;
   } = {
     product: '',
+    product_id: null,
     quantity: 1,
-    vehicle_category_id: null
+    vehicle_category_id: null,
+    description: ''
   };
 
   createFormSubmitted: boolean = false;
@@ -123,18 +131,16 @@ export class PurchaseRequestComponent implements OnInit {
 
   constructor(
     private ecomService: EcomService,
-    private razorpayService: RazorpayService
+    private razorpayService: RazorpayService,
+    private router: Router
   ) {}
 
   getProductError(): string {
     if (!this.createFormSubmitted && !this.productTouched) {
       return '';
     }
-    if (!this.newRequest.product || !this.newRequest.product.trim()) {
-      return 'Please enter a product name.';
-    }
-    if (this.newRequest.product.trim().length < 2) {
-      return 'Product name must be at least 2 characters.';
+    if (!this.newRequest.product_id) {
+      return 'Please select a product.';
     }
     return '';
   }
@@ -165,6 +171,50 @@ export class PurchaseRequestComponent implements OnInit {
     return '';
   }
 
+  onCategoryChange(): void {
+    this.categoryTouched = true;
+    this.newRequest.product_id = null;
+    this.newRequest.product = '';
+    this.productsList = [];
+
+    const catId = this.newRequest.vehicle_category_id;
+    if (catId) {
+      this.isLoadingProducts = true;
+      this.ecomService.getPublicProducts(catId).subscribe({
+        next: (res: any) => {
+          this.isLoadingProducts = false;
+          const list = res?.data?.items || res?.data || res || [];
+          this.productsList = Array.isArray(list) ? list : (list?.data || []);
+        },
+        error: () => {
+          this.isLoadingProducts = false;
+          this.productsList = [];
+        }
+      });
+    }
+  }
+
+  onProductChange(selected: any): void {
+    this.productTouched = true;
+    if (selected) {
+      this.newRequest.product = selected.name || '';
+      this.newRequest.product_id = selected.id || null;
+    } else {
+      this.newRequest.product = '';
+      this.newRequest.product_id = null;
+    }
+  }
+
+  customSearchFn = (term: string, item: any): boolean => {
+    term = (term || '').toLowerCase().trim();
+    if (!term) return true;
+    const nameMatch = (item.name || '').toLowerCase().includes(term);
+    const brandMatch = (item.vehicle_brand?.name || '').toLowerCase().includes(term);
+    const sparePartMatch = (item.spare_part?.name || '').toLowerCase().includes(term);
+    const subPartMatch = (item.sub_spare_part?.name || '').toLowerCase().includes(term);
+    return nameMatch || brandMatch || sparePartMatch || subPartMatch;
+  };
+
   // Toast / notification
   toastMessage: string = '';
   showToast: boolean = false;
@@ -189,12 +239,14 @@ export class PurchaseRequestComponent implements OnInit {
   }
 
   loadVehicleCategories(): void {
-    this.ecomService.getVehicleCategories().subscribe({
+    this.ecomService.getPublicVehicleCategories().subscribe({
       next: (res: any) => {
-        if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
-          this.vehicleCategories = res.data;
+        const list = res?.data || res || [];
+        if (Array.isArray(list) && list.length > 0) {
+          this.vehicleCategories = list;
           if (!this.newRequest.vehicle_category_id) {
             this.newRequest.vehicle_category_id = this.vehicleCategories[0]?.id || 1;
+            this.onCategoryChange();
           }
         }
       },
@@ -377,11 +429,14 @@ export class PurchaseRequestComponent implements OnInit {
         })
       : [];
 
+    const brandName = item.vehicle_brand?.name || item.commercial_snapshot?.product?.vehicle_brand?.name || '';
+
     return {
       id: item.id,
       reference: item.reference || (item.request_code ? item.request_code : `REQ-${item.id}`),
       product: item.product_name || item.product || 'Spare Part',
       category: item.vehicle_category?.name || item.category || 'Vehicle Spare Part',
+      brand: brandName,
       quantity: Number(item.quantity || 1),
       requestDate: dateStr,
       status: mapped.statusLabel,
@@ -420,6 +475,7 @@ export class PurchaseRequestComponent implements OnInit {
         String(req.id).toLowerCase().includes(query) ||
         (req.reference && req.reference.toLowerCase().includes(query)) ||
         req.product.toLowerCase().includes(query) ||
+        (req.brand && req.brand.toLowerCase().includes(query)) ||
         req.category.toLowerCase().includes(query);
 
       return matchesFilter && matchesSearch;
@@ -819,6 +875,7 @@ export class PurchaseRequestComponent implements OnInit {
         this.isOrderSuccessModalOpen = true;
         this.displayToast(verifyRes?.message || 'Payment verified! Order confirmed.');
         this.loadPurchaseRequests();
+        this.router.navigate(['/my-orders']);
       },
       error: (verifyErr: any) => {
         this.isVerifyingPayment = false;
@@ -902,16 +959,23 @@ export class PurchaseRequestComponent implements OnInit {
 
   // Create Request Modal
   openCreateModal(): void {
+    const defaultCatId = this.vehicleCategories[0]?.id || null;
     this.newRequest = {
       product: '',
+      product_id: null,
       quantity: 1,
-      vehicle_category_id: this.vehicleCategories[0]?.id || 1
+      vehicle_category_id: defaultCatId,
+      description: ''
     };
     this.createFormSubmitted = false;
     this.productTouched = false;
     this.quantityTouched = false;
     this.categoryTouched = false;
     this.isCreateModalOpen = true;
+
+    if (defaultCatId) {
+      this.onCategoryChange();
+    }
   }
 
   closeCreateModal(): void {
@@ -924,25 +988,28 @@ export class PurchaseRequestComponent implements OnInit {
 
   submitCreateRequest(): void {
     this.createFormSubmitted = true;
+    this.categoryTouched = true;
     this.productTouched = true;
     this.quantityTouched = true;
-    this.categoryTouched = true;
 
+    const catErr = this.getCategoryError();
     const productErr = this.getProductError();
     const qtyErr = this.getQuantityError();
-    const catErr = this.getCategoryError();
 
-    if (productErr || qtyErr || catErr) {
-      this.displayToast(productErr || qtyErr || catErr);
+    if (catErr || productErr || qtyErr) {
+      this.displayToast(catErr || productErr || qtyErr);
       return;
     }
 
     this.isSubmitting = true;
     const payload: CreatePurchaseRequestPayload = {
-      product_name: this.newRequest.product.trim(),
-      quantity: Number(this.newRequest.quantity),
-      vehicle_category_id: Number(this.newRequest.vehicle_category_id || 1)
+      product_id: Number(this.newRequest.product_id),
+      quantity: Number(this.newRequest.quantity)
     };
+
+    if (this.newRequest.description && this.newRequest.description.trim()) {
+      payload.description = this.newRequest.description.trim();
+    }
 
     this.ecomService.createPurchaseRequest(payload).subscribe({
       next: (res: any) => {

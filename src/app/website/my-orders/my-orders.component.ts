@@ -11,6 +11,9 @@ export interface OrderItem {
   orderNumber: string;
   product: string;
   vehicleCategory: string;
+  vehicleBrand?: string;
+  sparePartName?: string;
+  subSparePartName?: string;
   quantity: number;
   unitPrice: number;
   productAmount: number;
@@ -239,6 +242,19 @@ export class MyOrdersComponent implements OnInit {
     const snap = item.commercial_snapshot || {};
     const ord = item.order || {};
     const catName = item.vehicle_category?.name || '';
+    const brandName = item.vehicle_brand?.name ||
+                      snap.product?.vehicle_brand?.name ||
+                      snap.vehicle_brand?.name ||
+                      item.commercial_snapshot?.product?.vehicle_brand?.name ||
+                      '';
+    const sparePartName = item.spare_part?.name ||
+                          snap.product?.spare_part?.name ||
+                          snap.spare_part?.name ||
+                          '';
+    const subSparePartName = item.sub_spare_part?.name ||
+                             snap.product?.sub_spare_part?.name ||
+                             snap.sub_spare_part?.name ||
+                             '';
 
     // Active/accepted quotation from quotations array if present
     const quote = (Array.isArray(item.quotations) && item.quotations.length > 0)
@@ -356,6 +372,9 @@ export class MyOrdersComponent implements OnInit {
       orderNumber: ord.order_number || ('GMO-' + item.id),
       product: snap.product_name || item.product_name || 'Automotive Spare Part',
       vehicleCategory: catName || 'Two Wheeler',
+      vehicleBrand: brandName,
+      sparePartName,
+      subSparePartName,
       quantity,
       unitPrice,
       productAmount,
@@ -406,6 +425,9 @@ export class MyOrdersComponent implements OnInit {
         !query ||
         ord.orderNumber.toLowerCase().includes(query) ||
         ord.product.toLowerCase().includes(query) ||
+        (ord.vehicleBrand && ord.vehicleBrand.toLowerCase().includes(query)) ||
+        (ord.sparePartName && ord.sparePartName.toLowerCase().includes(query)) ||
+        (ord.subSparePartName && ord.subSparePartName.toLowerCase().includes(query)) ||
         ord.seller.toLowerCase().includes(query) ||
         ord.requestId.toLowerCase().includes(query);
 

@@ -119,28 +119,35 @@ export class SidenavComponent {
         },
         {
           index: 9,
+          icon: 'inventory_2',
+          label: 'Product Master',
+          route: '/admin/product-master',
+        },
+        {
+          index: 10,  
           icon: 'price_change',
           label: 'Configuration',
           route: '/admin/configuration',
         },
         {
-          index: 10,
+          index: 11,
           icon: 'shopping_bag',
           label: 'E-Commerce',
           route: '/admin/ecom',
         },
         {
-          index: 11,
+          index: 12,
           icon: 'account_balance_wallet',
           label: 'Settlements',
           route: '/admin/settlements',
         },
         {
-          index: 12,
+          index: 13,
           icon: 'currency_exchange',
           label: 'Refunds',
           route: '/admin/refunds',
         },
+        
 
         // {
         //   index: 9,

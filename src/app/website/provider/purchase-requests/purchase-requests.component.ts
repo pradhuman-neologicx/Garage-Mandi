@@ -37,6 +37,9 @@ export interface PurchaseRequestItem {
   rawStatus: string;
   customerRequirement: string;
   vehicleCategory?: string;
+  vehicleBrand?: string;
+  sparePart?: string;
+  subSparePart?: string;
   deliveryLocation?: DeliveryLocation;
   myQuotation?: any;
   quotation?: PurchaseQuotation;
@@ -255,6 +258,9 @@ export class PurchaseRequestsComponent implements OnInit {
       rawStatus: item.status || 'quote_received',
       customerRequirement: item.description || (item.vehicle_category?.name ? `Category: ${item.vehicle_category.name}` : 'Spare part quotation requested.'),
       vehicleCategory: item.vehicle_category?.name || '',
+      vehicleBrand: item.vehicle_brand?.name || '',
+      sparePart: item.spare_part?.name || '',
+      subSparePart: item.sub_spare_part?.name || '',
       deliveryLocation: item.delivery_location || undefined,
       myQuotation: myQ,
       quotation: quotation
@@ -295,6 +301,9 @@ export class PurchaseRequestsComponent implements OnInit {
         r.product.toLowerCase().includes(q) ||
         r.requestCode.toLowerCase().includes(q) ||
         r.customerRequirement.toLowerCase().includes(q) ||
+        (r.vehicleBrand && r.vehicleBrand.toLowerCase().includes(q)) ||
+        (r.sparePart && r.sparePart.toLowerCase().includes(q)) ||
+        (r.subSparePart && r.subSparePart.toLowerCase().includes(q)) ||
         (r.vehicleCategory && r.vehicleCategory.toLowerCase().includes(q)) ||
         (r.deliveryLocation?.city && r.deliveryLocation.city.toLowerCase().includes(q))
       );

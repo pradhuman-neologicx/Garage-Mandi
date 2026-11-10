@@ -58,6 +58,7 @@ export interface ConfirmedOrderItem {
   settlementStatus: string;
   readyForPickupAt?: string;
   vehicleCategory?: string;
+  vehicleBrand?: string;
   vehicleModel?: string;
   providerNotice?: string;
   rawItem?: any;
@@ -299,6 +300,16 @@ export class ConfirmedOrdersComponent implements OnInit {
       deliveryAddress.pincode
     ].filter(Boolean).join(', ') || '—';
 
+    // Vehicle Brand
+    const vehicleBrand =
+      snapshot.product?.vehicle_brand?.name ||
+      snapshot.vehicle_brand?.name ||
+      snapshot.product?.vehicle_maker?.name ||
+      item.product?.vehicle_brand?.name ||
+      item.purchase_request?.vehicle_brand?.name ||
+      snapshot.vehicle_brand_name ||
+      '';
+
     // Numbers & Commercial amounts
     const quantity = Number(snapshot.quantity ?? item.quantity ?? 1);
     const unitPrice = Number(snapshot.unit_price ?? item.unit_price ?? 0);
@@ -425,6 +436,7 @@ export class ConfirmedOrdersComponent implements OnInit {
       settlementStatus,
       readyForPickupAt: item.ready_for_pickup_at ? this.formatDateTime(item.ready_for_pickup_at) : undefined,
       vehicleCategory: snapshot.vehicle_category_name || item.vehicle_category?.name || 'Automobile',
+      vehicleBrand,
       vehicleModel: item.vehicle_model || snapshot.vehicle_category_name || '',
       providerNotice,
       rawItem: item
@@ -491,6 +503,7 @@ export class ConfirmedOrdersComponent implements OnInit {
       const q = this.searchQuery.trim().toLowerCase();
       result = result.filter(item =>
         (item.product && item.product.toLowerCase().includes(q)) ||
+        (item.vehicleBrand && item.vehicleBrand.toLowerCase().includes(q)) ||
         (item.orderCode && item.orderCode.toLowerCase().includes(q)) ||
         (item.quotationCode && item.quotationCode.toLowerCase().includes(q)) ||
         (item.requestCode && item.requestCode.toLowerCase().includes(q)) ||

@@ -169,7 +169,10 @@ export class EcomComponent implements OnInit {
   selectedNewStatus: OrderStatus = 'confirmed';
   courierPartnerInput = '';
   awbNumberInput = '';
+  trackingUrlInput = '';
+  deliveredAtInput = '';
   statusRemarksInput = '';
+  isUpdatingStatus = false;
 
   // 4. Cancel Order Modal
   isCancelModalOpen = false;
@@ -490,34 +493,30 @@ export class EcomComponent implements OnInit {
   canRefund(order: AdminOrder | null | undefined): boolean {
     if (!order) return false;
 
-    // Explicit can_refund flag if returned directly by API
-    if ((order as any).can_refund === false || order.rawItem?.can_refund === false) {
-      return false;
+    // 1. Check refund_summary.can_refund from API (listing or details)
+    const refundSummary = order.refundSummary || order.rawItem?.refund_summary;
+    if (refundSummary && typeof refundSummary.can_refund === 'boolean') {
+      const remaining = Number(refundSummary.remaining_refundable_amount ?? 1);
+      return refundSummary.can_refund === true && (isNaN(remaining) || remaining > 0);
     }
 
-    // 1. If financial or payment status is refunded
+    // 2. Direct can_refund flag if returned on order or rawItem
+    if ((order as any).can_refund !== undefined) {
+      return (order as any).can_refund === true;
+    }
+    if (order.rawItem?.can_refund !== undefined) {
+      return order.rawItem.can_refund === true;
+    }
+
+    // 3. Fallbacks if refund_summary is not yet provided by API
     if (order.payment?.financialStatus === 'refunded' || order.payment?.status === 'refunded') {
       return false;
     }
 
-    // 2. If allowedActions array is explicitly provided and non-empty (e.g. from API details)
     if (order.allowedActions && Array.isArray(order.allowedActions) && order.allowedActions.length > 0) {
-      if (!order.allowedActions.includes('record_refund')) {
-        return false;
-      }
+      return order.allowedActions.includes('record_refund');
     }
 
-    // 3. If refundSummary has can_refund explicitly set to false
-    if (order.refundSummary) {
-      if (order.refundSummary.can_refund === false) {
-        return false;
-      }
-      if (order.refundSummary.remaining_refundable_amount !== undefined && Number(order.refundSummary.remaining_refundable_amount) <= 0) {
-        return false;
-      }
-    }
-
-    // 4. Raw API item checks (from listing or details)
     const raw = order.rawItem;
     if (raw) {
       if (raw.financial_status === 'refunded' || Boolean(raw.refunded_at)) {
@@ -532,12 +531,10 @@ export class EcomComponent implements OnInit {
       }
     }
 
-    // 5. Total refunded amount equal or exceeds final amount
     if ((order.payment?.refundAmount || 0) >= order.finalAmount && order.finalAmount > 0) {
       return false;
     }
 
-    // 6. Only paid or partially_refunded orders can be refunded
     return order.payment?.status === 'paid' || order.payment?.status === 'partially_refunded';
   }
 
@@ -696,14 +693,22 @@ export class EcomComponent implements OnInit {
 
   canCancelOrder(order: AdminOrder | null | undefined): boolean {
     if (!order) return false;
-    if (order.allowedActions && Array.isArray(order.allowedActions)) {
+    if (order.allowedActions && Array.isArray(order.allowedActions) && order.allowedActions.length > 0) {
       return order.allowedActions.includes('cancel_order');
     }
-    return order.status !== 'cancelled' &&
-           order.status !== 'delivered' &&
-           order.status !== 'delivered_open_box' &&
-           order.status !== 'settlement_hold' &&
-           order.status !== 'settled';
+    const status = (order.status || '').toLowerCase();
+    const deliveryStatus = (order.deliveryStatus || order.rawItem?.delivery_status || '').toLowerCase();
+
+    return status !== 'cancelled' &&
+           status !== 'admin_cancelled' &&
+           status !== 'customer_cancelled' &&
+           status !== 'seller_cancelled' &&
+           deliveryStatus !== 'cancelled' &&
+           status !== 'delivered' &&
+           status !== 'delivered_open_box' &&
+           deliveryStatus !== 'delivered' &&
+           status !== 'settlement_hold' &&
+           status !== 'settled';
   }
 
   closeDetailsModal(): void {
@@ -792,68 +797,210 @@ export class EcomComponent implements OnInit {
   // ==========================================================
   // MODAL ACTIONS: 3. STATUS UPDATE
   // ==========================================================
+  getOrderDeliveryStatus(order: AdminOrder | null | undefined): string {
+    if (!order) return 'confirmed';
+    const val = (order.deliveryStatus || order.rawItem?.delivery_status || order.status || '').toLowerCase().trim();
+    if (['confirmed', 'ready_for_pickup', 'shipped', 'out_for_delivery', 'delivered', 'cancelled', 'admin_cancelled'].includes(val)) {
+      return val;
+    }
+    const shipVal = (order.rawItem?.shipment?.status || order.shipment?.status || '').toLowerCase().trim();
+    if (['shipped', 'out_for_delivery', 'delivered'].includes(shipVal)) {
+      return shipVal;
+    }
+    return val || 'confirmed';
+  }
+
+  getStepProgressPercentage(order: AdminOrder | null | undefined): string {
+    const status = this.getOrderDeliveryStatus(order);
+    switch (status) {
+      case 'confirmed': return '0%';
+      case 'ready_for_pickup': return '25%';
+      case 'shipped': return '50%';
+      case 'out_for_delivery': return '75%';
+      case 'delivered': return '100%';
+      default: return '0%';
+    }
+  }
+
+  isStepPassedOrActive(step: string, order: AdminOrder | null | undefined): boolean {
+    const orderSteps = ['confirmed', 'ready_for_pickup', 'shipped', 'out_for_delivery', 'delivered'];
+    const currentStatus = this.getOrderDeliveryStatus(order);
+    const currentIndex = orderSteps.indexOf(currentStatus);
+    const stepIndex = orderSteps.indexOf(step);
+    if (currentIndex === -1 || stepIndex === -1) return false;
+    return stepIndex <= currentIndex;
+  }
+
+  isStepActive(step: string, order: AdminOrder | null | undefined): boolean {
+    return this.getOrderDeliveryStatus(order) === step;
+  }
+
+  isStepCompleted(step: string, order: AdminOrder | null | undefined): boolean {
+    const orderSteps = ['confirmed', 'ready_for_pickup', 'shipped', 'out_for_delivery', 'delivered'];
+    const currentStatus = this.getOrderDeliveryStatus(order);
+    const currentIndex = orderSteps.indexOf(currentStatus);
+    const stepIndex = orderSteps.indexOf(step);
+    if (currentIndex === -1 || stepIndex === -1) return false;
+    return stepIndex < currentIndex;
+  }
+
+  onLogisticsChange(): void {
+    if (this.awbNumberInput?.trim() && !this.trackingUrlInput?.trim()) {
+      this.onAwbNumberChange();
+    }
+  }
+
+  onAwbNumberChange(): void {
+    const awb = this.awbNumberInput?.trim();
+    const partner = (this.courierPartnerInput || '').toLowerCase();
+    if (awb && partner.includes('delhivery')) {
+      this.trackingUrlInput = `https://www.delhivery.com/track/package/${awb}`;
+    }
+  }
+
+  formatDateTimeForApi(date: Date = new Date()): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const y = date.getFullYear();
+    const m = pad(date.getMonth() + 1);
+    const d = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+    const ss = pad(date.getSeconds());
+    return `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  }
+
   openStatusModal(order: AdminOrder, event?: Event): void {
     if (event) event.stopPropagation();
     this.orderForStatus = order;
     this.selectedNewStatus = order.status;
-    this.courierPartnerInput = order.shipment?.courierPartner || 'Delhivery Surface';
-    this.awbNumberInput = order.shipment?.awbNumber || '';
+    this.courierPartnerInput = order.shipment?.courierPartner || order.rawItem?.shipment?.logistics_partner || 'Delhivery';
+    this.awbNumberInput = order.shipment?.awbNumber || order.rawItem?.shipment?.awb_number || '';
+    this.trackingUrlInput = order.shipment?.trackingUrl || order.rawItem?.shipment?.tracking_url || '';
+    if (!this.trackingUrlInput && this.awbNumberInput && this.courierPartnerInput.toLowerCase().includes('delhivery')) {
+      this.trackingUrlInput = `https://www.delhivery.com/track/package/${this.awbNumberInput}`;
+    }
+    this.deliveredAtInput = this.formatDateTimeForApi();
     this.statusRemarksInput = '';
+    this.isUpdatingStatus = false;
     this.isStatusModalOpen = true;
   }
 
   closeStatusModal(): void {
     this.isStatusModalOpen = false;
     this.orderForStatus = null;
+    this.isUpdatingStatus = false;
   }
 
   confirmStatusUpdate(): void {
-    if (!this.orderForStatus) return;
+    if (!this.orderForStatus || this.isUpdatingStatus) return;
 
-    const prevStatus = this.orderForStatus.status;
-    const newStatus = this.selectedNewStatus;
+    const orderId = this.orderForStatus.id;
+    const currentStatus = this.getOrderDeliveryStatus(this.orderForStatus);
 
-    this.orderForStatus.status = newStatus;
+    if (currentStatus === 'ready_for_pickup') {
+      // 1. Ready for pickup -> Shipped
+      if (!this.courierPartnerInput?.trim()) {
+        this.notificationService.show('Please enter courier / logistics partner name.', 'error');
+        return;
+      }
+      if (!this.awbNumberInput?.trim()) {
+        this.notificationService.show('Please enter AWB / tracking number.', 'error');
+        return;
+      }
 
-    // Handle shipment fields
-    if (newStatus === 'shipped' || newStatus === 'out_for_delivery' || newStatus === 'delivered') {
-      this.orderForStatus.shipment = {
-        id: this.orderForStatus.shipment?.id || `SHP-${Math.floor(1000 + Math.random() * 9000)}`,
-        courierPartner: this.courierPartnerInput || 'Delhivery Surface',
-        awbNumber: this.awbNumberInput || `DLV-${Math.floor(100000 + Math.random() * 900000)}`,
-        status: newStatus === 'delivered' ? 'Delivered (OTP Verified)' : (newStatus === 'out_for_delivery' ? 'Out for Delivery' : 'In Transit'),
-        dispatchedAt: this.orderForStatus.shipment?.dispatchedAt || this.formatCurrentDateTime()
+      const awb = this.awbNumberInput.trim();
+      const partner = this.courierPartnerInput.trim();
+      let trackingUrl = this.trackingUrlInput?.trim();
+      if (!trackingUrl && partner.toLowerCase().includes('delhivery')) {
+        trackingUrl = `https://www.delhivery.com/track/package/${awb}`;
+      }
+
+      const payload = {
+        logistics_partner: partner,
+        awb_number: awb,
+        tracking_url: trackingUrl || `https://track.package/${awb}`,
+        expected_status: 'ready_for_pickup'
       };
+
+      this.isUpdatingStatus = true;
+      this.ecomService.createAdminOrderShipment(orderId, payload).subscribe({
+        next: (res: any) => {
+          this.isUpdatingStatus = false;
+          const msg = res?.message || 'Order dispatched and marked as Shipped!';
+          this.notificationService.show(msg, 'success');
+          this.handleStatusUpdateSuccess(orderId);
+        },
+        error: (err: any) => {
+          this.isUpdatingStatus = false;
+          const errMsg = err?.error?.message || err?.message || 'Failed to dispatch shipment.';
+          this.notificationService.show(errMsg, 'error');
+        }
+      });
+
+    } else if (currentStatus === 'shipped') {
+      // 2. Shipped -> Out for Delivery
+      const payload = {
+        expected_status: 'shipped'
+      };
+
+      this.isUpdatingStatus = true;
+      this.ecomService.updateAdminOrderOutForDelivery(orderId, payload).subscribe({
+        next: (res: any) => {
+          this.isUpdatingStatus = false;
+          const msg = res?.message || 'Order marked Out for Delivery!';
+          this.notificationService.show(msg, 'success');
+          this.handleStatusUpdateSuccess(orderId);
+        },
+        error: (err: any) => {
+          this.isUpdatingStatus = false;
+          const errMsg = err?.error?.message || err?.message || 'Failed to update to Out for Delivery.';
+          this.notificationService.show(errMsg, 'error');
+        }
+      });
+
+    } else if (currentStatus === 'out_for_delivery') {
+      // 3. Out for delivery -> Delivered
+      const deliveredAt = this.deliveredAtInput?.trim() || this.formatDateTimeForApi();
+      const payload = {
+        delivered_at: deliveredAt,
+        expected_status: 'out_for_delivery'
+      };
+
+      this.isUpdatingStatus = true;
+      this.ecomService.updateAdminOrderDelivery(orderId, payload).subscribe({
+        next: (res: any) => {
+          this.isUpdatingStatus = false;
+          const msg = res?.message || 'Order marked Delivered successfully!';
+          this.notificationService.show(msg, 'success');
+          this.handleStatusUpdateSuccess(orderId);
+        },
+        error: (err: any) => {
+          this.isUpdatingStatus = false;
+          const errMsg = err?.error?.message || err?.message || 'Failed to mark order delivered.';
+          this.notificationService.show(errMsg, 'error');
+        }
+      });
+
+    } else {
+      this.notificationService.show(`Cannot update status from ${this.formatStatusLabel(currentStatus)}.`, 'error');
     }
+  }
 
-    if (newStatus === 'delivered' && !this.orderForStatus.deliveredAt) {
-      this.orderForStatus.deliveredAt = this.formatCurrentDateTime();
-      this.orderForStatus.payment.financialStatus = 'released';
-    }
-
-    // Add note
-    const remarks = this.statusRemarksInput.trim() ? ` Remarks: ${this.statusRemarksInput.trim()}` : '';
-    this.orderForStatus.notes.unshift({
-      id: Date.now(),
-      author: 'Super Admin',
-      role: 'Admin',
-      text: `Status changed from ${this.formatStatusLabel(prevStatus)} to ${this.formatStatusLabel(newStatus)}.${remarks}`,
-      createdAt: this.formatCurrentDateTime()
-    });
-
-    const idx = this.orders.findIndex(o => o.id === this.orderForStatus!.id);
-    if (idx !== -1) {
-      this.orders[idx] = this.orderForStatus;
-    }
-
-    this.applyOrderFilters();
-
-    this.notificationService.show(
-      `Order ${this.orderForStatus.orderNumber} status updated to ${this.formatStatusLabel(newStatus)}!`,
-      'success'
-    );
-
+  private handleStatusUpdateSuccess(orderId: number): void {
     this.closeStatusModal();
+    this.loadAdminOrders();
+
+    // If order details modal is open for this order, refresh it immediately
+    if (this.selectedOrder && this.selectedOrder.id === orderId) {
+      this.ecomService.getAdminOrderDetails(orderId).subscribe({
+        next: (detailRes: any) => {
+          const item = detailRes?.data?.item || detailRes?.data || detailRes;
+          if (item && typeof item === 'object') {
+            this.selectedOrder = this.mapApiOrder(item);
+          }
+        }
+      });
+    }
   }
 
   // ==========================================================
@@ -932,14 +1079,28 @@ export class EcomComponent implements OnInit {
   // ==========================================================
   // MODAL ACTIONS: 5. REFUND OPTION
   // ==========================================================
+  get orderRefundedAmount(): number {
+    if (!this.orderToRefund) return 0;
+    const ref = this.orderToRefund.refundSummary?.refunded_amount ??
+      this.orderToRefund.rawItem?.refund_summary?.refunded_amount;
+    if (ref !== undefined && ref !== null && ref !== '') {
+      const num = Number(ref);
+      if (!isNaN(num)) return num;
+    }
+    return this.orderToRefund.payment?.refundAmount || 0;
+  }
+
   get maxRefundableAmount(): number {
     if (!this.orderToRefund) return 0;
-    const rem = this.orderToRefund.refundSummary?.remaining_refundable_amount;
+    const rem = this.orderToRefund.refundSummary?.remaining_refundable_amount ??
+      this.orderToRefund.rawItem?.refund_summary?.remaining_refundable_amount;
     if (rem !== undefined && rem !== null && rem !== '') {
       const num = Number(rem);
       if (!isNaN(num)) return num;
     }
-    return this.orderToRefund.finalAmount || 0;
+    const paid = this.orderToRefund.finalAmount || 0;
+    const refunded = this.orderRefundedAmount;
+    return Math.max(0, paid - refunded);
   }
 
   openRefundModal(order: AdminOrder, event?: Event): void {
@@ -947,7 +1108,7 @@ export class EcomComponent implements OnInit {
     this.orderToRefund = order;
     this.refundType = 'full';
     this.refundAmountInput = this.maxRefundableAmount;
-    this.refundReasonInput = 'Customer dispute / Defective part';
+    this.refundReasonInput = '';
     this.isRefundModalOpen = true;
   }
 
@@ -976,21 +1137,19 @@ export class EcomComponent implements OnInit {
 
     const order = this.orderToRefund;
     const orderId = order.id;
+    const maxRefundable = this.maxRefundableAmount;
+    const amount = this.refundType === 'full' ? maxRefundable : Number(this.refundAmountInput);
+
+    if (isNaN(amount) || amount <= 0 || amount > maxRefundable) {
+      this.notificationService.show(`Refund amount must be between ₹1 and ₹${maxRefundable.toFixed(2)}`, 'error');
+      return;
+    }
 
     const payload: any = {
       refund_type: this.refundType,
+      amount: amount,
       remarks: this.refundReasonInput?.trim() || 'Customer dispute / Defective part'
     };
-
-    if (this.refundType === 'partial') {
-      const maxRefundable = this.maxRefundableAmount;
-      const amount = Number(this.refundAmountInput);
-      if (isNaN(amount) || amount <= 0 || amount > maxRefundable) {
-        this.notificationService.show(`Refund amount must be between ₹1 and ₹${maxRefundable.toFixed(2)}`, 'error');
-        return;
-      }
-      payload.amount = amount;
-    }
 
     this.ecomService.refundAdminOrder(orderId, payload).subscribe({
       next: (res: any) => {

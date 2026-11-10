@@ -12,6 +12,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { NotificationService } from 'src/app/core/services/notificationnew.service';
 import { AdminService } from 'src/app/core/services/admin.service';
 
@@ -26,6 +27,7 @@ import { AdminService } from 'src/app/core/services/admin.service';
     MatIconModule,
     MatButtonModule,
     NgxPaginationModule,
+    NgSelectModule,
   ],
   templateUrl: './vechicle-brand.component.html',
   styleUrl: './vechicle-brand.component.scss',
@@ -67,6 +69,9 @@ export class VechicleBrandComponent implements OnInit {
   viewBrandOpen: boolean = false;
   currentBrandId: any;
   brandList: any;
+  vehicleCategories: any[] = [];
+  isLoadingCategories: boolean = false;
+  selectedViewBrand: any = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -81,18 +86,63 @@ export class VechicleBrandComponent implements OnInit {
 
     this.createBrandForm = this.formBuilder.group({
       Name: ['', [Validators.required]],
+      vehicle_category_id: [[]],
     });
 
     this.updateBrandForm = this.formBuilder.group({
       Name: ['', [Validators.required, Validators.minLength(2)]],
+      vehicle_category_id: [[]],
     });
 
     this.viewBrandForm = this.formBuilder.group({
       Name: [''],
+      vehicle_category_id: [[]],
     });
+
+    this.loadCategories();
     this.GetBrandsFun();
   }
 
+  loadCategories(): void {
+    this.isLoadingCategories = true;
+    this.adminService.getPublicVehicleCategories().subscribe({
+      next: (res: any) => {
+        this.isLoadingCategories = false;
+        const list = res?.data || res || [];
+        this.vehicleCategories = Array.isArray(list) ? list : (list?.items || []);
+      },
+      error: () => {
+        this.isLoadingCategories = false;
+      }
+    });
+  }
+
+  getBrandCategoryIds(brand: any): number[] {
+    if (!brand) return [];
+    if (Array.isArray(brand.vehicle_category_id) && brand.vehicle_category_id.length > 0) {
+      return brand.vehicle_category_id.map((id: any) => Number(id));
+    }
+    if (Array.isArray(brand.vehicle_categories) && brand.vehicle_categories.length > 0) {
+      return brand.vehicle_categories.map((cat: any) => Number(cat.id));
+    }
+    return [];
+  }
+
+  getBrandCategoryNames(brand: any): string[] {
+    if (!brand) return [];
+    if (Array.isArray(brand.vehicle_categories) && brand.vehicle_categories.length > 0) {
+      return brand.vehicle_categories.map((cat: any) => cat.name).filter(Boolean);
+    }
+    if (Array.isArray(brand.vehicle_category_id) && brand.vehicle_category_id.length > 0) {
+      return brand.vehicle_category_id.map((id: any) => this.getVehicleCategoryName(id));
+    }
+    return [];
+  }
+
+  getVehicleCategoryName(id: any): string {
+    const cat = this.vehicleCategories.find((v: any) => Number(v.id) === Number(id));
+    return cat ? cat.name : `Category #${id}`;
+  }
   onTableSizeChange(event: any): void {
     this.tableSize = event.target.value;
     this.page = 1;
@@ -125,33 +175,53 @@ export class VechicleBrandComponent implements OnInit {
   }
 
   openAddModal() {
+    this.createBrandForm.reset({
+      Name: '',
+      vehicle_category_id: []
+    });
     this.createBrandOpen = true;
   }
 
   OpenEditModal(brand: any): void {
     this.currentBrandId = brand.id;
     this.updateBrandOpen = true;
-    this.updateBrandForm.patchValue({ Name: brand.name });
+    this.updateBrandForm.patchValue({
+      Name: brand.name,
+      vehicle_category_id: this.getBrandCategoryIds(brand)
+    });
   }
 
   openviewModal(brand: any): void {
     this.viewBrandOpen = true;
     this.currentBrandId = brand.id;
-    this.viewBrandForm.patchValue({ Name: brand.name });
+    this.selectedViewBrand = brand;
+    this.viewBrandForm.patchValue({
+      Name: brand.name,
+      vehicle_category_id: this.getBrandCategoryIds(brand)
+    });
   }
 
   closeModal() {
     this.updateBrandOpen = false;
     this.createBrandOpen = false;
     this.viewBrandOpen = false;
-    this.createBrandForm.reset();
-    this.updateBrandForm.reset();
+    this.selectedViewBrand = null;
+    this.createBrandForm.reset({ Name: '', vehicle_category_id: [] });
+    this.updateBrandForm.reset({ Name: '', vehicle_category_id: [] });
+    this.viewBrandForm.reset();
   }
 
   createBrand() {
     if (this.createBrandForm.valid) {
       const name = this.createBrandForm.get('Name')?.value;
-      const data = { name: name };
+      const selectedCats = this.createBrandForm.get('vehicle_category_id')?.value;
+      const vehicle_category_id = Array.isArray(selectedCats)
+        ? selectedCats.map((id: any) => Number(id))
+        : [];
+      const data = {
+        name: name,
+        vehicle_category_id: vehicle_category_id
+      };
 
       this.adminService.addVehicleBrand(data).subscribe({
         next: (response: any) => {
@@ -160,11 +230,12 @@ export class VechicleBrandComponent implements OnInit {
             this.notificationService.show(response.message || 'Brand created successfully', 'success', 3000);
             this.GetBrandsFun();
           } else {
-            this.notificationService.show(response.error || 'Failed to create brand', 'error', 3000);
+            this.notificationService.show(response.error || response.message || 'Failed to create brand', 'error', 3000);
           }
         },
         error: (error: any) => {
           console.error('Create failed', error);
+          // this.notificationService.show(error?.error?.message || 'Failed to create brand', 'error', 3000);
         }
       });
     } else {
@@ -175,7 +246,15 @@ export class VechicleBrandComponent implements OnInit {
   updateBrand() {
     if (this.updateBrandForm.valid) {
       const name = this.updateBrandForm.get('Name')?.value;
-      const data = { id: this.currentBrandId, name: name };
+      const selectedCats = this.updateBrandForm.get('vehicle_category_id')?.value;
+      const vehicle_category_id = Array.isArray(selectedCats)
+        ? selectedCats.map((id: any) => Number(id))
+        : [];
+      const data = {
+        id: this.currentBrandId,
+        name: name,
+        vehicle_category_id: vehicle_category_id
+      };
 
       this.adminService.addVehicleBrand(data).subscribe({
         next: (response: any) => {
@@ -184,11 +263,12 @@ export class VechicleBrandComponent implements OnInit {
             this.notificationService.show(response.message || 'Brand updated successfully', 'success', 3000);
             this.GetBrandsFun();
           } else {
-            this.notificationService.show(response.error || 'Failed to update brand', 'error', 3000);
+            this.notificationService.show(response.error || response.message || 'Failed to update brand', 'error', 3000);
           }
         },
         error: (error: any) => {
           console.error('Update failed', error);
+          // this.notificationService.show(error?.error?.message || 'Failed to update brand', 'error', 3000);
         }
       });
     } else {

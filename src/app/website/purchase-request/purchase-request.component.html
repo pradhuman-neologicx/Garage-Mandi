@@ -126,7 +126,7 @@
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
         <div *ngFor="let req of filteredRequests" (click)="selectRequest(req)"
-          class="bg-white rounded-3xl p-5 border border-gray-100 hover:border-red-200 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between hover:-translate-y-1">
+          class="bg-white rounded-3xl p-3 sm:p-5 border border-gray-100 hover:border-red-200 hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between hover:-translate-y-1">
 
           <div
             class="h-1.5 bg-gradient-to-r from-[#db3333] to-[#c22b2b] -mt-5 -mx-5 mb-4 group-hover:h-2 transition-all">
@@ -173,7 +173,13 @@
               <div class="flex items-start justify-between gap-2">
                 <div class="truncate">
                   <span class="text-[10px] font-medium text-gray-400 block uppercase">Product</span>
-                  <span class="text-sm font-bold text-gray-900 truncate block">{{ req.product }}</span>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm font-bold text-gray-900 truncate block">{{ req.product }}</span>
+                    <span *ngIf="req.brand"
+                      class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                      <i class="fa-solid fa-tag text-[9px] mr-1"></i>{{ req.brand }}
+                    </span>
+                  </div>
                   <span *ngIf="req.category" class="text-[11px] text-gray-500 font-medium truncate block mt-0.5">
                     <i class="fa-solid fa-car text-gray-400 mr-1 text-[10px]"></i>{{ req.category }}
                   </span>
@@ -232,25 +238,30 @@
               </span>
 
               <!-- 2. Order Confirmed / Paid Status -->
-              <span *ngIf="req.status === 'Order Confirmed'" class="text-emerald-700 font-semibold flex items-center gap-1.5">
+              <span *ngIf="req.status === 'Order Confirmed'"
+                class="text-emerald-700 font-semibold flex items-center gap-1.5">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i>
                 <span *ngIf="req.order?.order_number">{{ req.order.order_number }}</span>
                 <span *ngIf="!req.order?.order_number">Order Confirmed</span>
               </span>
 
               <!-- 3. Awaiting Payment -->
-              <span *ngIf="req.status === 'Awaiting Payment'" class="text-blue-700 font-semibold flex items-center gap-1.5">
+              <span *ngIf="req.status === 'Awaiting Payment'"
+                class="text-blue-700 font-semibold flex items-center gap-1.5">
                 <i class="fa-solid fa-credit-card text-blue-600 text-xs"></i> Ready for Payment
               </span>
 
               <!-- 4. Quotes Received (quotationsCount > 0 or quotations.length > 0) -->
-              <span *ngIf="(req.status === 'Quote Received' || (req.quotationsCount && req.quotationsCount > 0) || req.quotations.length > 0) && req.status !== 'Order Confirmed' && req.status !== 'Cancelled' && req.status !== 'Awaiting Payment'"
+              <span
+                *ngIf="(req.status === 'Quote Received' || (req.quotationsCount && req.quotationsCount > 0) || req.quotations.length > 0) && req.status !== 'Order Confirmed' && req.status !== 'Cancelled' && req.status !== 'Awaiting Payment'"
                 class="text-gray-700 font-medium flex items-center gap-1.5">
-                <i class="fa-solid fa-store text-[#db3333] text-xs"></i> {{ req.quotationsCount || req.quotations.length }} Seller Quote(s)
+                <i class="fa-solid fa-store text-[#db3333] text-xs"></i> {{ req.quotationsCount || req.quotations.length
+                }} Seller Quote(s)
               </span>
 
               <!-- 5. Awaiting Quotes (only if not cancelled, not confirmed, not paid, and 0 quotes) -->
-              <span *ngIf="(req.status === 'Awaiting Quotation' || (!req.quotationsCount && req.quotations.length === 0)) && req.status !== 'Order Confirmed' && req.status !== 'Cancelled' && req.status !== 'Awaiting Payment' && req.status !== 'Quote Received'"
+              <span
+                *ngIf="(req.status === 'Awaiting Quotation' || (!req.quotationsCount && req.quotations.length === 0)) && req.status !== 'Order Confirmed' && req.status !== 'Cancelled' && req.status !== 'Awaiting Payment' && req.status !== 'Quote Received'"
                 class="text-amber-600 font-medium flex items-center gap-1.5">
                 <i class="fa-regular fa-clock text-amber-500 text-xs"></i> Awaiting Quotes
               </span>
@@ -263,8 +274,10 @@
               </span>
 
               <!-- If quotes available but no commercial snapshot -->
-              <span *ngIf="!req.commercialSnapshot?.final_amount && req.quotations.length > 0" class="text-[#db3333] font-extrabold text-sm">
-                From ₹{{ (req.quotations[0].finalAmount || (req.quotations[0].unitPrice * req.quantity)) | number:'1.2-2' }}
+              <span *ngIf="!req.commercialSnapshot?.final_amount && req.quotations.length > 0"
+                class="text-[#db3333] font-extrabold text-sm">
+                From ₹{{ (req.quotations[0].finalAmount || (req.quotations[0].unitPrice * req.quantity)) |
+                number:'1.2-2' }}
               </span>
 
               <span
@@ -341,8 +354,12 @@
             <div>
               <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Inquiry
                 Overview</span>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-3 flex-wrap">
                 <h3 class="text-2xl font-black text-gray-900 tracking-tight">{{ selectedRequest.product }}</h3>
+                <span *ngIf="selectedRequest.brand"
+                  class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                  <i class="fa-solid fa-tag text-[10px] mr-1"></i>{{ selectedRequest.brand }}
+                </span>
                 <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-[#db3333] border border-red-200">
                   {{ selectedRequest.reference || selectedRequest.id }}
                 </span>
@@ -437,13 +454,15 @@
         <div *ngIf="canCheckout(selectedRequest)"
           class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div
+              class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
               <i class="fa-solid fa-credit-card text-xl"></i>
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <h4 class="text-base sm:text-lg font-black text-amber-950">Quotation Accepted - Payment Pending</h4>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
                   Ready to Pay
                 </span>
               </div>
@@ -452,8 +471,7 @@
               </p>
             </div>
           </div>
-          <button (click)="proceedToCheckout(selectedRequest)"
-            [disabled]="isCheckingOut || isVerifyingPayment"
+          <button (click)="proceedToCheckout(selectedRequest)" [disabled]="isCheckingOut || isVerifyingPayment"
             class="px-6 py-3 rounded-2xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer disabled:opacity-50">
             <i *ngIf="isCheckingOut || isVerifyingPayment" class="fa-solid fa-spinner fa-spin text-xs"></i>
             <i *ngIf="!isCheckingOut && !isVerifyingPayment" class="fa-solid fa-credit-card text-xs"></i>
@@ -465,18 +483,21 @@
         <div *ngIf="selectedRequest.status === 'Order Confirmed' || selectedRequest.order"
           class="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 rounded-3xl p-6 sm:p-7 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div
+              class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
               <i class="fa-solid fa-circle-check text-xl"></i>
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <h4 class="text-base sm:text-lg font-black text-emerald-950">Order Placed & Confirmed</h4>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <span
+                  class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
                   Payment Successful
                 </span>
               </div>
               <p class="text-xs text-emerald-800 mt-1">
-                Order <span class="font-bold text-emerald-950">{{ selectedRequest.order?.order_number || selectedRequest.reference }}</span> has been placed. You can view all confirmed orders in My Orders.
+                Order <span class="font-bold text-emerald-950">{{ selectedRequest.order?.order_number ||
+                  selectedRequest.reference }}</span> has been placed. You can view all confirmed orders in My Orders.
               </p>
             </div>
           </div>
@@ -512,13 +533,11 @@
           <div class="space-y-4">
             <div *ngFor="let step of steps; let i = index" class="relative flex items-center group">
               <!-- Vertical Line Connector -->
-              <div *ngIf="i < steps.length - 1"
-                [ngClass]="{
+              <div *ngIf="i < steps.length - 1" [ngClass]="{
                   'bg-emerald-500': selectedRequest.status === 'Order Confirmed',
                   'bg-[#db3333]': selectedRequest.status !== 'Order Confirmed' && step.id < selectedRequest.currentStep,
                   'bg-gray-200': selectedRequest.status !== 'Order Confirmed' && step.id >= selectedRequest.currentStep
-                }"
-                class="absolute left-4 top-8 w-0.5 h-7 -ml-[1px] transition-colors duration-300">
+                }" class="absolute left-4 top-8 w-0.5 h-7 -ml-[1px] transition-colors duration-300">
               </div>
 
               <!-- Step Circle Indicator -->
@@ -528,8 +547,10 @@
                   'bg-gray-100 text-gray-400': selectedRequest.status !== 'Order Confirmed' && step.id > selectedRequest.currentStep
                 }"
                 class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 transition-all duration-300">
-                <i *ngIf="selectedRequest.status === 'Order Confirmed' || step.id <= selectedRequest.currentStep" class="fa-solid fa-check text-xs"></i>
-                <span *ngIf="selectedRequest.status !== 'Order Confirmed' && step.id > selectedRequest.currentStep" class="w-2 h-2 rounded-full bg-gray-300"></span>
+                <i *ngIf="selectedRequest.status === 'Order Confirmed' || step.id <= selectedRequest.currentStep"
+                  class="fa-solid fa-check text-xs"></i>
+                <span *ngIf="selectedRequest.status !== 'Order Confirmed' && step.id > selectedRequest.currentStep"
+                  class="w-2 h-2 rounded-full bg-gray-300"></span>
               </div>
 
               <!-- Step Label -->
@@ -549,7 +570,8 @@
                 </span>
 
                 <!-- 2. Current step In Progress only when not confirmed and not cancelled -->
-                <span *ngIf="step.id === selectedRequest.currentStep && selectedRequest.status !== 'Order Confirmed' && selectedRequest.status !== 'Cancelled'"
+                <span
+                  *ngIf="step.id === selectedRequest.currentStep && selectedRequest.status !== 'Order Confirmed' && selectedRequest.status !== 'Cancelled'"
                   class="text-[11px] font-bold text-[#db3333] bg-red-50 px-2 py-0.5 rounded-md">
                   In Progress
                 </span>
@@ -565,7 +587,7 @@
         </div>
 
         <!-- CARD 3: Seller Quotations List (Matching Screenshot 4) -->
-        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-100">
+        <div class="bg-white rounded-3xl p-3 sm:p-5 shadow-sm border border-gray-100">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h4 class="text-lg font-bold text-gray-900">Seller Quotations</h4>
@@ -582,7 +604,7 @@
 
           <!-- When NO quotations are available -->
           <div *ngIf="selectedRequest.quotations.length === 0"
-            class="bg-amber-50/60 rounded-2xl p-6 text-center border border-amber-200/80 my-4">
+            class="bg-amber-50/60 rounded-2xl p-3 sm:p-6 text-center border border-amber-200/80 my-4">
             <div
               class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <i class="fa-solid fa-hourglass-start text-xl animate-spin" style="animation-duration: 4s;"></i>
@@ -597,7 +619,7 @@
           <!-- List of Quotations (Matching Screenshot 4) -->
           <div *ngIf="selectedRequest.quotations.length > 0" class="space-y-4">
             <div *ngFor="let quote of selectedRequest.quotations"
-              class="bg-gray-50/70 hover:bg-gray-50 rounded-2xl p-5 border border-gray-100 hover:border-red-200 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
+              class="bg-gray-50/70 hover:bg-gray-50 rounded-2xl p-3 sm:p-5 border border-gray-100 hover:border-red-200 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
 
               <!-- Left: Seller Info -->
               <div class="flex items-start gap-4">
@@ -632,7 +654,7 @@
                   </span>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                   <!-- Case 1: This quote is accepted -->
                   <span *ngIf="isQuoteAccepted(quote, selectedRequest)"
                     class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-extrabold flex items-center gap-1.5 shadow-2xs">
@@ -641,8 +663,7 @@
 
                   <!-- Pay Now CTA next to accepted quote if payment is pending -->
                   <button *ngIf="isQuoteAccepted(quote, selectedRequest) && canCheckout(selectedRequest)"
-                    (click)="proceedToCheckout(selectedRequest)"
-                    [disabled]="isCheckingOut || isVerifyingPayment"
+                    (click)="proceedToCheckout(selectedRequest)" [disabled]="isCheckingOut || isVerifyingPayment"
                     class="px-3.5 py-1.5 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
                     <i *ngIf="isCheckingOut || isVerifyingPayment" class="fa-solid fa-spinner fa-spin text-[10px]"></i>
                     <i *ngIf="!isCheckingOut && !isVerifyingPayment" class="fa-solid fa-credit-card text-[10px]"></i>
@@ -650,7 +671,8 @@
                   </button>
 
                   <!-- Case 2: Other quote when order is already confirmed / accepted or quote is closed -->
-                  <span *ngIf="!isQuoteAccepted(quote, selectedRequest) && (isRequestAccepted(selectedRequest) || quote.status === 'closed')"
+                  <span
+                    *ngIf="!isQuoteAccepted(quote, selectedRequest) && (isRequestAccepted(selectedRequest) || quote.status === 'closed')"
                     class="px-2.5 py-1 rounded-xl bg-gray-100 text-gray-500 border border-gray-200 text-xs font-semibold flex items-center gap-1">
                     <i class="fa-solid fa-lock text-[10px] text-gray-400"></i> Closed
                   </span>
@@ -662,7 +684,8 @@
                   </button>
 
                   <!-- Review & Accept button (ONLY when NOT accepted, NOT confirmed, NOT cancelled) -->
-                  <button *ngIf="!isQuoteAccepted(quote, selectedRequest) && !isRequestAccepted(selectedRequest) && selectedRequest.status !== 'Cancelled'"
+                  <button
+                    *ngIf="!isQuoteAccepted(quote, selectedRequest) && !isRequestAccepted(selectedRequest) && selectedRequest.status !== 'Cancelled'"
                     (click)="openFinalConfirmation(quote)"
                     class="px-3.5 py-2 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs font-bold transition-all shadow-sm cursor-pointer">
                     Review & Accept
@@ -859,14 +882,16 @@
       </span>
 
       <!-- Badge if another quotation was accepted / this quote closed -->
-      <span *ngIf="!isQuoteAccepted(selectedQuotation, selectedRequest) && (isRequestAccepted(selectedRequest) || selectedQuotation.status === 'closed')"
+      <span
+        *ngIf="!isQuoteAccepted(selectedQuotation, selectedRequest) && (isRequestAccepted(selectedRequest) || selectedQuotation.status === 'closed')"
         class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 border border-gray-200 text-xs sm:text-sm font-semibold flex items-center gap-1.5">
         <i class="fa-solid fa-lock text-gray-400"></i>
         <span>Quotation Closed</span>
       </span>
 
       <!-- Action button only if pending -->
-      <button *ngIf="!isQuoteAccepted(selectedQuotation, selectedRequest) && !isRequestAccepted(selectedRequest) && selectedQuotation.status !== 'closed' && selectedRequest?.status !== 'Cancelled'"
+      <button
+        *ngIf="!isQuoteAccepted(selectedQuotation, selectedRequest) && !isRequestAccepted(selectedRequest) && selectedQuotation.status !== 'closed' && selectedRequest?.status !== 'Cancelled'"
         (click)="openFinalConfirmation(selectedQuotation)"
         class="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-[#db3333] hover:bg-[#c22b2b] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer">
         Review & Accept Quotation
@@ -1056,30 +1081,7 @@
 
     <!-- Body (Scrollable & Responsive) -->
     <div class="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
-
-      <!-- Product Input -->
-      <div>
-        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-          Product <span class="text-[#db3333]">*</span>
-        </label>
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none"
-            [ngClass]="getProductError() ? 'text-[#db3333]' : 'text-gray-400'">
-            <i class="fa-solid fa-box text-sm"></i>
-          </div>
-          <input type="text" [(ngModel)]="newRequest.product" (input)="productTouched = true"
-            (blur)="productTouched = true" placeholder="Enter product name (e.g. Brake Pad Set)"
-            [ngClass]="getProductError() ? 'border-[#db3333] bg-red-50/20 focus:border-[#db3333] focus:ring-1 focus:ring-red-200' : 'border-gray-200 bg-gray-50 focus:bg-white focus:border-[#db3333] focus:ring-[#db3333]'"
-            class="w-full pl-10 pr-4 py-3 rounded-xl border text-sm transition-all outline-none" />
-        </div>
-        <div *ngIf="getProductError()"
-          class="flex items-center gap-1.5 text-xs text-[#db3333] mt-1.5 font-medium animate-in fade-in duration-150">
-          <i class="fa-solid fa-circle-exclamation text-[11px] flex-shrink-0"></i>
-          <span>{{ getProductError() }}</span>
-        </div>
-      </div>
-
-      <!-- Vehicle Category Selection -->
+      <!-- 1. Vehicle Category Selection (First) -->
       <div>
         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
           Vehicle Category <span class="text-[#db3333]">*</span>
@@ -1089,7 +1091,7 @@
             [ngClass]="getCategoryError() ? 'text-[#db3333]' : 'text-gray-400'">
             <i class="fa-solid fa-car text-sm"></i>
           </div>
-          <select [(ngModel)]="newRequest.vehicle_category_id" (change)="categoryTouched = true"
+          <select [(ngModel)]="newRequest.vehicle_category_id" (change)="onCategoryChange()"
             [ngClass]="getCategoryError() ? 'border-[#db3333] bg-red-50/20 focus:border-[#db3333] focus:ring-1 focus:ring-red-200' : 'border-gray-200 bg-gray-50 focus:bg-white focus:border-[#db3333] focus:ring-[#db3333]'"
             class="w-full pl-10 pr-8 py-3 rounded-xl border text-sm transition-all outline-none appearance-none cursor-pointer bg-gray-50 focus:bg-white">
             <option [ngValue]="null" disabled>Select Vehicle Category</option>
@@ -1106,7 +1108,75 @@
         </div>
       </div>
 
-      <!-- Quantity -->
+      <!-- 2. Product Selection (ng-select, searchable with Brand) -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+            Product <span class="text-[#db3333]">*</span>
+          </label>
+          <span *ngIf="isLoadingProducts" class="text-xs font-medium text-[#db3333] flex items-center gap-1">
+            <i class="fa-solid fa-spinner fa-spin text-[10px]"></i> Loading products...
+          </span>
+        </div>
+
+        <div>
+          <ng-select [items]="productsList" bindLabel="name" bindValue="id" [(ngModel)]="newRequest.product_id"
+            (change)="onProductChange($event)" [searchFn]="customSearchFn" [searchable]="true" [clearable]="true"
+            [loading]="isLoadingProducts" [disabled]="!newRequest.vehicle_category_id"
+            [placeholder]="newRequest.vehicle_category_id ? 'Search product by name or brand...' : 'Select Vehicle Category first'"
+            [class.border-red-500]="getProductError()" class="custom-product-select w-full text-sm">
+
+            <!-- Selected Value Template -->
+            <ng-template ng-label-tmp let-item="item">
+              <div class="flex items-center justify-between gap-2 w-full py-0.5">
+                <span class="font-bold text-gray-900 text-sm truncate">{{ item.name }}</span>
+                <span *ngIf="item.vehicle_brand?.name"
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 flex-shrink-0">
+                  <i class="fa-solid fa-tag text-[9px] me-0.5"></i>{{ item.vehicle_brand.name }}
+                </span>
+              </div>
+            </ng-template>
+
+            <!-- Dropdown Option Template (Shows Name, Brand, and Part Hierarchy) -->
+            <ng-template ng-option-tmp let-item="item">
+              <div class="py-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold text-gray-900 text-sm">{{ item.name }}</span>
+                  <span *ngIf="item.vehicle_brand?.name"
+                    class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 flex-shrink-0">
+                    <i class="fa-solid fa-tag text-[9px] me-0.5"></i>{{ item.vehicle_brand.name }}
+                  </span>
+                </div>
+                <div *ngIf="item.spare_part?.name || item.sub_spare_part?.name"
+                  class="flex items-center gap-1.5 mt-1 text-[11px] text-gray-500">
+                  <span *ngIf="item.spare_part?.name" class="font-medium text-gray-600">
+                    {{ item.spare_part.name }}
+                  </span>
+                  <span *ngIf="item.spare_part?.name && item.sub_spare_part?.name" class="text-gray-300">&bull;</span>
+                  <span *ngIf="item.sub_spare_part?.name" class="text-gray-500">
+                    {{ item.sub_spare_part.name }}
+                  </span>
+                </div>
+              </div>
+            </ng-template>
+
+            <!-- Not Found Template -->
+            <ng-template ng-notfound-tmp>
+              <div class="p-3 text-center text-xs text-gray-400">
+                No products found for this category
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+
+        <div *ngIf="getProductError()"
+          class="flex items-center gap-1.5 text-xs text-[#db3333] mt-1.5 font-medium animate-in fade-in duration-150">
+          <i class="fa-solid fa-circle-exclamation text-[11px] flex-shrink-0"></i>
+          <span>{{ getProductError() }}</span>
+        </div>
+      </div>
+
+      <!-- 3. Quantity -->
       <div>
         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
           Quantity <span class="text-[#db3333]">*</span>
@@ -1126,6 +1196,16 @@
           <i class="fa-solid fa-circle-exclamation text-[11px] flex-shrink-0"></i>
           <span>{{ getQuantityError() }}</span>
         </div>
+      </div>
+
+      <!-- 4. Description (Optional) -->
+      <div>
+        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+          Description / Note <span class="text-gray-400 text-[10px] font-normal lowercase">(optional)</span>
+        </label>
+        <textarea [(ngModel)]="newRequest.description" rows="2"
+          placeholder="Any specific requirement or part notes (optional)..."
+          class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-[#db3333] focus:ring-1 focus:ring-red-200 text-sm transition-all outline-none resize-none"></textarea>
       </div>
 
     </div>

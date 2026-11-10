@@ -220,8 +220,8 @@
                                     </button>
 
                                     <!-- Cancel Order -->
-                                    <button *ngIf="order.status !== 'cancelled' && order.status !== 'delivered'"
-                                        (click)="openCancelModal(order, $event)" title="Cancel Order"
+                                    <button *ngIf="canCancelOrder(order)" (click)="openCancelModal(order, $event)"
+                                        title="Cancel Order"
                                         class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-colors">
                                         <i class="fa-solid fa-ban text-xs"></i>
                                     </button>
@@ -745,71 +745,359 @@
         <div
             class="relative bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 z-10 my-auto animate-scale-up">
 
+            <!-- Modal Header -->
             <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
                 <div>
                     <h3 class="text-lg font-black text-slate-900">Update Order Status</h3>
-                    <p class="text-xs text-slate-500 font-medium">Order: {{ orderForStatus.orderNumber }} &bull; {{
-                        orderForStatus.productName }}</p>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">
+                        Order: <span class="font-bold text-slate-800">{{ orderForStatus.orderNumber }}</span> &bull; {{
+                        orderForStatus.productName }}
+                    </p>
                 </div>
-                <button (click)="closeStatusModal()"
-                    class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center">
+                <button type="button" (click)="closeStatusModal()"
+                    class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors">
                     <i class="fa-solid fa-xmark text-xs"></i>
                 </button>
             </div>
 
-            <div class="space-y-4 mb-5 text-xs sm:text-sm">
+            <!-- Step Progress Indicator -->
+            <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 mb-5">
+                <div class="flex items-center justify-between relative px-2">
+                    <!-- Background Line -->
+                    <div class="absolute left-6 right-6 top-3.5 h-1 bg-slate-200 z-0">
+                        <div class="h-full bg-blue-600 transition-all duration-300"
+                            [style.width]="getStepProgressPercentage(orderForStatus)"></div>
+                    </div>
 
-                <div>
-                    <label class="text-xs font-bold text-slate-700 block mb-1.5">Select New Status</label>
-                    <select [(ngModel)]="selectedNewStatus"
-                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
-                        <option value="confirmed">Confirmed</option>
-                        <option value="ready_for_pickup">Ready for Pickup</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="out_for_delivery">Out for Delivery</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
+                    <!-- Step 1: Confirmed -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                            [ngClass]="isStepPassedOrActive('confirmed', orderForStatus) ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-200 text-slate-500'">
+                            <i class="fa-solid fa-check text-[10px]"
+                                *ngIf="isStepCompleted('confirmed', orderForStatus)"></i>
+                            <span *ngIf="!isStepCompleted('confirmed', orderForStatus)">1</span>
+                        </div>
+                        <span class="text-[10px] font-bold mt-1"
+                            [ngClass]="isStepActive('confirmed', orderForStatus) ? 'text-blue-700' : 'text-slate-600'">Confirmed</span>
+                    </div>
+
+                    <!-- Step 2: Ready for Pickup -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                            [ngClass]="isStepPassedOrActive('ready_for_pickup', orderForStatus) ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-200 text-slate-500'">
+                            <i class="fa-solid fa-check text-[10px]"
+                                *ngIf="isStepCompleted('ready_for_pickup', orderForStatus)"></i>
+                            <span *ngIf="!isStepCompleted('ready_for_pickup', orderForStatus)">2</span>
+                        </div>
+                        <span class="text-[10px] font-bold mt-1 text-center"
+                            [ngClass]="isStepActive('ready_for_pickup', orderForStatus) ? 'text-blue-700' : 'text-slate-600'">Ready
+                            for Pickup</span>
+                    </div>
+
+                    <!-- Step 3: Shipped -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                            [ngClass]="isStepPassedOrActive('shipped', orderForStatus) ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-200 text-slate-500'">
+                            <i class="fa-solid fa-check text-[10px]"
+                                *ngIf="isStepCompleted('shipped', orderForStatus)"></i>
+                            <span *ngIf="!isStepCompleted('shipped', orderForStatus)">3</span>
+                        </div>
+                        <span class="text-[10px] font-bold mt-1"
+                            [ngClass]="isStepActive('shipped', orderForStatus) ? 'text-blue-700' : 'text-slate-600'">Shipped</span>
+                    </div>
+
+                    <!-- Step 4: Out for Delivery -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                            [ngClass]="isStepPassedOrActive('out_for_delivery', orderForStatus) ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-200 text-slate-500'">
+                            <i class="fa-solid fa-check text-[10px]"
+                                *ngIf="isStepCompleted('out_for_delivery', orderForStatus)"></i>
+                            <span *ngIf="!isStepCompleted('out_for_delivery', orderForStatus)">4</span>
+                        </div>
+                        <span class="text-[10px] font-bold mt-1 text-center"
+                            [ngClass]="isStepActive('out_for_delivery', orderForStatus) ? 'text-blue-700' : 'text-slate-600'">Out
+                            for Delivery</span>
+                    </div>
+
+                    <!-- Step 5: Delivered -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                            [ngClass]="isStepPassedOrActive('delivered', orderForStatus) ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-200 text-slate-500'">
+                            <i class="fa-solid fa-check text-[10px]"
+                                *ngIf="isStepCompleted('delivered', orderForStatus)"></i>
+                            <span *ngIf="!isStepCompleted('delivered', orderForStatus)">5</span>
+                        </div>
+                        <span class="text-[10px] font-bold mt-1"
+                            [ngClass]="isStepActive('delivered', orderForStatus) ? 'text-emerald-700' : 'text-slate-600'">Delivered</span>
+                    </div>
                 </div>
+            </div>
 
-                <!-- Conditional Shipment Inputs if Shipped or Out for Delivery -->
-                <div *ngIf="selectedNewStatus === 'shipped' || selectedNewStatus === 'out_for_delivery' || selectedNewStatus === 'delivered'"
-                    class="bg-blue-50/60 border border-blue-200 rounded-2xl p-3.5 space-y-3">
-                    <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                        <i class="fa-solid fa-truck"></i> Courier Dispatch Details
-                    </span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-[11px] font-semibold text-slate-600 block mb-1">Courier Partner</label>
-                            <input type="text" [(ngModel)]="courierPartnerInput"
-                                placeholder="Delhivery, BlueDart, Shadowfax..."
-                                class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs" />
-                        </div>
-                        <div>
-                            <label class="text-[11px] font-semibold text-slate-600 block mb-1">AWB / Tracking
-                                Number</label>
-                            <input type="text" [(ngModel)]="awbNumberInput" placeholder="e.g. DLV-987214"
-                                class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold" />
-                        </div>
+            <!-- ============================================== -->
+            <!-- STATE 1: CONFIRMED (Awaiting Seller action) -->
+            <!-- ============================================== -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'confirmed'" class="space-y-4 mb-5">
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-amber-900">Awaiting Seller Action</h4>
+                        <p class="text-[11px] text-amber-800 mt-1 leading-relaxed">
+                            This order is currently <strong>Confirmed</strong>. The seller must pack the item and mark
+                            it as <strong>Ready for Pickup</strong> before admin can dispatch the shipment.
+                        </p>
                     </div>
                 </div>
 
-                <div>
-                    <label class="text-xs font-bold text-slate-700 block mb-1">Internal Remarks / Reason</label>
-                    <input type="text" [(ngModel)]="statusRemarksInput" placeholder="Optional audit trail note..."
-                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs" />
-                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">
+                    <span class="text-slate-500 font-semibold block mb-0.5">Seller Assigned:</span>
+                    <p class="font-bold text-slate-800">{{ orderForStatus.seller.workshopName ||
+                        orderForStatus.seller.name }}</p>
 
+                </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2">
-                <button (click)="closeStatusModal()"
-                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold">
+            <!-- ============================================== -->
+            <!-- STATE 2: READY FOR PICKUP -> SHIPPED (API 1) -->
+            <!-- ============================================== -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'ready_for_pickup'"
+                class="space-y-4 mb-5 text-xs sm:text-sm">
+                <div class="bg-blue-50/80 border border-blue-200 rounded-2xl p-3.5 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700 block">Next
+                            Action</span>
+                        <p class="text-xs font-black text-blue-900">Dispatch Order & Mark as Shipped</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 font-mono font-bold text-[10px]">
+                        POST /shipments
+                    </span>
+                </div>
+
+                <!-- Courier Partner -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">
+                        Logistics / Courier Partner <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" [(ngModel)]="courierPartnerInput" (input)="onLogisticsChange()"
+                        placeholder="e.g. Delhivery, BlueDart, Shadowfax, DTDC..."
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                </div>
+
+                <!-- AWB / Tracking Number -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">
+                        AWB / Tracking Number <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" [(ngModel)]="awbNumberInput" (input)="onAwbNumberChange()"
+                        placeholder="e.g. 1234567890 or DLV-987214"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                </div>
+
+                <!-- Tracking URL -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">Tracking URL</label>
+                    <input type="text" [(ngModel)]="trackingUrlInput"
+                        placeholder="https://www.delhivery.com/track/package/..."
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- STATE 3: SHIPPED -> OUT FOR DELIVERY (API 2) -->
+            <!-- ============================================== -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'shipped'" class="space-y-4 mb-5 text-xs sm:text-sm">
+                <div
+                    class="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-3.5 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 block">Next
+                            Action</span>
+                        <p class="text-xs font-black text-indigo-900">Mark Order as Out for Delivery</p>
+                    </div>
+                    <span
+                        class="px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-800 font-mono font-bold text-[10px]">
+                        POST /out-for-delivery
+                    </span>
+                </div>
+
+                <!-- Active Shipment Details Card -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
+                    <span class="text-xs font-bold text-slate-700 block mb-1">Active Shipment Details</span>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">Courier:</span>
+                            <span class="font-bold text-slate-800">{{ orderForStatus.shipment?.courierPartner ||
+                                courierPartnerInput || 'Delhivery' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">AWB Number:</span>
+                            <span class="font-mono font-bold text-slate-900">{{ orderForStatus.shipment?.awbNumber ||
+                                awbNumberInput || 'N/A' }}</span>
+                        </div>
+                    </div>
+                    <div *ngIf="orderForStatus.shipment?.trackingUrl || trackingUrlInput" class="pt-1 text-xs">
+                        <span class="text-slate-500 font-semibold block text-[11px]">Tracking URL:</span>
+                        <a [href]="orderForStatus.shipment?.trackingUrl || trackingUrlInput" target="_blank"
+                            class="text-blue-600 hover:underline break-all font-mono text-[11px]">
+                            {{ orderForStatus.shipment?.trackingUrl || trackingUrlInput }}
+                        </a>
+                    </div>
+                </div>
+
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    The shipment is currently in transit. When the package arrives at the local hub for customer
+                    delivery, click below to update status to <strong>Out for Delivery</strong>.
+                </p>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- STATE 4: OUT FOR DELIVERY -> DELIVERED (API 3) -->
+            <!-- ============================================== -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'out_for_delivery'"
+                class="space-y-4 mb-5 text-xs sm:text-sm">
+                <div
+                    class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-3.5 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">Next
+                            Action</span>
+                        <p class="text-xs font-black text-emerald-900">Confirm Order Delivery</p>
+                    </div>
+                    <span
+                        class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-mono font-bold text-[10px]">
+                        POST /delivery
+                    </span>
+                </div>
+
+                <!-- Delivered At Timestamp -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">
+                        Delivered At (Timestamp) <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" [(ngModel)]="deliveredAtInput" placeholder="YYYY-MM-DD HH:mm:ss"
+                        class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
+                    <p class="text-[11px] text-slate-400 mt-1">Defaulted to current time in required format (YYYY-MM-DD
+                        HH:mm:ss).</p>
+                </div>
+
+                <!-- Customer Delivery Address Confirmation -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs">
+                    <span class="text-slate-500 font-semibold block mb-0.5">Delivering to:</span>
+                    <p class="font-bold text-slate-800">{{ orderForStatus.customer.name }} ({{
+                        orderForStatus.customer.phone }})</p>
+                    <p class="text-slate-600 mt-0.5">{{ orderForStatus.customer.address }}</p>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- STATE 5: DELIVERED (Final State) -->
+            <!-- ============================================== -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'delivered'" class="space-y-4 mb-5">
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-emerald-900">Order Delivered Successfully</h4>
+                        <p class="text-[11px] text-emerald-800 mt-0.5">
+                            This order was delivered to customer<span *ngIf="orderForStatus.deliveredAt"> on {{
+                                orderForStatus.deliveredAt }}</span>.
+                        </p>
+                    </div>
+                </div>
+
+                <div *ngIf="orderForStatus.shipment"
+                    class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2 text-xs">
+                    <span class="text-xs font-bold text-slate-700 block mb-1">Shipment Summary</span>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">Courier:</span>
+                            <span class="font-bold text-slate-800">{{ orderForStatus.shipment.courierPartner }}</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 font-semibold block text-[11px]">AWB:</span>
+                            <span class="font-mono font-bold text-slate-900">{{ orderForStatus.shipment.awbNumber
+                                }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- STATE 6: CANCELLED -->
+            <!-- ============================================== -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'cancelled' || getOrderDeliveryStatus(orderForStatus) === 'admin_cancelled'"
+                class="space-y-4 mb-5">
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-start gap-3">
+                    <div
+                        class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 mt-0.5">
+                        <i class="fa-solid fa-ban"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-rose-900">Order is Cancelled</h4>
+                        <p class="text-[11px] text-rose-800 mt-0.5">
+                            {{ orderForStatus.cancelReason || 'This order has been cancelled. No further status changes
+                            can be made.' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footers for Each State -->
+            <!-- Footer: Confirmed / Delivered / Cancelled -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'confirmed' || getOrderDeliveryStatus(orderForStatus) === 'delivered' || getOrderDeliveryStatus(orderForStatus) === 'cancelled' || getOrderDeliveryStatus(orderForStatus) === 'admin_cancelled'"
+                class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" (click)="closeStatusModal()"
+                    class="px-5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold transition-colors">
+                    Close
+                </button>
+            </div>
+
+            <!-- Footer: Ready for Pickup -> Shipped -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'ready_for_pickup'"
+                class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" (click)="closeStatusModal()" [disabled]="isUpdatingStatus"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-colors">
                     Cancel
                 </button>
-                <button (click)="confirmStatusUpdate()"
-                    class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs active:scale-95">
-                    Update Status
+                <button type="button" (click)="confirmStatusUpdate()"
+                    [disabled]="isUpdatingStatus || !courierPartnerInput.trim() || !awbNumberInput.trim()"
+                    class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all">
+                    <i class="fa-solid fa-spinner fa-spin text-xs" *ngIf="isUpdatingStatus"></i>
+                    <i class="fa-solid fa-truck-fast text-xs" *ngIf="!isUpdatingStatus"></i>
+                    <span>Mark as Shipped</span>
+                </button>
+            </div>
+
+            <!-- Footer: Shipped -> Out for Delivery -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'shipped'"
+                class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" (click)="closeStatusModal()" [disabled]="isUpdatingStatus"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-colors">
+                    Cancel
+                </button>
+                <button type="button" (click)="confirmStatusUpdate()" [disabled]="isUpdatingStatus"
+                    class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs active:scale-95 disabled:opacity-50 flex items-center gap-1.5 transition-all">
+                    <i class="fa-solid fa-spinner fa-spin text-xs" *ngIf="isUpdatingStatus"></i>
+                    <i class="fa-solid fa-motorcycle text-xs" *ngIf="!isUpdatingStatus"></i>
+                    <span>Mark Out for Delivery</span>
+                </button>
+            </div>
+
+            <!-- Footer: Out for Delivery -> Delivered -->
+            <div *ngIf="getOrderDeliveryStatus(orderForStatus) === 'out_for_delivery'"
+                class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" (click)="closeStatusModal()" [disabled]="isUpdatingStatus"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-colors">
+                    Cancel
+                </button>
+                <button type="button" (click)="confirmStatusUpdate()"
+                    [disabled]="isUpdatingStatus || !deliveredAtInput.trim()"
+                    class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs active:scale-95 disabled:opacity-50 flex items-center gap-1.5 transition-all">
+                    <i class="fa-solid fa-spinner fa-spin text-xs" *ngIf="isUpdatingStatus"></i>
+                    <i class="fa-solid fa-circle-check text-xs" *ngIf="!isUpdatingStatus"></i>
+                    <span>Confirm Delivered</span>
                 </button>
             </div>
 
@@ -886,6 +1174,10 @@
                     <p class="text-xs text-slate-500 font-medium mt-0.5">Order: <span
                             class="font-bold text-slate-800">{{ orderToRefund.orderNumber }}</span> &bull; Paid:
                         <span class="font-bold text-slate-800">₹{{ orderToRefund.finalAmount | number:'1.2-2' }}</span>
+                        <ng-container *ngIf="orderRefundedAmount > 0">
+                            &bull; Refunded: <span class="font-bold text-rose-600">₹{{ orderRefundedAmount |
+                                number:'1.2-2' }}</span>
+                        </ng-container>
                     </p>
                 </div>
                 <button (click)="closeRefundModal()"
@@ -922,8 +1214,11 @@
                     <div class="flex items-center justify-between mb-1">
                         <label class="text-xs font-bold text-slate-700">Refund Amount (₹)</label>
 
-                        <span *ngIf="refundType === 'partial'" class="text-[11px] text-slate-500 font-medium">
-                            Max: ₹{{ maxRefundableAmount | number:'1.2-2' }}
+                        <span class="text-[11px] text-slate-500 font-medium">
+                            <span *ngIf="refundType === 'full'">Remaining: ₹{{ maxRefundableAmount | number:'1.2-2'
+                                }}</span>
+                            <span *ngIf="refundType === 'partial'">Max: ₹{{ maxRefundableAmount | number:'1.2-2'
+                                }}</span>
                         </span>
                     </div>
 
@@ -938,8 +1233,9 @@
                             class="w-full pl-8 pr-4 py-2.5 border rounded-xl text-sm transition-all focus:outline-none" />
                     </div>
 
-                    <p *ngIf="refundType === 'full'" class="text-[11px] text-slate-400 mt-1">
-                        Full order amount will be refunded. Amount cannot be edited.
+                    <p *ngIf="refundType === 'full'" class="text-[11px] text-slate-500 mt-1">
+                        Remaining refundable amount (₹{{ maxRefundableAmount | number:'1.2-2' }}) will be refunded.
+                        Amount cannot be edited.
                     </p>
                     <p *ngIf="refundType === 'partial'" class="text-[11px] text-slate-500 mt-1">
                         Enter any partial amount up to ₹{{ maxRefundableAmount | number:'1.2-2' }}.

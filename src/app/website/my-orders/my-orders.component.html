@@ -113,7 +113,7 @@
     <div *ngIf="!isLoadingOrders && filteredOrders.length > 0"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
       <div *ngFor="let order of filteredOrders"
-        class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
+        class="bg-white rounded-3xl p-3 sm:p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between group">
 
         <div>
           <!-- Card Top Row: Bag icon, Order Number, Status Badge -->
@@ -139,7 +139,7 @@
           </div>
 
           <!-- Product Details Box (Matching mobile screenshot styling adapted for web) -->
-          <div class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 mb-4">
+          <div class="bg-slate-50/80 rounded-2xl p-2 sm:p-4 border border-slate-100 mb-4">
             <!-- Product Label & Title -->
             <div class="flex items-start gap-2.5 mb-3.5">
               <div
@@ -148,9 +148,15 @@
               </div>
               <div class="flex-1">
                 <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block">Product</span>
-                <h3 class="text-base font-bold text-gray-900 leading-snug">
-                  {{ order.product }}
-                </h3>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="text-base font-bold text-gray-900 leading-snug">
+                    {{ order.product }}
+                  </h3>
+                  <span *ngIf="order.vehicleBrand"
+                    class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                    <i class="fa-solid fa-tag text-[9px] mr-1"></i>{{ order.vehicleBrand }}
+                  </span>
+                </div>
                 <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
                   <i class="fa-solid fa-store text-gray-400 text-[11px]"></i>
                   <span>{{ order.seller }}</span>
@@ -274,7 +280,7 @@
 <!-- ORDER DETAILS MODAL (Matching API data with 2-column web responsive beauty) -->
 <!-- ========================================================================= -->
 <div *ngIf="isDetailsModalOpen && selectedOrder"
-  class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+  class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 overflow-hidden">
 
   <!-- Backdrop -->
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" (click)="closeOrderDetails()"></div>
@@ -316,14 +322,14 @@
     </div>
 
     <!-- SCROLLABLE MODAL BODY (2-Column Grid on large screens) -->
-    <div class="flex-1 overflow-y-auto p-5 sm:p-6 custom-scrollbar bg-white">
+    <div class="flex-1 overflow-y-auto p-3 sm:p-5 custom-scrollbar bg-white">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         <!-- ==================== LEFT COLUMN ==================== -->
         <div class="space-y-5">
 
           <!-- 1. Order Status Banner -->
-          <div class="bg-slate-50/90 rounded-2xl p-4 border border-slate-100 flex items-start gap-3">
+          <div class="bg-slate-50/90 rounded-2xl p-3 border border-slate-100 flex items-start gap-3">
             <div
               class="w-10 h-10 rounded-full bg-rose-100 text-[#db3333] flex items-center justify-center text-base flex-shrink-0 mt-0.5">
               <i class="fa-solid fa-receipt"></i>
@@ -355,11 +361,25 @@
               class="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-100 divide-y divide-slate-200/70 text-xs sm:text-sm">
               <div class="flex items-center justify-between py-2 first:pt-0">
                 <span class="text-gray-500">Product Name</span>
-                <span class="font-bold text-gray-900 text-right">{{ selectedOrder.product }}</span>
+                <div class="flex items-center gap-1.5 justify-end flex-wrap">
+                  <span class="font-bold text-gray-900 text-right">{{ selectedOrder.product }}</span>
+                  <span *ngIf="selectedOrder.vehicleBrand"
+                    class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                    <i class="fa-solid fa-tag text-[9px] mr-1"></i>{{ selectedOrder.vehicleBrand }}
+                  </span>
+                </div>
               </div>
               <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.vehicleCategory">
                 <span class="text-gray-500">Vehicle Category</span>
                 <span class="font-bold text-gray-900">{{ selectedOrder.vehicleCategory }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.sparePartName">
+                <span class="text-gray-500">Spare Part</span>
+                <span class="font-bold text-gray-900 text-right">{{ selectedOrder.sparePartName }}</span>
+              </div>
+              <div class="flex items-center justify-between py-2" *ngIf="selectedOrder.subSparePartName">
+                <span class="text-gray-500">Sub Spare Part</span>
+                <span class="font-bold text-gray-900 text-right">{{ selectedOrder.subSparePartName }}</span>
               </div>
               <div class="flex items-center justify-between py-2">
                 <span class="text-gray-500">Ordered Quantity</span>

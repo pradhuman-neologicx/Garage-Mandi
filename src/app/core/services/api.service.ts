@@ -168,9 +168,10 @@ export class ApiService {
       })
     );
   }
-  patch(path: string, body: any): Observable<any> {
+  patch(path: string, body: any, headers?: any): Observable<any> {
+    const options = headers ? { headers } : {};
     return this.http
-      .patch(`${environment.api_url}${path}`, body)
+      .patch(`${environment.api_url}${path}`, body, options)
       .pipe(
         catchError(this.formatErrors),
         retry(1),

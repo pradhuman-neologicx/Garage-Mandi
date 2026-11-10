@@ -7,9 +7,11 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 
 export interface CreatePurchaseRequestPayload {
-  product_name: string;
+  product_id?: number;
+  product_name?: string;
   quantity: number;
-  vehicle_category_id: number;
+  vehicle_category_id?: number;
+  description?: string;
 }
 
 @Injectable({
@@ -298,6 +300,30 @@ export class EcomService {
   }
 
   /**
+   * POST /api/v1/ecom/admin/orders/:id/shipments
+   * Transition order from ready_for_pickup to shipped
+   */
+  createAdminOrderShipment(orderId: string | number, payload: any): Observable<any> {
+    return this.apiService.post(`ecom/admin/orders/${orderId}/shipments`, payload, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/orders/:id/out-for-delivery
+   * Transition order from shipped to out_for_delivery
+   */
+  updateAdminOrderOutForDelivery(orderId: string | number, payload: any): Observable<any> {
+    return this.apiService.post(`ecom/admin/orders/${orderId}/out-for-delivery`, payload, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/orders/:id/delivery
+   * Transition order from out_for_delivery to delivered
+   */
+  updateAdminOrderDelivery(orderId: string | number, payload: any): Observable<any> {
+    return this.apiService.post(`ecom/admin/orders/${orderId}/delivery`, payload, this.getAdminHeaders());
+  }
+
+  /**
    * POST /api/v1/ecom/admin/orders/:id/refund
    * Issue refund for order
    */
@@ -342,6 +368,51 @@ export class EcomService {
     return this.apiService.post(`ecom/admin/refunds/${id}/sync`, {}, this.getAdminHeaders());
   }
 
+  /**
+   * GET /api/v1/ecom/admin/platform-fee
+   * Query params: search, charged_to, is_active, direction, per_page, page
+   */
+  getAdminPlatformFees(params?: any): Observable<any> {
+    let path = 'ecom/admin/platform-fee';
+    if (params) {
+      const cleanParams: any = {};
+      Object.keys(params).forEach(k => {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+          cleanParams[k] = params[k];
+        }
+      });
+      const query = new URLSearchParams(cleanParams).toString();
+      if (query) {
+        path += `?${query}`;
+      }
+    }
+    return this.apiService.get(path, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/platform-fee
+   * Body: { name, description, charged_to, percent, flat, is_active }
+   */
+  createAdminPlatformFee(payload: any): Observable<any> {
+    return this.apiService.post('ecom/admin/platform-fee', payload, this.getAdminHeaders());
+  }
+
+  /**
+   * PUT /api/v1/ecom/admin/platform-fee/:id
+   * Body: { name, description, charged_to, percent, flat }
+   */
+  updateAdminPlatformFee(id: string | number, payload: any): Observable<any> {
+    return this.apiService.put(`ecom/admin/platform-fee/${id}`, payload, this.getAdminHeaders());
+  }
+
+  /**
+   * PATCH /api/v1/ecom/admin/platform-fee/:id/status
+   * Body: { is_active: boolean }
+   */
+  changeAdminPlatformFeeStatus(id: string | number, payload: { is_active: boolean }): Observable<any> {
+    return this.apiService.patch(`ecom/admin/platform-fee/${id}/status`, payload, this.getAdminHeaders());
+  }
+
   GetPlatformFee(): Observable<any> {
     const headers = this.getAdminHeaders();
     return this.apiService.get(`ecom/admin/platform-fee`, headers).pipe(
@@ -361,6 +432,100 @@ export class EcomService {
       }),
     );
   }
+
+
+  // ==========================================================
+  // PRODUCT MASTER & DROPDOWN APIS
+  // ==========================================================
+
+  /**
+   * GET /api/v1/vehicle-categories
+   * Retrieve active vehicle categories
+   */
+  getPublicVehicleCategories(): Observable<any> {
+    return this.apiService.get('vehicle-categories', this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/products?vehicle_category_id=:id
+   * Retrieve active public products by vehicle category
+   */
+  getPublicProducts(vehicleCategoryId?: number | string): Observable<any> {
+    const q = vehicleCategoryId !== undefined && vehicleCategoryId !== null && vehicleCategoryId !== '' ? `?vehicle_category_id=${vehicleCategoryId}` : '';
+    return this.apiService.get(`products${q}`, this.getHeaders());
+  }
+
+
+  /**
+   * GET /api/v1/vehicle-makers?vehicle_category_id=:id
+   * Retrieve vehicle makers / brands for category
+   */
+  getPublicVehicleMakers(categoryId?: number | string): Observable<any> {
+    const q = categoryId !== undefined && categoryId !== null && categoryId !== '' ? `?vehicle_category_id=${categoryId}` : '';
+    return this.apiService.get(`vehicle-makers${q}`, this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/vehicle-spare-parts?vehicle_category_id=:id
+   * Retrieve spare parts for vehicle category
+   */
+  getPublicVehicleSpareParts(categoryId?: number | string): Observable<any> {
+    const q = categoryId !== undefined && categoryId !== null && categoryId !== '' ? `?vehicle_category_id=${categoryId}` : '';
+    return this.apiService.get(`vehicle-spare-parts${q}`, this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/sub-spare-parts?vehicle_spare_parts_id=:id
+   * Retrieve sub spare parts for spare part
+   */
+  getPublicSubSpareParts(sparePartId?: number | string): Observable<any> {
+    const q = sparePartId !== undefined && sparePartId !== null && sparePartId !== '' ? `?vehicle_spare_parts_id=${sparePartId}` : '';
+    return this.apiService.get(`sub-spare-parts${q}`, this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/ecom/admin/products
+   * Params: search, vehicle_category_id, vehicle_brand_id, spare_part_id, sub_spare_part_id, is_active, direction, per_page, page
+   */
+  getAdminProducts(params?: any): Observable<any> {
+    let path = 'ecom/admin/products';
+    if (params) {
+      const cleanParams: any = {};
+      Object.keys(params).forEach(k => {
+        if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+          cleanParams[k] = params[k];
+        }
+      });
+      const query = new URLSearchParams(cleanParams).toString();
+      if (query) {
+        path += `?${query}`;
+      }
+    }
+    return this.apiService.get(path, this.getAdminHeaders());
+  }
+
+  /**
+   * POST /api/v1/ecom/admin/products
+   * Body: { vehicle_category_id, vehicle_brand_id, spare_part_id, sub_spare_part_id, name }
+   */
+  createAdminProduct(payload: any): Observable<any> {
+    return this.apiService.post('ecom/admin/products', payload, this.getAdminHeaders());
+  }
+
+  /**
+   * PUT /api/v1/ecom/admin/products/:id
+   * Body: { vehicle_category_id, vehicle_brand_id, spare_part_id, sub_spare_part_id, name }
+   */
+  updateAdminProduct(id: number | string, payload: any): Observable<any> {
+    return this.apiService.put(`ecom/admin/products/${id}`, payload, this.getAdminHeaders());
+  }
+
+  /**
+   * PATCH /api/v1/ecom/admin/products/:id/status
+   */
+  changeAdminProductStatus(id: number | string, payload?: any): Observable<any> {
+    return this.apiService.patch(`ecom/admin/products/${id}/status`, payload || {}, this.getAdminHeaders());
+  } 
     erromessagefunction(error: any) {
     console.log('Response received:', error);
     var response = error;

@@ -40,9 +40,15 @@ export interface PurchaseQuotationItem {
   paymentStatus: string;
   fundsStatus: string;
   vehicleCategory?: string;
+  vehicleBrand?: string;
   vehicleModel?: string;
   customerRequirement?: string;
   providerActionNotice?: string;
+  order?: {
+    id?: number | string;
+    order_number?: string;
+    status?: string;
+  } | null;
   rawItem?: any;
 }
 
@@ -288,6 +294,13 @@ export class PurchaseQuotationsComponent implements OnInit {
     const finalPayable = Number(item.final_amount !== undefined ? item.final_amount : (prodAmt + gstTax + delFee));
 
     const notes = item.notes || '';
+    const orderData = item.order || pr.order || null;
+    const vehicleBrand =
+      pr.vehicle_brand?.name ||
+      item.vehicle_brand?.name ||
+      pr.vehicle_maker?.name ||
+      pr.commercial_snapshot?.vehicle_brand_name ||
+      '';
 
     // Dynamic status message and action notice
     let statusMessage = '';
@@ -296,11 +309,12 @@ export class PurchaseQuotationsComponent implements OnInit {
     let fundsStatus = 'Not Held';
 
     if (rawStatus === 'accepted') {
-      if (prStatus === 'ordered') {
-        statusMessage = 'Order Placed • Escrow Payment Held';
+      if (orderData || prStatus === 'ordered') {
+        const orderNum = orderData?.order_number ? ` (${orderData.order_number})` : '';
+        statusMessage = `Order Confirmed${orderNum} • Payment Secured`;
         paymentStatus = 'Successful';
         fundsStatus = 'Held';
-        providerActionNotice = 'Provider action: Customer has placed the order and payment is held in escrow. Please prepare the order for dispatch/pickup.';
+        providerActionNotice = `Provider action: Customer has placed the order${orderNum} and payment is held in escrow. Please prepare the order for dispatch/pickup.`;
       } else {
         statusMessage = item.accepted_at
           ? `Accepted on ${this.formatDateTime(item.accepted_at)}`
@@ -311,7 +325,7 @@ export class PurchaseQuotationsComponent implements OnInit {
       }
     } else if (rawStatus === 'closed') {
       statusMessage = isExpired ? 'Quotation Closed (Validity Expired)' : 'Quotation Closed';
-      paymentStatus = prStatus === 'ordered' ? 'Successful' : 'Closed';
+      paymentStatus = (orderData || prStatus === 'ordered') ? 'Successful' : 'Closed';
       fundsStatus = 'Not Held';
       providerActionNotice = 'Provider action: This quotation request is closed.';
     } else {
@@ -357,9 +371,15 @@ export class PurchaseQuotationsComponent implements OnInit {
       paymentStatus,
       fundsStatus,
       vehicleCategory: pr.vehicle_category?.name || '',
+      vehicleBrand,
       vehicleModel: pr.vehicle_category?.name || '',
       customerRequirement: pr.description || (pr.vehicle_category?.name ? `Category: ${pr.vehicle_category.name}` : ''),
       providerActionNotice,
+      order: orderData ? {
+        id: orderData.id,
+        order_number: orderData.order_number,
+        status: orderData.status
+      } : null,
       rawItem: item
     };
   }
@@ -430,6 +450,7 @@ export class PurchaseQuotationsComponent implements OnInit {
       const q = this.searchQuery.trim().toLowerCase();
       result = result.filter(item =>
         (item.product && item.product.toLowerCase().includes(q)) ||
+        (item.vehicleBrand && item.vehicleBrand.toLowerCase().includes(q)) ||
         (item.quotationCode && item.quotationCode.toLowerCase().includes(q)) ||
         (item.requestCode && item.requestCode.toLowerCase().includes(q)) ||
         (item.customerName && item.customerName.toLowerCase().includes(q)) ||
@@ -467,29 +488,80 @@ export class PurchaseQuotationsComponent implements OnInit {
   // QUOTATION FLOW STEPPER LOGIC
   // ==========================================
 
-  getFlowStepIndex(status: string): number {
-    const s = String(status || '').toLowerCase();
-    switch (s) {
-      case 'submitted':
-        return 0; // Quotation Submitted
-      case 'accepted':
-        return 2; // Accepted / Payment
-      case 'ordered':
-      case 'confirmed':
-        return 3; // Order Confirmed
-      case 'closed':
-      case 'expired':
-        return -1;
-      default:
-        return 0;
+  getFlowStepIndex(quoteOrStatus: PurchaseQuotationItem | string | null | undefined): number {
+    if (!quoteOrStatus) return 0;
+
+    let qStatus = '';
+    let orderStatus = '';
+    let prStatus = '';
+    let hasOrder = false;
+
+    if (typeof quoteOrStatus === 'string') {
+      qStatus = quoteOrStatus.toLowerCase();
+    } else {
+      qStatus = String(quoteOrStatus.status || '').toLowerCase();
+      const order = quoteOrStatus.order || quoteOrStatus.rawItem?.order;
+      if (order) {
+        hasOrder = true;
+        if (order.status) {
+          orderStatus = String(order.status).toLowerCase();
+        }
+      }
+      const pr = quoteOrStatus.rawItem?.purchase_request;
+      if (pr && pr.status) {
+        prStatus = String(pr.status).toLowerCase();
+      }
+      if (quoteOrStatus.paymentStatus === 'Successful' || quoteOrStatus.rawItem?.payment_status === 'successful') {
+        hasOrder = true;
+      }
     }
+
+    if (qStatus === 'closed' || qStatus === 'expired') {
+      return -1;
+    }
+
+    // 1. Check order status if order exists
+    if (orderStatus) {
+      switch (orderStatus) {
+        case 'delivered':
+        case 'out_for_delivery':
+        case 'shipped':
+          return 5; // Step 5: Shipped
+        case 'ready_for_pickup':
+          return 4; // Step 4: Ready for Pickup
+        case 'confirmed':
+        case 'ordered':
+        case 'processing':
+          return 3; // Step 3: Order Confirmed
+        default:
+          return 3;
+      }
+    }
+
+    // 2. If order object is present or purchase request has status 'ordered'
+    if (hasOrder || prStatus === 'ordered' || qStatus === 'ordered' || qStatus === 'confirmed') {
+      return 3; // Step 3: Order Confirmed
+    }
+
+    // 3. Check quotation status
+    if (qStatus === 'accepted') {
+      return 2; // Step 2: Awaiting Customer Payment (Customer acceptance completed, awaiting payment)
+    }
+
+    if (qStatus === 'submitted') {
+      return 0; // Step 0: Quotation Submitted
+    }
+
+    return 0;
   }
 
-  isStepCompleted(stepIdx: number, status: string): boolean {
-    const s = String(status || '').toLowerCase();
-    if (s === 'closed' || s === 'expired') return false;
-    const current = this.getFlowStepIndex(status);
-    return stepIdx <= current;
+  isStepCompleted(stepIdx: number, quoteOrStatus: PurchaseQuotationItem | string | null | undefined): boolean {
+    if (!quoteOrStatus) return false;
+    const qStatus = typeof quoteOrStatus === 'string' ? quoteOrStatus.toLowerCase() : String(quoteOrStatus.status || '').toLowerCase();
+    if (qStatus === 'closed' || qStatus === 'expired') return false;
+
+    const currentIdx = this.getFlowStepIndex(quoteOrStatus);
+    return stepIdx <= currentIdx;
   }
 
   // ==========================================
