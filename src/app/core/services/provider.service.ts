@@ -122,6 +122,45 @@ export class ProviderService {
     return this.apiService.post('provider/quotations', formData, headers);
   }
 
+  /**
+   * GET /api/v1/provider/quotations
+   * Retrieve list of quotations submitted by provider
+   */
+  getProviderQuotations(params?: any): Observable<any> {
+    const headers = this.getHeaders();
+    const queryParts: string[] = [];
+    if (params) {
+      if (params.page !== undefined && params.page !== null) {
+        queryParts.push(`page=${encodeURIComponent(params.page)}`);
+      }
+      if (params.limit !== undefined && params.limit !== null) {
+        queryParts.push(`limit=${encodeURIComponent(params.limit)}`);
+      } else if (params.per_page !== undefined && params.per_page !== null) {
+        queryParts.push(`limit=${encodeURIComponent(params.per_page)}`);
+      }
+      if (params.category && params.category !== 'all') {
+        queryParts.push(`category=${encodeURIComponent(params.category)}`);
+      }
+      if (params.quotation_type && params.quotation_type !== 'all') {
+        queryParts.push(`quotation_type=${encodeURIComponent(params.quotation_type)}`);
+      }
+      if (params.search && params.search.trim()) {
+        queryParts.push(`search=${encodeURIComponent(params.search.trim())}`);
+      }
+    }
+    const url = queryParts.length > 0 ? `provider/quotations?${queryParts.join('&')}` : 'provider/quotations';
+    return this.apiService.get(url, headers);
+  }
+
+  /**
+   * GET /api/v1/provider/quotations/:id
+   * Retrieve single quotation details by ID
+   */
+  getProviderQuotationById(id: number | string): Observable<any> {
+    const headers = this.getHeaders();
+    return this.apiService.get(`provider/quotations/${id}`, headers);
+  }
+
  
 
 

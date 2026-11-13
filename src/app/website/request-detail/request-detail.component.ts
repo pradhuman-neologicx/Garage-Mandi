@@ -189,10 +189,18 @@ export class RequestDetailComponent implements OnInit {
         this.submittingFeedback = false;
         alert('Feedback submitted successfully!');
         this.closeFeedbackModal();
-        if (this.requestDetail && this.requestDetail.quotations) {
-          const q = this.requestDetail.quotations.find((qt: any) => qt.id === this.feedbackQuoteId);
-          if (q) q.feedback_given = true;
+        if (this.requestDetail) {
+          this.requestDetail.feedback_given = true;
+          if (this.feedbackForm.give_feedback) {
+            this.requestDetail.rating = this.feedbackForm.rating;
+            this.requestDetail.feedback_text = this.feedbackForm.feedback_text;
+          }
+          if (this.requestDetail.quotations) {
+            const q = this.requestDetail.quotations.find((qt: any) => qt.id === this.feedbackQuoteId);
+            if (q) q.feedback_given = true;
+          }
         }
+        this.fetchDetails();
       },
       error: (err: any) => {
         this.submittingFeedback = false;

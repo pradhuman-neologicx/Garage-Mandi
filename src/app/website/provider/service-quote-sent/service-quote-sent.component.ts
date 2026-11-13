@@ -5,129 +5,32 @@ import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { NotificationService } from 'src/app/core/services/notificationnew.service';
+import { ProviderService } from 'src/app/core/services/provider.service';
 
 export interface ServiceQuoteSentItem {
   id: string | number;
-  requirementTitle: string; // e.g. 'requirement title', 'qwertyuiop', 'vevhile'
-  description?: string; // e.g. 'test', 'testtest'
-  quotedAmount: number; // e.g. 12345.00, 100.00, 235.00
-  vehicleModel: string; // e.g. 'vehicle model', 'asfghjkl', 'vechile1'
-  category: string; // e.g. 'Spare Part', 'Periodic Service'
-  location: string; // e.g. '-', 'Jaipur, RJ'
-  sentDate: string; // e.g. '20 Aug 2026'
+  requestId?: string | number;
   requestCode?: string;
+  requirementTitle: string;
+  description?: string;
+  requestDescription?: string;
+  quotedAmount: number;
+  vehicleModel: string;
+  category: string;
+  quotationType?: string;
+  location: string;
+  sentDate: string;
+  status?: string;
+  requestStatus?: string;
   customerName?: string;
+  mediaUrls?: string[];
+  media?: any[];
+  feedbackGiven?: boolean;
+  rating?: number;
+  feedbackText?: string;
+  fulfilled?: boolean;
+  raw?: any;
 }
-
-const INITIAL_QUOTES: ServiceQuoteSentItem[] = [
-  {
-    id: 1,
-    requirementTitle: 'requirement title',
-    quotedAmount: 12345.00,
-    vehicleModel: 'vehicle model',
-    category: 'Spare Part',
-    location: '-',
-    sentDate: '20 Aug 2026',
-    requestCode: 'REQ-901',
-    customerName: 'Rahul Sharma'
-  },
-  {
-    id: 2,
-    requirementTitle: 'qwertyuiop',
-    description: 'test',
-    quotedAmount: 100.00,
-    vehicleModel: 'asfghjkl',
-    category: 'Spare Part',
-    location: '-',
-    sentDate: '20 Aug 2026',
-    requestCode: 'REQ-902',
-    customerName: 'Amit Joshi'
-  },
-  {
-    id: 3,
-    requirementTitle: 'vevhile',
-    description: 'testtest',
-    quotedAmount: 235.00,
-    vehicleModel: 'vechile1',
-    category: 'Spare Part',
-    location: '-',
-    sentDate: '20 Aug 2026',
-    requestCode: 'REQ-903',
-    customerName: 'Vikram Rathore'
-  },
-  {
-    id: 4,
-    requirementTitle: 'Brake Pad Replacement & Rotor Skimming',
-    description: 'Front ceramic disc brake pads replacement with high-precision rotor skimming and bleeding.',
-    quotedAmount: 4250.00,
-    vehicleModel: 'Maruti Suzuki Swift',
-    category: 'Spare Part',
-    location: 'Jaipur, RJ',
-    sentDate: '19 Aug 2026',
-    requestCode: 'REQ-904',
-    customerName: 'Rakesh Meena'
-  },
-  {
-    id: 5,
-    requirementTitle: 'Full Engine Periodic Service & Diagnostics',
-    description: 'Synthetic engine oil 5W-30 replacement, OEM oil filter, air filter, spark plug inspection and OBD-II scanner.',
-    quotedAmount: 3850.00,
-    vehicleModel: 'Hyundai Creta (2023)',
-    category: 'Periodic Service',
-    location: 'Jaipur, RJ',
-    sentDate: '18 Aug 2026',
-    requestCode: 'REQ-905',
-    customerName: 'Pooja Jain'
-  },
-  {
-    id: 6,
-    requirementTitle: 'Front Suspension Overhaul & Strut Mounting',
-    description: 'Gas-filled shock absorber strut replacement pair with lower ball joints and stabilizer bar links.',
-    quotedAmount: 6400.00,
-    vehicleModel: 'Honda City (5th Gen)',
-    category: 'Spare Part',
-    location: 'Udaipur, RJ',
-    sentDate: '17 Aug 2026',
-    requestCode: 'REQ-906',
-    customerName: 'Deepak Sharma'
-  },
-  {
-    id: 7,
-    requirementTitle: 'Car AC Gas Refill & Compressor Servicing',
-    description: 'Complete AC cooling loop evacuation, vacuum leak testing, 450g R134a refrigerant recharge and cabin filter replacement.',
-    quotedAmount: 2150.00,
-    vehicleModel: 'Tata Nexon',
-    category: 'AC Service',
-    location: 'Jodhpur, RJ',
-    sentDate: '16 Aug 2026',
-    requestCode: 'REQ-907',
-    customerName: 'Manoj Tiwari'
-  },
-  {
-    id: 8,
-    requirementTitle: 'Clutch Assembly & Flywheel Facing',
-    description: 'Clutch plate and diaphragm pressure plate overhaul with release bearing and synthetic transmission fluid.',
-    quotedAmount: 5800.00,
-    vehicleModel: 'Mahindra Scorpio',
-    category: 'Spare Part',
-    location: 'Kota, RJ',
-    sentDate: '15 Aug 2026',
-    requestCode: 'REQ-908',
-    customerName: 'Suresh Patel'
-  },
-  {
-    id: 9,
-    requirementTitle: 'Laser Iridium Spark Plugs Set of 4',
-    description: 'NGK laser iridium spark plugs for high fuel economy and smooth acceleration response.',
-    quotedAmount: 1800.00,
-    vehicleModel: 'Hyundai i20',
-    category: 'Spare Part',
-    location: 'Ajmer, RJ',
-    sentDate: '14 Aug 2026',
-    requestCode: 'REQ-909',
-    customerName: 'Mohan Lal'
-  }
-];
 
 @Component({
   selector: 'app-service-quote-sent',
@@ -149,10 +52,13 @@ export class ServiceQuoteSentComponent implements OnInit {
   searchQuery = '';
   selectedCategory = 'all';
 
-  // Pagination State
+  // Server-side Pagination State (matching API response)
   currentPage = 1;
-  pageSize = 6;
+  pageSize = 10;
   totalPages = 1;
+  totalRecords = 0;
+  startIndex = 0;
+  endIndex = 0;
 
   // KPIs
   kpis = {
@@ -162,14 +68,22 @@ export class ServiceQuoteSentComponent implements OnInit {
     service: 0
   };
 
-  constructor(private notificationService: NotificationService) {}
+  // View Modal State
+  isViewModalOpen = false;
+  isLoadingDetail = false;
+  selectedQuote: ServiceQuoteSentItem | null = null;
+
+  constructor(
+    private notificationService: NotificationService,
+    private providerService: ProviderService
+  ) {}
 
   ngOnInit(): void {
     this.loadQuotes();
   }
 
   // ==========================================
-  // DATA LOADING
+  // DATA LOADING (SERVER-SIDE PAGINATION)
   // ==========================================
 
   loadQuotes(isRefresh = false): void {
@@ -179,111 +93,229 @@ export class ServiceQuoteSentComponent implements OnInit {
       this.isLoading = true;
     }
 
-    setTimeout(() => {
-      this.isLoading = false;
-      this.isRefreshing = false;
-      this.quotes = JSON.parse(JSON.stringify(INITIAL_QUOTES));
-      this.computeKpis();
-      this.applyFilter(true);
-      if (isRefresh) {
-        this.notificationService.show('Quotes list refreshed successfully.', 'success');
+    const params: any = {
+      page: this.currentPage,
+      limit: this.pageSize
+    };
+
+    if (this.selectedCategory !== 'all') {
+      params.category = this.selectedCategory;
+      params.quotation_type = this.selectedCategory === 'spare_part' ? 'spare_part' : 'service_request';
+    }
+
+    if (this.searchQuery && this.searchQuery.trim()) {
+      params.search = this.searchQuery.trim();
+    }
+
+    this.providerService.getProviderQuotations(params).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
+
+        let rawList: any[] = [];
+        if (Array.isArray(res?.data)) {
+          rawList = res.data;
+        } else if (Array.isArray(res)) {
+          rawList = res;
+        } else if (res?.data && Array.isArray(res.data.data)) {
+          rawList = res.data.data;
+        }
+
+        this.quotes = rawList.map(item => this.mapApiItemToQuote(item));
+        this.filteredQuotes = [...this.quotes];
+        this.pagedQuotes = [...this.quotes];
+
+        // SERVER-SIDE PAGINATION FROM API
+        if (res?.pagination) {
+          const p = res.pagination;
+          this.totalRecords = Number(p.total) || this.quotes.length;
+          this.currentPage = Number(p.current_page) || 1;
+          this.pageSize = Number(p.per_page) || this.pageSize;
+          this.totalPages = Number(p.last_page) || Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+
+          if (p.from !== undefined && p.from !== null) {
+            this.startIndex = Number(p.from);
+          } else {
+            this.startIndex = this.totalRecords === 0 ? 0 : ((this.currentPage - 1) * this.pageSize + 1);
+          }
+
+          if (p.to !== undefined && p.to !== null) {
+            this.endIndex = Number(p.to);
+          } else {
+            this.endIndex = Math.min(this.currentPage * this.pageSize, this.totalRecords);
+          }
+        } else {
+          // Client-side fallback if pagination object not provided
+          this.totalRecords = this.quotes.length;
+          this.totalPages = Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+          this.startIndex = this.totalRecords === 0 ? 0 : ((this.currentPage - 1) * this.pageSize + 1);
+          this.endIndex = Math.min(this.currentPage * this.pageSize, this.totalRecords);
+        }
+
+        this.computeKpis(res);
+
+        if (isRefresh) {
+          this.notificationService.show('Quotes list refreshed successfully.', 'success');
+        }
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
+        this.quotes = [];
+        this.filteredQuotes = [];
+        this.pagedQuotes = [];
+        this.totalRecords = 0;
+        this.startIndex = 0;
+        this.endIndex = 0;
+        this.totalPages = 1;
+        this.computeKpis();
+        const msg = err?.error?.message || err?.message || 'Failed to load submitted quotations.';
+        this.notificationService.show(msg, 'error');
       }
-    }, isRefresh ? 350 : 200);
+    });
   }
 
-  computeKpis(): void {
-    this.kpis.totalQuotes = this.quotes.length;
-    this.kpis.totalValue = this.quotes.reduce((sum, q) => sum + (q.quotedAmount || 0), 0);
-    this.kpis.spareParts = this.quotes.filter(q => q.category === 'Spare Part').length;
-    this.kpis.service = this.quotes.filter(q => q.category !== 'Spare Part').length;
+  private mapApiItemToQuote(item: any): ServiceQuoteSentItem {
+    const req = item?.request || {};
+    const reqId = item?.request_id || req?.id || '';
+    const qType = item?.quotation_type || '';
+
+    // Category resolution
+    let category = 'Service';
+    if (qType.includes('spare') || req?.spare_parts_id || req?.category_id) {
+      category = 'Spare Part';
+    } else if (qType.includes('service') || req?.service_type_id) {
+      category = 'Service';
+    } else if (req?.vehicle_category?.name) {
+      category = req.vehicle_category.name;
+    }
+
+    // Vehicle model resolution
+    let vehicleModel = req?.vehicle_model || req?.vehicle_brand?.name || req?.vehicle_brand || '';
+    if (!vehicleModel) {
+      if (req?.vehicle_category?.name) {
+        vehicleModel = req.vehicle_category.name;
+      } else if (req?.vehicle_category_id === 1) {
+        vehicleModel = 'Two Wheeler';
+      } else if (req?.vehicle_category_id === 2) {
+        vehicleModel = 'Four Wheeler';
+      } else {
+        vehicleModel = 'General Vehicle';
+      }
+    }
+
+    const title = req?.title || req?.requirement_title || item?.title || 'Quotation';
+    const desc = item?.description || req?.description || '';
+    const location = req?.location || item?.location || '-';
+    const amount = Number(item?.price) || 0;
+
+    let mediaList: string[] = [];
+    if (Array.isArray(item?.media_urls)) {
+      mediaList = item.media_urls;
+    } else if (Array.isArray(item?.media)) {
+      mediaList = item.media.map((m: any) => m.file_url || m.url || m.file_path || m);
+    }
+
+    return {
+      id: item?.id,
+      requestId: reqId,
+      requestCode: reqId ? `REQ-${reqId}` : `Q-${item?.id}`,
+      requirementTitle: title,
+      description: desc,
+      requestDescription: req?.description || '',
+      quotedAmount: amount,
+      vehicleModel: vehicleModel,
+      category: category,
+      quotationType: qType,
+      location: location,
+      sentDate: this.formatDate(item?.created_at),
+      status: item?.status || 'sent',
+      requestStatus: req?.status || '',
+      customerName: req?.customer_name || req?.creator?.name || '',
+      mediaUrls: mediaList,
+      media: item?.media || [],
+      feedbackGiven: Boolean(req?.feedback_given),
+      rating: req?.rating || 0,
+      feedbackText: req?.feedback_text || '',
+      fulfilled: Boolean(req?.fulfilled),
+      raw: item
+    };
+  }
+
+  formatDate(dateStr: string | null | undefined): string {
+    if (!dateStr) return 'N/A';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  computeKpis(res?: any): void {
+    const summary = res?.summary || res?.data?.summary;
+    if (summary) {
+      this.kpis.totalQuotes = Number(summary.total) || this.totalRecords;
+      this.kpis.totalValue = Number(summary.total_value) || 0;
+      this.kpis.spareParts = Number(summary.spare_parts) || 0;
+      this.kpis.service = Number(summary.service) || 0;
+    } else {
+      this.kpis.totalQuotes = this.totalRecords;
+      this.kpis.totalValue = this.quotes.reduce((sum, q) => sum + (q.quotedAmount || 0), 0);
+      if (this.selectedCategory === 'all') {
+        this.kpis.spareParts = this.quotes.filter(q => q.category.toLowerCase().includes('spare')).length;
+        this.kpis.service = this.quotes.filter(q => !q.category.toLowerCase().includes('spare')).length;
+      }
+    }
   }
 
   // ==========================================
-  // FILTER & SEARCH
+  // FILTER & SEARCH (TRIGGERS API)
   // ==========================================
 
   setCategory(cat: string): void {
+    if (this.selectedCategory === cat) return;
     this.selectedCategory = cat;
-    this.applyFilter(true);
+    this.currentPage = 1;
+    this.loadQuotes();
   }
 
-  onSearchChange(): void {
-    this.applyFilter(true);
+  onSearchSubmit(): void {
+    this.currentPage = 1;
+    this.loadQuotes();
   }
 
-  applyFilter(resetPage = false): void {
-    if (resetPage) {
-      this.currentPage = 1;
-    }
-
-    let result = [...this.quotes];
-
-    // Category Filter
-    if (this.selectedCategory !== 'all') {
-      if (this.selectedCategory === 'spare_part') {
-        result = result.filter(q => q.category === 'Spare Part');
-      } else if (this.selectedCategory === 'service') {
-        result = result.filter(q => q.category !== 'Spare Part');
-      }
-    }
-
-    // Search Query Filter
-    if (this.searchQuery && this.searchQuery.trim()) {
-      const q = this.searchQuery.trim().toLowerCase();
-      result = result.filter(item =>
-        item.requirementTitle.toLowerCase().includes(q) ||
-        (item.description && item.description.toLowerCase().includes(q)) ||
-        item.vehicleModel.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q) ||
-        (item.location && item.location.toLowerCase().includes(q)) ||
-        (item.requestCode && item.requestCode.toLowerCase().includes(q))
-      );
-    }
-
-    this.filteredQuotes = result;
-    this.updatePagination();
+  clearSearch(): void {
+    if (!this.searchQuery) return;
+    this.searchQuery = '';
+    this.currentPage = 1;
+    this.loadQuotes();
   }
 
   // ==========================================
-  // PAGINATION
+  // PAGINATION CONTROLS
   // ==========================================
-
-  get totalRecords(): number {
-    return this.filteredQuotes.length;
-  }
-
-  get startIndex(): number {
-    if (this.totalRecords === 0) return 0;
-    return (this.currentPage - 1) * this.pageSize + 1;
-  }
-
-  get endIndex(): number {
-    return Math.min(this.currentPage * this.pageSize, this.totalRecords);
-  }
-
-  updatePagination(): void {
-    this.totalPages = Math.max(1, Math.ceil(this.filteredQuotes.length / this.pageSize));
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = this.totalPages;
-    }
-    const start = (this.currentPage - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.pagedQuotes = this.filteredQuotes.slice(start, end);
-  }
 
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages || page === this.currentPage) return;
     this.currentPage = page;
-    this.updatePagination();
+    this.loadQuotes();
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 200, behavior: 'smooth' });
     }
   }
 
   onPageSizeChange(newSize: any): void {
-    this.pageSize = Number(newSize);
+    const size = Number(newSize);
+    if (!size || size === this.pageSize) return;
+    this.pageSize = size;
     this.currentPage = 1;
-    this.updatePagination();
+    this.loadQuotes();
   }
 
   getPageNumbers(): (number | string)[] {
@@ -307,6 +339,44 @@ export class ServiceQuoteSentComponent implements OnInit {
       pages.push(total);
     }
     return pages;
+  }
+
+  // ==========================================
+  // VIEW DETAILS MODAL (BY ID API)
+  // ==========================================
+
+  openViewModal(quote: ServiceQuoteSentItem): void {
+    this.selectedQuote = quote;
+    this.isViewModalOpen = true;
+    this.isLoadingDetail = true;
+
+    this.providerService.getProviderQuotationById(quote.id).subscribe({
+      next: (res: any) => {
+        this.isLoadingDetail = false;
+        const detailData = res?.data || res;
+        if (detailData && typeof detailData === 'object') {
+          this.selectedQuote = this.mapApiItemToQuote(detailData);
+        }
+      },
+      error: (_err: any) => {
+        this.isLoadingDetail = false;
+      }
+    });
+  }
+
+  closeViewModal(): void {
+    this.isViewModalOpen = false;
+    this.isLoadingDetail = false;
+    this.selectedQuote = null;
+  }
+
+  getStatusClass(status: string | undefined): string {
+    const s = (status || '').toLowerCase();
+    if (s === 'accepted' || s === 'completed' || s === 'complete') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (s === 'viewed') return 'bg-blue-50 text-blue-700 border-blue-200';
+    if (s === 'pending' || s === 'sent') return 'bg-amber-50 text-amber-700 border-amber-200';
+    if (s === 'rejected' || s === 'cancelled') return 'bg-red-50 text-red-700 border-red-200';
+    return 'bg-slate-100 text-slate-700 border-slate-200';
   }
 
   copyText(text: string, label = 'Copied'): void {
