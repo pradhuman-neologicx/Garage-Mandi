@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { NotificationService } from 'src/app/core/services/notificationnew.service';
+import { ProviderService } from 'src/app/core/services/provider.service';
 
 export type VehicleRequestStatus = 'CONTACTED' | 'PENDING';
 export type FilterTab = 'all' | 'pending' | 'contacted';
@@ -12,139 +13,30 @@ export type FilterTab = 'all' | 'pending' | 'contacted';
 export interface CustomerVehicleRequestItem {
   id: string | number;
   // Vehicle Info
-  vehicleName: string; // e.g. 'Hyundai gdh56'
-  brand: string; // e.g. 'Hyundai'
-  model: string; // e.g. 'gdh56'
-  vehicleCategory: string; // e.g. 'Two Wheeler', 'Four Wheeler'
-  manufacturingYear: string | number; // e.g. '2022'
-  fuelType: string; // e.g. 'Petrol'
-  registrationNumber: string; // e.g. '344747'
-  price: number; // e.g. 120.00
-  vehicleDescription?: string; // e.g. 'hxb'
+  vehicleId?: string | number;
+  vehicleName: string;
+  brand: string;
+  model: string;
+  vehicleCategory: string;
+  manufacturingYear: string | number;
+  fuelType: string;
+  registrationNumber: string;
+  price: number;
+  vehicleDescription?: string;
+  vehicleImage?: string;
 
   // Customer Info
-  customerName: string; // e.g. 'ashi'
-  customerInitial: string; // e.g. 'A'
-  customerPhone: string; // e.g. '9632589653'
-  customerEmail: string; // e.g. 'yashu1@yopmail.com'
-  interestDate: string; // e.g. '02 Sep 2026'
+  customerId?: string | number;
+  customerName: string;
+  customerInitial: string;
+  customerPhone: string;
+  customerEmail: string;
+  interestDate: string;
 
   // Status
-  status: VehicleRequestStatus; // 'CONTACTED' or 'PENDING'
+  status: VehicleRequestStatus;
+  raw?: any;
 }
-
-const STORAGE_KEY = 'garage_mandi_mock_custome_vehicle_requests_v1';
-
-const INITIAL_REQUESTS: CustomerVehicleRequestItem[] = [
-  {
-    id: 1,
-    vehicleName: 'Hyundai gdh56',
-    brand: 'Hyundai',
-    model: 'gdh56',
-    vehicleCategory: 'Two Wheeler',
-    manufacturingYear: 2022,
-    fuelType: 'Petrol',
-    registrationNumber: '344747',
-    price: 120.00,
-    vehicleDescription: 'hxb',
-    customerName: 'ashi',
-    customerInitial: 'A',
-    customerPhone: '9632589653',
-    customerEmail: 'yashu1@yopmail.com',
-    interestDate: '02 Sep 2026',
-    status: 'CONTACTED'
-  },
-  {
-    id: 2,
-    vehicleName: 'Honda Activa 6G DLX',
-    brand: 'Honda',
-    model: 'Activa 6G',
-    vehicleCategory: 'Two Wheeler',
-    manufacturingYear: 2023,
-    fuelType: 'Petrol',
-    registrationNumber: 'RJ-14-EA-8812',
-    price: 68500.00,
-    vehicleDescription: 'Single owner, pristine showroom condition, only 9,400 kms driven, comprehensive insurance valid till Nov 2027.',
-    customerName: 'Vikram Sharma',
-    customerInitial: 'V',
-    customerPhone: '9829012345',
-    customerEmail: 'vikram.sharma@gmail.com',
-    interestDate: '01 Sep 2026',
-    status: 'PENDING'
-  },
-  {
-    id: 3,
-    vehicleName: 'Maruti Suzuki Swift ZXi+',
-    brand: 'Maruti Suzuki',
-    model: 'Swift ZXi+',
-    vehicleCategory: 'Four Wheeler',
-    manufacturingYear: 2021,
-    fuelType: 'Petrol',
-    registrationNumber: 'RJ-14-CC-4091',
-    price: 590000.00,
-    vehicleDescription: 'Top model with push button start, touchscreen infotainment, reverse camera, non-accidental certified vehicle.',
-    customerName: 'Priya Meena',
-    customerInitial: 'P',
-    customerPhone: '9784098765',
-    customerEmail: 'priya.meena@outlook.com',
-    interestDate: '31 Aug 2026',
-    status: 'CONTACTED'
-  },
-  {
-    id: 4,
-    vehicleName: 'Royal Enfield Classic 350 Reborn',
-    brand: 'Royal Enfield',
-    model: 'Classic 350',
-    vehicleCategory: 'Two Wheeler',
-    manufacturingYear: 2022,
-    fuelType: 'Petrol',
-    registrationNumber: 'RJ-07-SE-1982',
-    price: 175000.00,
-    vehicleDescription: 'Halcyon green color, dual channel ABS, original alloy wheels and backrest installed, complete service records available.',
-    customerName: 'Manoj Rathore',
-    customerInitial: 'M',
-    customerPhone: '9414567812',
-    customerEmail: 'rathore.manoj@yahoo.com',
-    interestDate: '30 Aug 2026',
-    status: 'PENDING'
-  },
-  {
-    id: 5,
-    vehicleName: 'Hyundai Creta SX (O) Turbo',
-    brand: 'Hyundai',
-    model: 'Creta SX (O)',
-    vehicleCategory: 'Four Wheeler',
-    manufacturingYear: 2022,
-    fuelType: 'Diesel',
-    registrationNumber: 'RJ-14-TB-5544',
-    price: 1380000.00,
-    vehicleDescription: 'Panoramic sunroof, ventilated front seats, Bose 8-speaker audio, brand new Michelin tyres.',
-    customerName: 'Anil Agarwal',
-    customerInitial: 'A',
-    customerPhone: '9829988776',
-    customerEmail: 'anil.agarwal@gmail.com',
-    interestDate: '28 Aug 2026',
-    status: 'CONTACTED'
-  },
-  {
-    id: 6,
-    vehicleName: 'Tata Ace Gold Petrol Plus',
-    brand: 'Tata Motors',
-    model: 'Ace Gold',
-    vehicleCategory: 'Commercial Vehicle',
-    manufacturingYear: 2023,
-    fuelType: 'Petrol',
-    registrationNumber: 'RJ-14-GA-1122',
-    price: 360000.00,
-    vehicleDescription: 'Commercial loading vehicle, high mileage, certified fitness certificate and valid state permit.',
-    customerName: 'Deepak Verma',
-    customerInitial: 'D',
-    customerPhone: '9587034567',
-    customerEmail: 'deepak.v@yopmail.com',
-    interestDate: '26 Aug 2026',
-    status: 'CONTACTED'
-  }
-];
 
 @Component({
   selector: 'app-custome-vehicle-requests',
@@ -156,6 +48,7 @@ const INITIAL_REQUESTS: CustomerVehicleRequestItem[] = [
 export class CustomeVehicleRequestsComponent implements OnInit {
   isLoading = false;
   isRefreshing = false;
+  isMarkingContacted = false;
 
   // Requests Data
   requests: CustomerVehicleRequestItem[] = [];
@@ -180,16 +73,20 @@ export class CustomeVehicleRequestsComponent implements OnInit {
 
   // Details Modal State ("Interest Details")
   isDetailsModalOpen = false;
+  isLoadingDetails = false;
   selectedRequest: CustomerVehicleRequestItem | null = null;
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private providerService: ProviderService
+  ) {}
 
   ngOnInit(): void {
     this.loadRequests();
   }
 
   // ==========================================
-  // DATA MANAGEMENT
+  // DATA MANAGEMENT (DYNAMIC API)
   // ==========================================
 
   loadRequests(isRefresh = false): void {
@@ -199,39 +96,129 @@ export class CustomeVehicleRequestsComponent implements OnInit {
       this.isLoading = true;
     }
 
-    setTimeout(() => {
-      this.isLoading = false;
-      this.isRefreshing = false;
+    this.providerService.getVehicleResellRequests().subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
 
-      let stored = null;
-      if (typeof window !== 'undefined' && window.localStorage) {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) stored = JSON.parse(raw);
-        } catch (_) {}
+        let rawList: any[] = [];
+        if (Array.isArray(res?.data)) {
+          rawList = res.data;
+        } else if (Array.isArray(res)) {
+          rawList = res;
+        } else if (res?.data && Array.isArray(res.data.data)) {
+          rawList = res.data.data;
+        }
+
+        this.requests = rawList.map(item => this.mapApiItemToRequest(item));
+
+        // Update KPIs from API summary if provided, otherwise compute from list
+        const summary = res?.summary || res?.data?.summary;
+        if (summary) {
+          this.kpis = {
+            total: Number(summary.total) || this.requests.length,
+            pending: Number(summary.pending) || this.requests.filter(r => r.status === 'PENDING').length,
+            contacted: Number(summary.contacted) || this.requests.filter(r => r.status === 'CONTACTED').length
+          };
+        } else {
+          this.computeKpis();
+        }
+
+        this.applyFilter(true);
+
+        if (isRefresh) {
+          this.notificationService.show('Customer vehicle requests refreshed.', 'success');
+        }
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.isRefreshing = false;
+        this.requests = [];
+        this.filteredRequests = [];
+        this.pagedRequests = [];
+        this.computeKpis();
+        const errMsg = err?.error?.message || err?.message || 'Failed to load customer vehicle requests.';
+        this.notificationService.show(errMsg, 'error');
       }
-
-      if (stored && Array.isArray(stored) && stored.length > 0) {
-        this.requests = stored;
-      } else {
-        this.requests = JSON.parse(JSON.stringify(INITIAL_REQUESTS));
-        this.persistRequests();
-      }
-
-      this.computeKpis();
-      this.applyFilter(true);
-
-      if (isRefresh) {
-        this.notificationService.show('Customer vehicle requests refreshed.', 'success');
-      }
-    }, isRefresh ? 350 : 200);
+    });
   }
 
-  private persistRequests(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.requests));
-      } catch (_) {}
+  private mapApiItemToRequest(item: any): CustomerVehicleRequestItem {
+    const v = item?.vehicle || {};
+    const brandName = (v.brand?.name || v.brand || '').trim();
+    const modelName = (v.vehicle_model || v.model || '').trim();
+
+    let vehicleName = '';
+    if (brandName && modelName) {
+      if (modelName.toLowerCase().startsWith(brandName.toLowerCase())) {
+        vehicleName = modelName;
+      } else {
+        vehicleName = `${brandName} ${modelName}`;
+      }
+    } else {
+      vehicleName = brandName || modelName || v.name || 'Resale Vehicle';
+    }
+
+    const categoryName = v.vehicle_category?.name || v.vehicle_category || v.category?.name || 'N/A';
+    const regNumber = v.registration_number || v.registrationNo || 'N/A';
+    const price = Number(v.price) || 0;
+    const year = v.manufacturing_year || v.year || 'N/A';
+    const fuel = v.fuel_type?.name || v.fuel_type || 'N/A';
+    const desc = v.description || item?.description || '';
+
+    let imageUrl = '';
+    if (Array.isArray(v.images) && v.images.length > 0) {
+      imageUrl = v.images[0].file_url || v.images[0].url || v.images[0].file_path || '';
+    } else if (v.image) {
+      imageUrl = typeof v.image === 'string' ? v.image : (v.image.file_url || '');
+    }
+
+    // Customer resolution (supports nested customer/user/buyer or top-level properties)
+    const c = item?.customer || item?.user || item?.buyer || {};
+    const customerName = (c.name || item?.customer_name || item?.user_name || item?.name || 'Interested Buyer').trim();
+    const customerPhone = c.phone_number || c.phone || c.mobile || item?.customer_phone || item?.phone_number || item?.phone || item?.mobile || 'Not provided';
+    const customerEmail = c.email || item?.customer_email || item?.email || 'Not provided';
+    const initial = (customerName.charAt(0) || 'B').toUpperCase();
+
+    const rawStatus = (item?.status || 'pending').toString().toLowerCase();
+    const status: VehicleRequestStatus = rawStatus === 'contacted' ? 'CONTACTED' : 'PENDING';
+
+    return {
+      id: item?.id,
+      vehicleId: v.id,
+      vehicleName: vehicleName || 'Resale Vehicle',
+      brand: brandName || 'N/A',
+      model: modelName || 'N/A',
+      vehicleCategory: categoryName,
+      manufacturingYear: year,
+      fuelType: fuel,
+      registrationNumber: regNumber,
+      price: price,
+      vehicleDescription: desc,
+      vehicleImage: imageUrl,
+      customerId: c.id,
+      customerName: customerName,
+      customerInitial: initial,
+      customerPhone: customerPhone,
+      customerEmail: customerEmail,
+      interestDate: this.formatDate(item?.created_at),
+      status: status,
+      raw: item
+    };
+  }
+
+  formatDate(dateStr: string | null | undefined): string {
+    if (!dateStr) return 'N/A';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch (_) {
+      return dateStr;
     }
   }
 
@@ -251,6 +238,11 @@ export class CustomeVehicleRequestsComponent implements OnInit {
   }
 
   onSearchChange(): void {
+    this.applyFilter(true);
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
     this.applyFilter(true);
   }
 
@@ -357,10 +349,96 @@ export class CustomeVehicleRequestsComponent implements OnInit {
   openDetailsModal(req: CustomerVehicleRequestItem): void {
     this.selectedRequest = req;
     this.isDetailsModalOpen = true;
+    this.isLoadingDetails = true;
+
+    this.providerService.getVehicleResellRequestById(req.id).subscribe({
+      next: (res: any) => {
+        this.isLoadingDetails = false;
+        const detailData = res?.data || res;
+        if (detailData && typeof detailData === 'object') {
+          const mapped = this.mapApiItemToRequest(detailData);
+          // Preserve customer contact info if present in original request
+          if ((!mapped.customerPhone || mapped.customerPhone === 'Not provided') && req.customerPhone !== 'Not provided') {
+            mapped.customerPhone = req.customerPhone;
+          }
+          if ((!mapped.customerEmail || mapped.customerEmail === 'Not provided') && req.customerEmail !== 'Not provided') {
+            mapped.customerEmail = req.customerEmail;
+          }
+          if (!mapped.vehicleImage && req.vehicleImage) {
+            mapped.vehicleImage = req.vehicleImage;
+          }
+          this.selectedRequest = mapped;
+        }
+      },
+      error: (_err: any) => {
+        // Fallback: If request-specific view by ID fails or 404s, attempt fetching full vehicle details by vehicleId
+        if (req.vehicleId) {
+          this.providerService.getResaleVehicleById(req.vehicleId).subscribe({
+            next: (vRes: any) => {
+              this.isLoadingDetails = false;
+              const vData = vRes?.data || vRes;
+              if (vData && this.selectedRequest) {
+                this.selectedRequest = {
+                  ...this.selectedRequest,
+                  ...this.mapApiItemToRequest({ ...(req.raw || {}), vehicle: vData })
+                };
+              }
+            },
+            error: () => {
+              this.isLoadingDetails = false;
+            }
+          });
+        } else {
+          this.isLoadingDetails = false;
+        }
+      }
+    });
+    this.isLoadingDetails = true;
+
+    this.providerService.getVehicleResellRequestById(req.id).subscribe({
+      next: (res: any) => {
+        this.isLoadingDetails = false;
+        const detailData = res?.data || res;
+        if (detailData && typeof detailData === 'object') {
+          const mapped = this.mapApiItemToRequest(detailData);
+          // Preserve customer contact info if present in original request
+          if ((!mapped.customerPhone || mapped.customerPhone === 'Not provided') && req.customerPhone !== 'Not provided') {
+            mapped.customerPhone = req.customerPhone;
+          }
+          if ((!mapped.customerEmail || mapped.customerEmail === 'Not provided') && req.customerEmail !== 'Not provided') {
+            mapped.customerEmail = req.customerEmail;
+          }
+          this.selectedRequest = mapped;
+        }
+      },
+      error: (_err: any) => {
+        // Fallback: If request-specific view by ID fails or 404s, attempt fetching full vehicle details by vehicleId
+        if (req.vehicleId) {
+          this.providerService.getResaleVehicleById(req.vehicleId).subscribe({
+            next: (vRes: any) => {
+              this.isLoadingDetails = false;
+              const vData = vRes?.data || vRes;
+              if (vData && this.selectedRequest) {
+                this.selectedRequest = {
+                  ...this.selectedRequest,
+                  ...this.mapApiItemToRequest({ ...(req.raw || {}), vehicle: vData })
+                };
+              }
+            },
+            error: () => {
+              this.isLoadingDetails = false;
+            }
+          });
+        } else {
+          this.isLoadingDetails = false;
+        }
+      }
+    });
   }
 
   closeDetailsModal(): void {
     this.isDetailsModalOpen = false;
+    this.isLoadingDetails = false;
     this.selectedRequest = null;
   }
 
@@ -368,29 +446,38 @@ export class CustomeVehicleRequestsComponent implements OnInit {
     if (event) {
       event.stopPropagation();
     }
+    if (this.isMarkingContacted) return;
 
-    req.status = 'CONTACTED';
-    const idx = this.requests.findIndex(r => r.id === req.id);
-    if (idx !== -1) {
-      this.requests[idx].status = 'CONTACTED';
-    }
+    this.isMarkingContacted = true;
+    this.providerService.markVehicleResellRequestContacted(req.id).subscribe({
+      next: (res: any) => {
+        this.isMarkingContacted = false;
+        req.status = 'CONTACTED';
+        const idx = this.requests.findIndex(r => r.id === req.id);
+        if (idx !== -1) {
+          this.requests[idx].status = 'CONTACTED';
+        }
 
-    if (this.selectedRequest && this.selectedRequest.id === req.id) {
-      this.selectedRequest.status = 'CONTACTED';
-    }
+        if (this.selectedRequest && this.selectedRequest.id === req.id) {
+          this.selectedRequest.status = 'CONTACTED';
+        }
 
-    this.persistRequests();
-    this.computeKpis();
-    this.applyFilter();
-    this.notificationService.show(`Buyer interest for ${req.vehicleName} marked as Contacted.`, 'success');
-  }
+        // Adjust KPIs
+        if (this.kpis.pending > 0) {
+          this.kpis.pending--;
+        }
+        this.kpis.contacted++;
 
-  resetMockData(): void {
-    this.requests = JSON.parse(JSON.stringify(INITIAL_REQUESTS));
-    this.persistRequests();
-    this.computeKpis();
-    this.applyFilter(true);
-    this.notificationService.show('Customer vehicle requests reset to initial mock data.', 'info');
+        this.applyFilter();
+        const msg = res?.message || `Buyer interest for ${req.vehicleName} marked as Contacted.`;
+        this.notificationService.show(msg, 'success');
+      },
+      error: (err: any) => {
+        this.isMarkingContacted = false;
+        const errMsg = err?.error?.message || err?.message || 'Failed to mark request as contacted.';
+        this.notificationService.show(errMsg, 'error');
+      }
+    });
   }
 
   copyText(text: string, label = 'Copied'): void {

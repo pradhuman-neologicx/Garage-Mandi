@@ -132,4 +132,142 @@ export class ProviderService {
     const headers = this.getHeaders();
     return this.apiService.deleteFun(`provider/images/${imageId}`, { headers });
   }
+
+
+
+  /**
+   * GET /api/v1/vehicle-categories
+   * Retrieve active vehicle categories
+   */
+  getPublicVehicleCategories(): Observable<any> {
+    return this.apiService.get('vehicle-categories', this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/vehicle-makers?vehicle_category_id=:id
+   * Retrieve vehicle makers / brands for category
+   */
+  getPublicVehicleMakers(categoryId?: number | string): Observable<any> {
+    const q = categoryId !== undefined && categoryId !== null && categoryId !== '' ? `?vehicle_category_id=${categoryId}` : '';
+    return this.apiService.get(`vehicle-makers${q}`, this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/fuel-types
+   * Retrieve active fuel types
+   */
+  getFuelTypes(): Observable<any> {
+    return this.apiService.get('fuel-types', this.getHeaders());
+  }
+
+  /**
+   * GET /api/v1/provider/vehicle-resells
+   * Retrieve provider's resale vehicles with optional query filters
+   */
+  getResaleVehicles(params?: any): Observable<any> {
+    const headers = this.getHeaders();
+    const queryParts: string[] = [];
+    if (params) {
+      if (params.page !== undefined && params.page !== null) {
+        queryParts.push(`page=${encodeURIComponent(params.page)}`);
+      }
+      if (params.limit !== undefined && params.limit !== null) {
+        queryParts.push(`limit=${encodeURIComponent(params.limit)}`);
+      } else if (params.per_page !== undefined && params.per_page !== null) {
+        queryParts.push(`limit=${encodeURIComponent(params.per_page)}`);
+      }
+      if (params.search && params.search.trim()) {
+        queryParts.push(`search=${encodeURIComponent(params.search.trim())}`);
+      }
+      if (params.vehicle_category_id) {
+        queryParts.push(`vehicle_category_id=${encodeURIComponent(params.vehicle_category_id)}`);
+      }
+      if (params.fuel_type_id) {
+        queryParts.push(`fuel_type_id=${encodeURIComponent(params.fuel_type_id)}`);
+      }
+    }
+    const url = queryParts.length > 0 ? `provider/vehicle-resells?${queryParts.join('&')}` : 'provider/vehicle-resells';
+    return this.apiService.get(url, headers);
+  }
+
+  /**
+   * GET /api/v1/provider/vehicle-resells/:id
+   * Retrieve single resale vehicle details by ID
+   */
+  getResaleVehicleById(id: number | string): Observable<any> {
+    const headers = this.getHeaders();
+    return this.apiService.get(`provider/vehicle-resells/${id}`, headers);
+  }
+
+  /**
+   * POST /api/v1/provider/vehicle-resells
+   * Create or update resale vehicle (FormData with images[] and optional id)
+   */
+  saveResaleVehicle(formData: FormData): Observable<any> {
+    const headers = this.getHeaders();
+    return this.apiService.post('provider/vehicle-resells', formData, headers);
+  }
+
+  /**
+   * DELETE /api/v1/provider/vehicle-resells/:id
+   * Delete resale vehicle listing
+   */
+  deleteResaleVehicle(id: number | string): Observable<any> {
+    const headers = this.getHeaders();
+    return this.apiService.deleteFun(`provider/vehicle-resells/${id}`, { headers });
+  }
+
+  /**
+   * DELETE /api/v1/provider/vehicle-resells/gallery/:imageId
+   * Delete vehicle gallery image
+   */
+  deleteResaleVehicleImage(imageId: number | string): Observable<any> {
+    const headers = this.getHeaders();
+    return this.apiService.deleteFun(`provider/vehicle-resells/gallery/${imageId}`, { headers });
+  }
+
+  /**
+   * GET /api/v1/provider/vehicle-resell-requests
+   * Retrieve customer vehicle interest requests for provider's vehicles
+   */
+  getVehicleResellRequests(params?: any): Observable<any> {
+    const headers = this.getHeaders();
+    const queryParts: string[] = [];
+    if (params) {
+      if (params.page !== undefined && params.page !== null) {
+        queryParts.push(`page=${encodeURIComponent(params.page)}`);
+      }
+      if (params.limit !== undefined && params.limit !== null) {
+        queryParts.push(`limit=${encodeURIComponent(params.limit)}`);
+      } else if (params.per_page !== undefined && params.per_page !== null) {
+        queryParts.push(`limit=${encodeURIComponent(params.per_page)}`);
+      }
+      if (params.status && params.status !== 'all') {
+        queryParts.push(`status=${encodeURIComponent(params.status)}`);
+      }
+      if (params.search && params.search.trim()) {
+        queryParts.push(`search=${encodeURIComponent(params.search.trim())}`);
+      }
+    }
+    const url = queryParts.length > 0 ? `provider/vehicle-resell-requests?${queryParts.join('&')}` : 'provider/vehicle-resell-requests';
+    return this.apiService.get(url, headers);
+  }
+
+  /**
+   * GET /api/v1/provider/vehicle-resell-requests/:id
+   * Retrieve single customer vehicle interest request details by ID
+   */
+  getVehicleResellRequestById(id: number | string): Observable<any> {
+    const headers = this.getHeaders();
+    return this.apiService.get(`provider/vehicle-resell-requests/${id}`, headers);
+  }
+
+  /**
+   * POST /api/v1/provider/vehicle-resell-requests/:id/contacted
+   * Mark customer vehicle interest request as contacted
+   */
+  markVehicleResellRequestContacted(requestId: number | string): Observable<any> {
+    const headers = this.getHeaders();
+    return this.apiService.post(`provider/vehicle-resell-requests/${requestId}/contacted`, {}, headers);
+  }
 }

@@ -10,6 +10,28 @@ import { FooterComponent } from '../components/footer/footer.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgForm } from '@angular/forms';
 
+export interface SellerAccountDetails {
+  legal_business_name: string;
+  business_type: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  pan: string;
+  stakeholder_pan: string | null;
+  gstin: string;
+  address: {
+    street1: string;
+    street2: string;
+    city: string;
+    state: string;
+    postal_code: string;
+  };
+  beneficiary_name: string;
+  account_number: string;
+  account_number_confirmation: string;
+  ifsc: string;
+}
+
 @Component({
   selector: 'app-provider-profile',
   standalone: true,
@@ -22,6 +44,37 @@ export class ProviderProfileComponent implements OnInit {
   profileData: any = null;
   isLoading = true;
   selectedImage: string | null = null;
+
+  // Account Details Modal (static initial data until backend API is ready)
+  showAccountDetailsModal = false;
+  isEditingAccountDetails = false;
+  isSavingAccountDetails = false;
+  accountDetailsError = '';
+  showFullAccountNumber = false;
+
+  accountDetails: SellerAccountDetails = {
+    legal_business_name: 'Seller One Spares',
+    business_type: 'proprietorship',
+    contact_name: 'Seller One',
+    email: 'seller.one@example.com',
+    phone: '9876543210',
+    pan: 'ABCDE1234F',
+    stakeholder_pan: null,
+    gstin: '08ABCDE1234F1Z5',
+    address: {
+      street1: '5 Industrial Area',
+      street2: 'Sitapura',
+      city: 'Jaipur',
+      state: 'Rajasthan',
+      postal_code: '302013'
+    },
+    beneficiary_name: 'Seller One',
+    account_number: '123456789012',
+    account_number_confirmation: '123456789012',
+    ifsc: 'HDFC0001234'
+  };
+
+  accountDetailsDraft: SellerAccountDetails = this.cloneAccountDetails(this.accountDetails);
 
   // Password Modal
   showPasswordModal = false;
@@ -528,6 +581,172 @@ export class ProviderProfileComponent implements OnInit {
         // this.notificationService.show(err.error?.message || err.message || 'Failed to change password', 'error');
       }
     });
+  }
+
+  // ==========================================
+  // ACCOUNT DETAILS MODAL (VIEW / EDIT)
+  // ==========================================
+
+  private cloneAccountDetails(source: SellerAccountDetails): SellerAccountDetails {
+    return {
+      ...source,
+      address: { ...source.address }
+    };
+  }
+
+  getBusinessEntityLabel(type: string): string {
+    return type ? type.replace(/_/g, ' ') : '—';
+  }
+
+  getMaskedAccountNumber(accNo: string): string {
+    if (!accNo) return '—';
+    if (this.showFullAccountNumber || accNo.length <= 4) return accNo;
+    return '•'.repeat(accNo.length - 4) + accNo.slice(-4);
+  }
+
+  openAccountDetailsModal(): void {
+    this.accountDetailsDraft = this.cloneAccountDetails(this.accountDetails);
+    this.isEditingAccountDetails = false;
+    this.accountDetailsError = '';
+    this.showFullAccountNumber = false;
+    this.showAccountDetailsModal = true;
+  }
+
+  closeAccountDetailsModal(): void {
+    if (this.isSavingAccountDetails) return;
+    this.showAccountDetailsModal = false;
+    this.isEditingAccountDetails = false;
+    this.accountDetailsError = '';
+  }
+
+  enableAccountDetailsEdit(): void {
+    this.accountDetailsDraft = this.cloneAccountDetails(this.accountDetails);
+    this.accountDetailsError = '';
+    this.isEditingAccountDetails = true;
+  }
+
+  cancelAccountDetailsEdit(): void {
+    this.accountDetailsDraft = this.cloneAccountDetails(this.accountDetails);
+    this.accountDetailsError = '';
+    this.isEditingAccountDetails = false;
+  }
+
+  saveAccountDetails(): void {
+    const d = this.accountDetailsDraft;
+    this.accountDetailsError = '';
+
+    const legalName = (d.legal_business_name || '').trim();
+    const businessType = (d.business_type || '').trim();
+    const contactName = (d.contact_name || '').trim();
+    const email = (d.email || '').trim();
+    const phone = (d.phone || '').trim();
+    const pan = (d.pan || '').trim().toUpperCase();
+    const stakeholderPanRaw = d.stakeholder_pan !== null && d.stakeholder_pan !== undefined
+      ? String(d.stakeholder_pan).trim().toUpperCase()
+      : '';
+    const stakeholderPan = stakeholderPanRaw ? stakeholderPanRaw : null;
+    const gstin = (d.gstin || '').trim().toUpperCase();
+
+    const street1 = (d.address?.street1 || '').trim();
+    const street2 = (d.address?.street2 || '').trim();
+    const city = (d.address?.city || '').trim();
+    const state = (d.address?.state || '').trim();
+    const postalCode = (d.address?.postal_code || '').trim();
+
+    const beneficiaryName = (d.beneficiary_name || '').trim();
+    const accountNumber = (d.account_number || '').trim();
+    const accountNumberConfirm = (d.account_number_confirmation || '').trim();
+    const ifsc = (d.ifsc || '').trim().toUpperCase();
+
+    if (!legalName || !businessType || !contactName || !email || !phone) {
+      this.accountDetailsError = 'Please fill all required business and contact fields.';
+      return;
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      this.accountDetailsError = 'Please enter a valid 10-digit phone number.';
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.accountDetailsError = 'Please enter a valid email address.';
+      return;
+    }
+
+    if (pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+      this.accountDetailsError = 'Please enter a valid 10-character PAN (e.g. ABCDE1234F).';
+      return;
+    }
+
+    if (stakeholderPan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(stakeholderPan)) {
+      this.accountDetailsError = 'Please enter a valid 10-character Stakeholder PAN.';
+      return;
+    }
+
+    if (gstin && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gstin)) {
+      this.accountDetailsError = 'Please enter a valid 15-character GSTIN (e.g. 08ABCDE1234F1Z5).';
+      return;
+    }
+
+    if (!street1 || !city || !state || !postalCode) {
+      this.accountDetailsError = 'Please fill all required registered address fields.';
+      return;
+    }
+
+    if (!/^\d{6}$/.test(postalCode)) {
+      this.accountDetailsError = 'Please enter a valid 6-digit postal code.';
+      return;
+    }
+
+    if (!beneficiaryName || !accountNumber || !accountNumberConfirm || !ifsc) {
+      this.accountDetailsError = 'Please fill all required bank & settlement details.';
+      return;
+    }
+
+    if (!/^\d{6,20}$/.test(accountNumber)) {
+      this.accountDetailsError = 'Please enter a valid numeric bank account number.';
+      return;
+    }
+
+    if (accountNumber !== accountNumberConfirm) {
+      this.accountDetailsError = 'Account Number and Confirm Account Number do not match.';
+      return;
+    }
+
+    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) {
+      this.accountDetailsError = 'Please enter a valid 11-character IFSC code (e.g. HDFC0001234).';
+      return;
+    }
+
+    const updatedPayload: SellerAccountDetails = {
+      legal_business_name: legalName,
+      business_type: businessType,
+      contact_name: contactName,
+      email,
+      phone,
+      pan,
+      stakeholder_pan: stakeholderPan,
+      gstin,
+      address: {
+        street1,
+        street2,
+        city,
+        state,
+        postal_code: postalCode
+      },
+      beneficiary_name: beneficiaryName,
+      account_number: accountNumber,
+      account_number_confirmation: accountNumberConfirm,
+      ifsc
+    };
+
+    // Static update for now — replace with API call when backend endpoint is available
+    this.accountDetails = updatedPayload;
+    this.accountDetailsDraft = this.cloneAccountDetails(updatedPayload);
+    this.isEditingAccountDetails = false;
+    this.showFullAccountNumber = false;
+    console.log('[ProviderProfile] Saved Account Details:', updatedPayload);
+    this.notificationService.show('Account details updated successfully!', 'success');
   }
 
   // Delete Account Logic

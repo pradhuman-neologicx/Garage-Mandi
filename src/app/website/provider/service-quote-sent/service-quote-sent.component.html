@@ -13,7 +13,7 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      
+
       <!-- Top Row: Back button & Breadcrumbs -->
       <div class="flex items-center gap-3 mb-5">
         <a routerLink="/workshop-operations"
@@ -36,7 +36,8 @@
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div class="flex items-center gap-2.5 mb-1.5">
-            <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+            <span
+              class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
               <span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
               Provider Portal
             </span>
@@ -77,74 +78,16 @@
   <!-- ========================================================== -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
 
-    <!-- KPI STATS CARDS RIBBON -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-      
-      <!-- Total Quotes Sent -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
-        <div class="flex items-center justify-between gap-1 mb-1.5">
-          <p class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate">Total Quotes</p>
-          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xs sm:text-base shrink-0">
-            <i class="fa-solid fa-paper-plane"></i>
-          </div>
-        </div>
-        <div class="flex items-baseline justify-between">
-          <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ kpis.totalQuotes }}</h3>
-          <span class="text-[10px] sm:text-xs text-slate-400 hidden sm:inline">Active Quotes</span>
-        </div>
-      </div>
-
-      <!-- Total Quoted Value -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
-        <div class="flex items-center justify-between gap-1 mb-1.5">
-          <p class="text-[11px] sm:text-xs font-bold text-emerald-700 uppercase tracking-wider truncate">Total Value</p>
-          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs sm:text-base shrink-0">
-            <i class="fa-solid fa-indian-rupee-sign"></i>
-          </div>
-        </div>
-        <div class="flex items-baseline justify-between">
-          <h3 class="text-xl sm:text-3xl font-black text-emerald-600 tracking-tight">₹{{ kpis.totalValue | number:'1.0-0' }}</h3>
-          <span class="text-[10px] sm:text-xs text-slate-400 hidden sm:inline">Gross Pipeline</span>
-        </div>
-      </div>
-
-      <!-- Spare Parts Quotes -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
-        <div class="flex items-center justify-between gap-1 mb-1.5">
-          <p class="text-[11px] sm:text-xs font-bold text-red-600 uppercase tracking-wider truncate">Spare Parts</p>
-          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-xs sm:text-base shrink-0">
-            <i class="fa-solid fa-shapes"></i>
-          </div>
-        </div>
-        <div class="flex items-baseline justify-between">
-          <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ kpis.spareParts }}</h3>
-          <span class="text-[10px] sm:text-xs text-slate-400 hidden sm:inline">Parts Inquiries</span>
-        </div>
-      </div>
-
-      <!-- Service & Repairs -->
-      <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-100 flex flex-col justify-between hover:shadow-md transition-all">
-        <div class="flex items-center justify-between gap-1 mb-1.5">
-          <p class="text-[11px] sm:text-xs font-bold text-indigo-600 uppercase tracking-wider truncate">Services</p>
-          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs sm:text-base shrink-0">
-            <i class="fa-solid fa-wrench"></i>
-          </div>
-        </div>
-        <div class="flex items-baseline justify-between">
-          <h3 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">{{ kpis.service }}</h3>
-          <span class="text-[10px] sm:text-xs text-slate-400 hidden sm:inline">Labor & Repair</span>
-        </div>
-      </div>
-    </div>
 
     <!-- ========================================================== -->
     <!-- CONTROLS & FILTER TOOLBAR -->
     <!-- ========================================================== -->
-    <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-xs border border-slate-200/80 mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-      
+    <div
+      class="bg-white rounded-2xl p-3 sm:p-4 shadow-xs border border-slate-200/80 mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+
       <!-- Category Filter Pills -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-        
+
         <!-- All Tab -->
         <button (click)="setCategory('all')"
           [ngClass]="selectedCategory === 'all' ? 'bg-[#db3333] text-white shadow-xs font-bold' : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-medium'"
@@ -194,7 +137,8 @@
 
     <!-- Loading Skeleton -->
     <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div *ngFor="let _ of [1, 2, 3, 4, 5, 6]" class="bg-white rounded-3xl p-5 border border-slate-200 animate-pulse space-y-4">
+      <div *ngFor="let _ of [1, 2, 3, 4, 5, 6]"
+        class="bg-white rounded-3xl p-5 border border-slate-200 animate-pulse space-y-4">
         <div class="flex items-center justify-between">
           <div class="w-36 h-6 bg-slate-200 rounded-lg"></div>
           <div class="w-20 h-7 bg-slate-200 rounded-2xl"></div>
@@ -212,12 +156,14 @@
     <!-- Empty State -->
     <div *ngIf="!isLoading && filteredQuotes.length === 0"
       class="bg-white rounded-3xl p-10 sm:p-14 text-center border border-slate-200 shadow-xs">
-      <div class="w-16 h-16 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center mx-auto mb-4 text-2xl">
+      <div
+        class="w-16 h-16 rounded-full bg-red-50 text-[#db3333] flex items-center justify-center mx-auto mb-4 text-2xl">
         <i class="fa-solid fa-paper-plane"></i>
       </div>
       <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">No Quotes Sent Found</h3>
       <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
-        {{ searchQuery ? 'No quotes match your search criteria. Try a different query.' : 'You have not submitted any quotes in this category yet.' }}
+        {{ searchQuery ? 'No quotes match your search criteria. Try a different query.' : 'You have not submitted any
+        quotes in this category yet.' }}
       </p>
       <button *ngIf="searchQuery" (click)="searchQuery = ''; applyFilter(true)"
         class="mt-4 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">
@@ -226,21 +172,23 @@
     </div>
 
     <!-- Cards Grid (Exact Screenshot Match: Requirement Title, Green Price Pill, Badges, Date) -->
-    <div *ngIf="!isLoading && pagedQuotes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+    <div *ngIf="!isLoading && pagedQuotes.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
       <div *ngFor="let quote of pagedQuotes"
         class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between">
-        
+
         <div>
           <!-- Top Row: Requirement Title on Left, Quoted Amount Badge on Right -->
           <div class="flex items-start justify-between gap-3 mb-2">
-            
+
             <!-- Requirement Title (Screenshot Match: Bold dark text) -->
             <h3 class="text-base sm:text-lg font-black text-slate-900 tracking-tight leading-snug break-words flex-1">
               {{ quote.requirementTitle }}
             </h3>
 
             <!-- Quoted Amount Pill (Screenshot Match: Soft green background with bright green text) -->
-            <span class="bg-[#eaf8ee] text-[#1aa053] font-black text-sm sm:text-base px-3.5 py-1.5 rounded-2xl shrink-0 tracking-tight inline-flex items-center">
+            <span
+              class="bg-[#eaf8ee] text-[#1aa053] font-black text-sm sm:text-base px-3.5 py-1.5 rounded-2xl shrink-0 tracking-tight inline-flex items-center">
               ₹{{ quote.quotedAmount | number:'1.2-2' }}
             </span>
           </div>
@@ -252,21 +200,24 @@
 
           <!-- Badges Row (Screenshot Match: Vehicle Model, Spare Part, Location) -->
           <div class="flex flex-wrap items-center gap-2 mb-4 mt-1">
-            
+
             <!-- Vehicle Model Badge (Red Car Icon) -->
-            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100/80 text-slate-700 text-xs font-semibold">
+            <div
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100/80 text-slate-700 text-xs font-semibold">
               <i class="fa-solid fa-car text-red-500 text-xs"></i>
               <span>{{ quote.vehicleModel }}</span>
             </div>
 
             <!-- Category Badge (Red Shapes/Parts Icon) -->
-            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100/80 text-slate-700 text-xs font-semibold">
+            <div
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100/80 text-slate-700 text-xs font-semibold">
               <i class="fa-solid fa-shapes text-red-500 text-xs"></i>
               <span>{{ quote.category }}</span>
             </div>
 
             <!-- Location Badge (Red Map Pin Icon) -->
-            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100/80 text-slate-700 text-xs font-semibold">
+            <div
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-100/80 text-slate-700 text-xs font-semibold">
               <i class="fa-solid fa-location-dot text-red-500 text-xs"></i>
               <span>{{ quote.location || '-' }}</span>
             </div>
@@ -298,12 +249,12 @@
     <!-- ========================================================== -->
     <div *ngIf="!isLoading && totalRecords > 0"
       class="mt-8 bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-      
+
       <!-- Counter & Per Page -->
       <div class="flex items-center gap-4 text-xs sm:text-sm text-slate-600">
         <span>
-          Showing <span class="font-bold text-slate-900">{{ startIndex }}</span> - 
-          <span class="font-bold text-slate-900">{{ endIndex }}</span> of 
+          Showing <span class="font-bold text-slate-900">{{ startIndex }}</span> -
+          <span class="font-bold text-slate-900">{{ endIndex }}</span> of
           <span class="font-bold text-slate-900">{{ totalRecords }}</span> quotes
         </span>
 
